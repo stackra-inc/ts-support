@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit — frontend-monorepo
+#
+# Runs before every commit as a fast local quality gate.
+#
+# Checks (in order):
+#   1. Prettier format — fail if any staged JS/TS/JSON/MD file is unformatted
+#   2. ESLint          — fail on lint errors in staged files
+#   3. TypeScript      — type-check affected workspaces
+#
+# Tests are intentionally skipped here (too slow for a commit hook).
+# Run `npm run test` manually before pushing, or rely on pre-push hook.
+#
+# Install:
+#   git config core.hooksPath .githooks
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+step()  { echo -e "${YELLOW}▶ $*${NC}"; }
+ok()    { echo -e "${GREEN}✔ $*${NC}"; }
+fail()  { echo -e "${RED}✖ $*${NC}"; exit 1; }
+
+command -v node >/dev/null 2>&1 || fail "node not found. Install Node.js >= 18."
+command -v npm  >/dev/null 2>&1 || fail "npm not found."
+
+# ── Collect staged files ──────────────────────────────────────────────────────
+STAGED_JS=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '\.(js|jsx|ts|tsx|json|md)$' || true)
+
+if [ -z "$STAGED_JS" ]; then
+  ok "No staged JS/TS files — skipping format and lint."
+  exit 0
+fi
+
+# ── 1. Prettier format check ──────────────────────────────────────────────────
+step "Checking Prettier formatting..."
+
+# Build a space-separated list of staged files for prettier.
+FILES=$(echo "$STAGED_JS" | tr '\n' ' ')
+
+# --check exits non-zero if any file would be reformatted.
+npx prettier --check $FILES 2>&1 || \
+  fail "Formatting issues found.\nRun: npm run format\nThen re-stage the files."
+
+ok "Format check passed."
+
+# ── 2. ESLint ─────────────────────────────────────────────────────────────────
+step "Running ESLint on staged files..."
+
+STAGED_ESLINT=$(echo "$STAGED_JS" | grep -E '\.(js|jsx|ts|tsx)$' || true)
+
+if [ -n "$STAGED_ESLINT" ]; then
+  npx turbo run lint 2>&1 || fail "ESLint failed. Fix errors before committing."
+  ok "ESLint passed."
+else
+  ok "No JS/TS files staged — skipping ESLint."
+fi
+
+# ── 3. TypeScript type-check ──────────────────────────────────────────────────
+step "Running TypeScript type-check..."
+
+npx turbo run check-types 2>&1 || fail "Type errors found. Fix them before committing."
+
+ok "Type-check passed."
+
+# ── Done ──────────────────────────────────────────────────────────────────────
+ok "Pre-commit checks passed."

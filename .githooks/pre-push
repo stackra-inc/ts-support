@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# .githooks/pre-push — frontend-monorepo
+#
+# Runs before `git push` as a final local gate.
+# Slower checks (full build + tests) live here rather than in pre-commit.
+#
+# Checks (in order):
+#   1. turbo lint       — ESLint across all workspaces
+#   2. turbo check-types — TypeScript across all workspaces
+#   3. turbo build      — ensure everything compiles
+#
+# Skip for emergency pushes (use sparingly):
+#   git push --no-verify
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+step()  { echo -e "${YELLOW}▶ $*${NC}"; }
+ok()    { echo -e "${GREEN}✔ $*${NC}"; }
+fail()  { echo -e "${RED}✖ $*${NC}"; exit 1; }
+
+command -v node >/dev/null 2>&1 || fail "node not found. Install Node.js >= 18."
+command -v npm  >/dev/null 2>&1 || fail "npm not found."
+
+# ── 1. Lint ───────────────────────────────────────────────────────────────────
+step "Running lint across all workspaces..."
+npm run lint 2>&1 || fail "Lint failed. Fix errors before pushing."
+ok "Lint passed."
+
+# ── 2. Type-check ─────────────────────────────────────────────────────────────
+step "Running type-check across all workspaces..."
+npm run check-types 2>&1 || fail "Type errors found. Fix them before pushing."
+ok "Type-check passed."
+
+# ── 3. Build ──────────────────────────────────────────────────────────────────
+step "Building all workspaces..."
+npm run build 2>&1 || fail "Build failed. Fix errors before pushing."
+ok "Build passed."
+
+# ── Done ──────────────────────────────────────────────────────────────────────
+ok "Pre-push checks passed. Pushing..."
