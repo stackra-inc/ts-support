@@ -178,6 +178,9 @@ importers:
       '@abdokouta/ts-application':
         specifier: workspace:*
         version: link:../../packages/container/application
+      '@abdokouta/ts-cache':
+        specifier: workspace:*
+        version: link:../../packages/cache
       '@abdokouta/ts-config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -190,9 +193,18 @@ importers:
       '@abdokouta/ts-desktop':
         specifier: workspace:*
         version: link:../../packages/desktop
+      '@abdokouta/ts-events':
+        specifier: workspace:*
+        version: link:../../packages/events
       '@abdokouta/ts-logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@abdokouta/ts-redis':
+        specifier: workspace:*
+        version: link:../../packages/redis
+      '@abdokouta/ts-settings':
+        specifier: workspace:*
+        version: link:../../packages/settings
       '@abdokouta/ts-support':
         specifier: workspace:*
         version: link:../../packages/support
