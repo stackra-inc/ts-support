@@ -1,4 +1,19 @@
-import { Module, DynamicModule } from '@abdokouta/react-di';
+/**
+ * Configuration Module
+ *
+ * Registers:
+ * - `CONFIG_OPTIONS` — raw options object
+ * - `CONFIG_DRIVER` — the active configuration driver
+ * - `ConfigService` — created by DI so @Inject decorators fire
+ * - `CONFIG_SERVICE` — useExisting alias to ConfigService
+ *
+ * Users inject `CONFIG_SERVICE` (or `ConfigService` directly) and call
+ * `config.get('key')` to read configuration values.
+ *
+ * @module config.module
+ */
+
+import { Module, type DynamicModule } from '@abdokouta/ts-container';
 
 import { EnvDriver } from './drivers/env.driver';
 import { FileDriver } from './drivers/file.driver';
@@ -8,19 +23,21 @@ import type { ConfigModuleOptions } from './interfaces/config-module-options.int
 import { CONFIG_DRIVER, CONFIG_OPTIONS, CONFIG_SERVICE } from './constants/tokens.constant';
 
 /**
- * Configuration Module
+ * ConfigModule — provides configuration management with multiple drivers.
  *
- * Provides configuration management with multiple drivers.
- * Similar to NestJS ConfigModule.
+ * Follows the non-manager DI pattern:
+ * - `CONFIG_OPTIONS` — raw config object
+ * - `ConfigService` — class-based injection
+ * - `CONFIG_SERVICE` — useExisting alias
  *
  * @example
  * ```typescript
- * // Using environment variables (default)
  * @Module({
  *   imports: [
  *     ConfigModule.forRoot({
- *       envFilePath: '.env',
+ *       driver: 'env',
  *       isGlobal: true,
+ *       envPrefix: 'auto',
  *     }),
  *   ],
  * })
@@ -29,12 +46,11 @@ import { CONFIG_DRIVER, CONFIG_OPTIONS, CONFIG_SERVICE } from './constants/token
  *
  * @example
  * ```typescript
- * // Using file-based configuration
  * @Module({
  *   imports: [
  *     ConfigModule.forRoot({
  *       driver: 'file',
- *       filePattern: 'config/**\/*.config.ts',
+ *       load: { database: { host: 'localhost', port: 5432 } },
  *       isGlobal: true,
  *     }),
  *   ],
@@ -43,68 +59,50 @@ import { CONFIG_DRIVER, CONFIG_OPTIONS, CONFIG_SERVICE } from './constants/token
  * ```
  */
 @Module({})
+// biome-ignore lint/complexity/noStaticOnlyClass: Module pattern requires static methods
 export class ConfigModule {
   /**
-   * Register configuration module with options
+   * Register configuration module with runtime options.
    *
-   * @param options - Configuration options
-   * @returns Dynamic module
+   * Creates the appropriate driver based on `options.driver`,
+   * loads configuration, and registers all providers.
+   *
+   * @param options - Configuration module options
+   * @returns DynamicModule with all config providers
    */
   static forRoot(options: ConfigModuleOptions = {}): DynamicModule {
-    const driver = this.createDriver(options);
-
-    const isGlobal = options.isGlobal ?? false;
-
-    const providers = [
-      {
-        provide: CONFIG_OPTIONS,
-        useValue: options,
-        isGlobal,
-      },
-      {
-        provide: CONFIG_DRIVER,
-        useValue: driver,
-        isGlobal,
-      },
-      ConfigService,
-      {
-        provide: CONFIG_SERVICE,
-        useExisting: ConfigService,
-        isGlobal,
-      },
-    ];
+    const driver = ConfigModule.createDriver(options);
 
     return {
       module: ConfigModule,
-      providers: providers as any,
-      exports: [ConfigService],
+      global: options.isGlobal ?? true,
+      providers: [
+        { provide: CONFIG_OPTIONS, useValue: options },
+        { provide: CONFIG_DRIVER, useValue: driver },
+        { provide: ConfigService, useClass: ConfigService },
+        { provide: CONFIG_SERVICE, useExisting: ConfigService },
+      ],
+      exports: [ConfigService, CONFIG_SERVICE, CONFIG_OPTIONS, CONFIG_DRIVER],
     };
   }
 
   /**
-   * Register configuration module asynchronously
+   * Create the configuration driver based on options.
    *
-   * @param options - Async configuration options
-   * @returns Dynamic module
-   */
-  static async forRootAsync(
-    options: ConfigModuleOptions & {
-      useFactory?: () => Promise<ConfigModuleOptions> | ConfigModuleOptions;
-    }
-  ): Promise<DynamicModule> {
-    const resolvedOptions = options.useFactory ? await options.useFactory() : options;
-
-    return this.forRoot(resolvedOptions);
-  }
-
-  /**
-   * Create configuration driver based on options
+   * Dispatches to `EnvDriver` or `FileDriver` based on the
+   * `driver` field in options. Defaults to `'env'`.
+   *
+   * @param options - Configuration module options
+   * @returns A configured ConfigDriver instance
+   * @throws Error if the driver type is unknown
+   *
+   * @private
    */
   private static createDriver(options: ConfigModuleOptions): ConfigDriver {
     const driverType = options.driver || 'env';
 
     switch (driverType) {
-      case 'env':
+      case 'env': {
         const envDriver = new EnvDriver({
           envFilePath: options.envFilePath,
           ignoreEnvFile: options.ignoreEnvFile,
@@ -116,16 +114,18 @@ export class ConfigModule {
 
         // Merge custom load function if provided
         if (options.load) {
-          this.mergeCustomConfig(envDriver, options.load);
+          ConfigModule.mergeCustomConfig(envDriver, options.load);
         }
 
         return envDriver;
+      }
 
-      case 'file':
+      case 'file': {
         const fileDriver = new FileDriver({
           config: typeof options.load === 'object' ? options.load : undefined,
         });
         return fileDriver;
+      }
 
       default:
         throw new Error(`Unknown configuration driver: ${driverType}`);
@@ -133,11 +133,18 @@ export class ConfigModule {
   }
 
   /**
-   * Merge custom configuration into driver
+   * Merge custom configuration into an existing driver.
+   *
+   * Supports both synchronous objects and async factory functions.
+   *
+   * @param driver - The driver to merge config into
+   * @param load - Config object or factory function
+   *
+   * @private
    */
   private static mergeCustomConfig(
     driver: ConfigDriver,
-    load: Record<string, any> | (() => Record<string, any> | Promise<Record<string, any>>)
+    load: Record<string, any> | (() => Record<string, any> | Promise<Record<string, any>>),
   ): void {
     const customConfig = typeof load === 'function' ? load() : load;
 

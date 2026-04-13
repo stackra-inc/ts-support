@@ -1,48 +1,96 @@
-import { Inject, Injectable } from '@abdokouta/react-di';
+/**
+ * Configuration Service
+ *
+ * Provides type-safe access to configuration values with various getter methods.
+ * Wraps a `ConfigDriver` with convenience methods for typed access.
+ *
+ * This IS injectable — registered by `ConfigModule.forRoot()`.
+ *
+ * @module services/config
+ */
+
+import { Inject, Injectable } from '@abdokouta/ts-container';
 
 import { CONFIG_DRIVER } from '@/constants/tokens.constant';
 import type { ConfigDriver } from '@/interfaces/config-driver.interface';
 import type { ConfigServiceInterface } from '@/interfaces/config-service.interface';
 
 /**
- * Configuration Service
+ * ConfigService — the consumer-facing configuration API.
  *
- * Provides type-safe access to configuration values with various getter methods.
- * Similar to NestJS ConfigService.
+ * Injected via `ConfigService` class or `CONFIG_SERVICE` token.
+ * Provides typed getters for string, number, boolean, array, and JSON values.
  *
  * @example
  * ```typescript
- * class MyService {
- *   constructor(private config: ConfigService) {}
+ * @Injectable()
+ * class DatabaseService {
+ *   constructor(@Inject(ConfigService) private config: ConfigService) {}
  *
- *   getDbConfig() {
- *     return {
- *       host: this.config.getString('DB_HOST', 'localhost'),
- *       port: this.config.getNumber('DB_PORT', 5432),
- *       ssl: this.config.getBool('DB_SSL', false),
- *     };
+ *   connect() {
+ *     const host = this.config.getString('DB_HOST', 'localhost');
+ *     const port = this.config.getNumber('DB_PORT', 5432);
+ *     const ssl = this.config.getBool('DB_SSL', false);
  *   }
  * }
  * ```
  */
 @Injectable()
 export class ConfigService implements ConfigServiceInterface {
-  constructor(
-    @Inject(CONFIG_DRIVER)
-    private driver: ConfigDriver
-  ) {}
+  /**
+   * The underlying configuration driver.
+   * @private
+   */
+  private readonly _driver: ConfigDriver;
 
   /**
-   * Get configuration value
+   * Create a new ConfigService.
+   *
+   * @param driver - The configuration driver injected via DI
    */
-  get<T = any>(key: string, defaultValue?: T): T | undefined {
-    return this.driver.get<T>(key, defaultValue);
+  constructor(
+    @Inject(CONFIG_DRIVER)
+    driver: ConfigDriver,
+  ) {
+    this._driver = driver;
+  }
+
+  // ── Read ────────────────────────────────────────────────────────────────
+
+  /**
+   * Get a configuration value by key.
+   *
+   * Supports dot-notation for nested values (e.g., `'database.host'`).
+   *
+   * @typeParam T - Expected return type
+   * @param key - Configuration key (supports dot notation)
+   * @param defaultValue - Fallback value if key is not found
+   * @returns The configuration value, or `defaultValue` if not found
+   *
+   * @example
+   * ```typescript
+   * const host = config.get('database.host', 'localhost');
+   * const port = config.get<number>('database.port', 5432);
+   * ```
+   */
+  public get<T = any>(key: string, defaultValue?: T): T | undefined {
+    return this._driver.get<T>(key, defaultValue);
   }
 
   /**
-   * Get configuration value or throw if not found
+   * Get a configuration value or throw if not found.
+   *
+   * @typeParam T - Expected return type
+   * @param key - Configuration key
+   * @returns The configuration value
+   * @throws Error if the key is not set
+   *
+   * @example
+   * ```typescript
+   * const secret = config.getOrThrow<string>('JWT_SECRET');
+   * ```
    */
-  getOrThrow<T = any>(key: string): T {
+  public getOrThrow<T = any>(key: string): T {
     const value = this.get<T>(key);
     if (value === undefined) {
       throw new Error(`Configuration key "${key}" is required but not set`);
@@ -50,25 +98,42 @@ export class ConfigService implements ConfigServiceInterface {
     return value;
   }
 
+  // ── Typed getters ───────────────────────────────────────────────────────
+
   /**
-   * Get string value
+   * Get a string configuration value.
+   *
+   * @param key - Configuration key
+   * @param defaultValue - Fallback string value
+   * @returns The string value, or `defaultValue` if not found
    */
-  getString(key: string, defaultValue?: string): string | undefined {
+  public getString(key: string, defaultValue?: string): string | undefined {
     const value = this.get(key, defaultValue);
     return value !== undefined ? String(value) : undefined;
   }
 
   /**
-   * Get string value or throw
+   * Get a string configuration value or throw if not found.
+   *
+   * @param key - Configuration key
+   * @returns The string value
+   * @throws Error if the key is not set
    */
-  getStringOrThrow(key: string): string {
+  public getStringOrThrow(key: string): string {
     return String(this.getOrThrow(key));
   }
 
   /**
-   * Get number value
+   * Get a numeric configuration value.
+   *
+   * Parses string values to numbers. Returns `defaultValue` if
+   * the value cannot be parsed.
+   *
+   * @param key - Configuration key
+   * @param defaultValue - Fallback number value
+   * @returns The numeric value, or `defaultValue` if not found/unparseable
    */
-  getNumber(key: string, defaultValue?: number): number | undefined {
+  public getNumber(key: string, defaultValue?: number): number | undefined {
     const value = this.get(key, defaultValue);
     if (value === undefined) {
       return undefined;
@@ -78,9 +143,13 @@ export class ConfigService implements ConfigServiceInterface {
   }
 
   /**
-   * Get number value or throw
+   * Get a numeric configuration value or throw if not found.
+   *
+   * @param key - Configuration key
+   * @returns The numeric value
+   * @throws Error if the key is not set
    */
-  getNumberOrThrow(key: string): number {
+  public getNumberOrThrow(key: string): number {
     const value = this.getNumber(key);
     if (value === undefined) {
       throw new Error(`Configuration key "${key}" is required but not set`);
@@ -89,10 +158,16 @@ export class ConfigService implements ConfigServiceInterface {
   }
 
   /**
-   * Get boolean value
-   * Treats 'true', '1', 'yes', 'on' as true
+   * Get a boolean configuration value.
+   *
+   * Treats `'true'`, `'1'`, `'yes'`, `'on'` as `true`.
+   * All other string values are treated as `false`.
+   *
+   * @param key - Configuration key
+   * @param defaultValue - Fallback boolean value
+   * @returns The boolean value, or `defaultValue` if not found
    */
-  getBool(key: string, defaultValue?: boolean): boolean | undefined {
+  public getBool(key: string, defaultValue?: boolean): boolean | undefined {
     const value = this.get(key, defaultValue);
     if (value === undefined) {
       return undefined;
@@ -104,9 +179,13 @@ export class ConfigService implements ConfigServiceInterface {
   }
 
   /**
-   * Get boolean value or throw
+   * Get a boolean configuration value or throw if not found.
+   *
+   * @param key - Configuration key
+   * @returns The boolean value
+   * @throws Error if the key is not set
    */
-  getBoolOrThrow(key: string): boolean {
+  public getBoolOrThrow(key: string): boolean {
     const value = this.getBool(key);
     if (value === undefined) {
       throw new Error(`Configuration key "${key}" is required but not set`);
@@ -115,9 +194,23 @@ export class ConfigService implements ConfigServiceInterface {
   }
 
   /**
-   * Get array value (comma-separated string or actual array)
+   * Get an array configuration value.
+   *
+   * Splits comma-separated strings into arrays. If the value is
+   * already an array, it's returned as-is (stringified).
+   *
+   * @param key - Configuration key
+   * @param defaultValue - Fallback array value
+   * @returns The array value, or `defaultValue` if not found
+   *
+   * @example
+   * ```typescript
+   * // ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+   * const origins = config.getArray('ALLOWED_ORIGINS');
+   * // => ['http://localhost:3000', 'http://localhost:5173']
+   * ```
    */
-  getArray(key: string, defaultValue?: string[]): string[] | undefined {
+  public getArray(key: string, defaultValue?: string[]): string[] | undefined {
     const value = this.get(key, defaultValue);
     if (value === undefined) {
       return undefined;
@@ -132,9 +225,17 @@ export class ConfigService implements ConfigServiceInterface {
   }
 
   /**
-   * Get JSON value
+   * Get a JSON configuration value.
+   *
+   * Parses JSON strings into objects. If the value is already
+   * an object, it's returned as-is.
+   *
+   * @typeParam T - Expected return type
+   * @param key - Configuration key
+   * @param defaultValue - Fallback value
+   * @returns The parsed JSON value, or `defaultValue` if parsing fails
    */
-  getJson<T = any>(key: string, defaultValue?: T): T | undefined {
+  public getJson<T = any>(key: string, defaultValue?: T): T | undefined {
     const value = this.get(key, defaultValue);
     if (value === undefined) {
       return undefined;
@@ -149,24 +250,33 @@ export class ConfigService implements ConfigServiceInterface {
     }
   }
 
+  // ── Introspection ───────────────────────────────────────────────────────
+
   /**
-   * Check if configuration key exists
+   * Check if a configuration key exists.
+   *
+   * @param key - Configuration key (supports dot notation)
+   * @returns `true` if the key exists in the configuration
    */
-  has(key: string): boolean {
-    return this.driver.has(key);
+  public has(key: string): boolean {
+    return this._driver.has(key);
   }
 
   /**
-   * Get all configuration values
+   * Get all configuration values as a plain object.
+   *
+   * @returns A shallow copy of all configuration key-value pairs
    */
-  all(): Record<string, any> {
-    return this.driver.all();
+  public all(): Record<string, any> {
+    return this._driver.all();
   }
 
   /**
-   * Clear cache (no-op since we don't cache in ConfigService)
+   * Clear any cached configuration values.
+   *
+   * Currently a no-op — caching should be done at a higher level if needed.
    */
-  clearCache(): void {
-    // No-op - caching should be done at a higher level if needed
+  public clearCache(): void {
+    // No-op — caching should be done at a higher level if needed
   }
 }

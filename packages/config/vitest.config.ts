@@ -1,5 +1,5 @@
 /**
- * @fileoverview Vitest configuration for @abdokouta/react-di package
+ * @fileoverview Vitest configuration for @abdokouta/ts-container package
  *
  * This configuration sets up the testing environment for the container package,
  * including test globals, jsdom environment, coverage reporting, and path aliases.
@@ -11,7 +11,7 @@
  * - Coverage: Configures v8 coverage provider with HTML/JSON/text reports
  * - Path Aliases: Resolves @ to ./src for consistent imports
  *
- * @module @abdokouta/react-di
+ * @module @abdokouta/ts-container
  * @category Configuration
  */
 
@@ -39,7 +39,7 @@ export default defineConfig({
     // Fix ESM/CJS compatibility for inversiland
     server: {
       deps: {
-        inline: ['inversiland', '@inversiland/inversify', '@abdokouta/react-di'],
+        inline: ['inversiland', '@inversiland/inversify', '@abdokouta/ts-container'],
         interopDefault: true,
       },
     },

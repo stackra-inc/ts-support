@@ -1,5 +1,5 @@
 /**
- * @abdokouta/config
+ * @abdokouta/react-config
  *
  * NestJS-inspired configuration management with multiple drivers for loading
  * configuration from various sources (environment variables, files, etc.).
@@ -7,15 +7,15 @@
  * properties and default values.
  *
  * @example
- * Basic usage with environment variables:
  * ```typescript
- * import { ConfigModule, ConfigService, EnvDriver } from '@abdokouta/config';
- * import { Module, Injectable, Inject } from '@abdokouta/react-di';
+ * import { ConfigModule, ConfigService } from '@abdokouta/react-config';
+ * import { Module, Injectable, Inject } from '@abdokouta/ts-container';
  *
  * @Module({
  *   imports: [
  *     ConfigModule.forRoot({
- *       driver: new EnvDriver(),
+ *       driver: 'env',
+ *       isGlobal: true,
  *     }),
  *   ],
  * })
@@ -26,39 +26,13 @@
  *   constructor(@Inject(ConfigService) private config: ConfigService) {}
  *
  *   connect() {
- *     const host = this.config.get('DATABASE_HOST', 'localhost');
- *     const port = this.config.get('DATABASE_PORT', 5432);
- *     // Connect to database...
+ *     const host = this.config.getString('DB_HOST', 'localhost');
+ *     const port = this.config.getNumber('DB_PORT', 5432);
  *   }
  * }
  * ```
  *
- * @example
- * Using file-based configuration:
- * ```typescript
- * import { ConfigModule, FileDriver } from '@abdokouta/config';
- *
- * @Module({
- *   imports: [
- *     ConfigModule.forRoot({
- *       driver: new FileDriver({
- *         path: './config/app.json',
- *       }),
- *     }),
- *   ],
- * })
- * export class AppModule {}
- * ```
- *
- * @example
- * Accessing nested configuration:
- * ```typescript
- * // config.json: { "database": { "host": "localhost", "port": 5432 } }
- * const host = config.get('database.host');
- * const port = config.get('database.port', 3306);
- * ```
- *
- * @module @abdokouta/config
+ * @module @abdokouta/react-config
  */
 
 // ============================================================================
@@ -84,6 +58,11 @@ export type { ConfigDriver } from './interfaces/config-driver.interface';
 export type { ConfigModuleOptions } from './interfaces/config-module-options.interface';
 export type { ConfigServiceInterface } from './interfaces/config-service.interface';
 export type { ViteConfigPluginOptions } from './interfaces/vite-config-plugin-options.interface';
+
+// ============================================================================
+// Constants / Tokens
+// ============================================================================
+export { CONFIG_OPTIONS, CONFIG_DRIVER, CONFIG_SERVICE } from './constants/tokens.constant';
 
 // ============================================================================
 // Utilities
