@@ -2,7 +2,7 @@
  * Laravel-style Collection class for arrays
  * Wraps collect.js for Laravel-compatible collection operations
  */
-import collectJs, { Collection as CollectJsCollection } from 'collect';
+import collectJs, { Collection as CollectJsCollection } from "collect.js";
 
 export class Collection<T = any> {
   private collection: CollectJsCollection<T>;
@@ -381,7 +381,7 @@ export class Collection<T = any> {
    */
   sum(key?: keyof T | ((item: T) => number)): number {
     const result = this.collection.sum(key as any);
-    return typeof result === 'number' ? result : 0;
+    return typeof result === "number" ? result : 0;
   }
 
   /**

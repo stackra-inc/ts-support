@@ -9,32 +9,32 @@
 // ============================================================================
 // String Utilities
 // ============================================================================
-export { Str } from '@/str';
+export { Str } from "@/str";
 
 // ============================================================================
 // Collection Utilities
 // ============================================================================
-export { Collection, collect } from '@/collections';
-export { MapCollection, collectMap } from '@/collections';
-export { SetCollection, collectSet } from '@/collections';
+export { Collection, collect } from "@/collections";
+export { MapCollection, collectMap } from "@/collections";
+export { SetCollection, collectSet } from "@/collections";
 
 // Re-export types from collect.js for convenience
-export type { Collection as CollectJsCollection } from 'collect';
+export type { Collection as CollectJsCollection } from "collect.js";
 
 // ============================================================================
 // Registries
 // ============================================================================
-export { BaseRegistry } from '@/registry';
+export { BaseRegistry } from "@/registry";
 
 // ============================================================================
 // Managers
 // ============================================================================
-export { MultipleInstanceManager } from '@/managers';
+export { MultipleInstanceManager } from "@/managers";
 
 // ============================================================================
 // Mixins
 // ============================================================================
-export { withMultipleInstanceManager } from '@/mixins';
+export { withMultipleInstanceManager } from "@/mixins";
 
 // ============================================================================
 // Types & Interfaces
@@ -44,4 +44,4 @@ export type {
   Collection as RegistryCollection,
   ValidationResult,
   DriverCreator,
-} from '@/types';
+} from "@/types";
