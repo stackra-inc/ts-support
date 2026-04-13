@@ -1,0 +1,95 @@
+{
+  "name": "@pixielity/events",
+  "version": "0.2.0",
+  "description": "Laravel-style event dispatcher for TypeScript — pub/sub with wildcard listeners, subscribers, decorators, multiple drivers (memory, redis, null), and RxJS streaming.",
+  "license": "MIT",
+  "author": {
+    "name": "Abdelrhman Kouta",
+    "email": "abdelrhman@pixielity.com",
+    "url": "https://github.com/abdokouta"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pixielity-inc/frontend-monorepo.git",
+    "directory": "packages/events"
+  },
+  "keywords": [
+    "events",
+    "event-dispatcher",
+    "pub-sub",
+    "laravel",
+    "rxjs",
+    "decorators",
+    "dependency-injection",
+    "typescript"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "config",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist node_modules/.cache",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.1",
+    "reflect-metadata": "^0.2.2"
+  },
+  "peerDependencies": {
+    "@abdokouta/ts-container": "^1.2.0",
+    "@abdokouta/ts-container-react": "^1.2.0",
+    "@abdokouta/react-support": "^2.1.0",
+    "@abdokouta/react-redis": "^1.1.2",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@abdokouta/ts-container": {
+      "optional": false
+    },
+    "@abdokouta/react-support": {
+      "optional": false
+    },
+    "@abdokouta/ts-container-react": {
+      "optional": true
+    },
+    "@abdokouta/react-redis": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@nesvel/tsup-config": "^1.0.3",
+    "@nesvel/typescript-config": "^1.0.4",
+    "@types/node": "^25.5.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false
+}
