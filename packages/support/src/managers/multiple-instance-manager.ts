@@ -27,7 +27,7 @@
  * @module managers/multiple-instance-manager
  */
 
-import type { DriverCreator } from '@/types';
+import type { DriverCreator } from "@/types";
 
 /**
  * Abstract base manager for multi-instance, multi-driver services.
@@ -60,7 +60,7 @@ export abstract class MultipleInstanceManager<T> {
    *
    * @default 'driver'
    */
-  protected readonly driverKey: string = 'driver';
+  protected readonly driverKey: string = "driver";
 
   // ── Abstract methods ────────────────────────────────────────────────────
 
@@ -86,7 +86,10 @@ export abstract class MultipleInstanceManager<T> {
    * For async-only drivers (e.g., Redis), throw an error here
    * and implement `createDriverAsync()` instead.
    */
-  protected abstract createDriver(driver: string, config: Record<string, any>): T;
+  protected abstract createDriver(
+    driver: string,
+    config: Record<string, any>,
+  ): T;
 
   /**
    * Create a driver instance asynchronously.
@@ -101,7 +104,10 @@ export abstract class MultipleInstanceManager<T> {
    * @param config - The raw instance config
    * @returns A promise that resolves to the driver instance
    */
-  protected async createDriverAsync(driver: string, config: Record<string, any>): Promise<T> {
+  protected async createDriverAsync(
+    driver: string,
+    config: Record<string, any>,
+  ): Promise<T> {
     return this.createDriver(driver, config);
   }
 
@@ -115,7 +121,7 @@ export abstract class MultipleInstanceManager<T> {
    * @param instance - The newly created instance
    * @returns The instance (possibly modified)
    */
-  protected onInstanceCreated(name: string, instance: T): T {
+  protected onInstanceCreated(_name: string, instance: T): T {
     return instance;
   }
 
@@ -208,7 +214,11 @@ export abstract class MultipleInstanceManager<T> {
    * @param name - Instance name(s). Uses default if omitted.
    */
   forgetInstance(name?: string | string[]): this {
-    const names = name ? (Array.isArray(name) ? name : [name]) : [this.getDefaultInstance()];
+    const names = name
+      ? Array.isArray(name)
+        ? name
+        : [name]
+      : [this.getDefaultInstance()];
 
     for (const n of names) {
       this.instances.delete(n);
@@ -268,11 +278,15 @@ export abstract class MultipleInstanceManager<T> {
 
     const driver = config[this.driverKey];
     if (!driver) {
-      throw new Error(`Instance [${name}] does not specify a "${this.driverKey}".`);
+      throw new Error(
+        `Instance [${name}] does not specify a "${this.driverKey}".`,
+      );
     }
 
     const customCreator = this.customCreators.get(driver);
-    const instance = customCreator ? customCreator(config) : this.createDriver(driver, config);
+    const instance = customCreator
+      ? customCreator(config)
+      : this.createDriver(driver, config);
 
     return this.onInstanceCreated(name, instance);
   }
@@ -288,7 +302,9 @@ export abstract class MultipleInstanceManager<T> {
 
     const driver = config[this.driverKey];
     if (!driver) {
-      throw new Error(`Instance [${name}] does not specify a "${this.driverKey}".`);
+      throw new Error(
+        `Instance [${name}] does not specify a "${this.driverKey}".`,
+      );
     }
 
     const customCreator = this.customCreators.get(driver);
