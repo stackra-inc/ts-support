@@ -15,20 +15,21 @@
 */
 
 /* Make the top navbar area draggable (move window by dragging) */
-.electron-drag {
+body.is-electron nav {
   -webkit-app-region: drag;
 }
 
 /* Buttons and interactive elements inside the drag area must be no-drag */
-.electron-drag a,
-.electron-drag button,
-.electron-drag input,
-.electron-drag select {
+body.is-electron nav a,
+body.is-electron nav button,
+body.is-electron nav input,
+body.is-electron nav select,
+body.is-electron nav label,
+body.is-electron nav [role="button"] {
   -webkit-app-region: no-drag;
 }
 
 /* Add left padding for traffic lights when in Electron */
-body.is-electron .navbar,
 body.is-electron nav {
   padding-left: 80px;
 }
