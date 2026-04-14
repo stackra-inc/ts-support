@@ -7,7 +7,7 @@
  * @module config/config
  */
 
-import { defineConfig } from '@abdokouta/ts-config';
+import { defineConfig } from "@abdokouta/ts-config";
 
 /**
  * Config Configuration
@@ -38,7 +38,7 @@ export const configConfig = defineConfig({
    * Driver to use for loading configuration
    * 'env' reads from process.env
    */
-  driver: 'env',
+  driver: "env",
 
   /**
    * Ignore .env file loading
@@ -58,5 +58,5 @@ export const configConfig = defineConfig({
    * 'auto' detects VITE_ or NEXT_PUBLIC_ and strips it
    * So VITE_APP_NAME becomes accessible as APP_NAME
    */
-  envPrefix: 'auto',
+  envPrefix: "auto",
 });

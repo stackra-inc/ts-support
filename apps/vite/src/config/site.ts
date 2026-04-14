@@ -2,8 +2,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Pixielity — Vite",
-  description:
-    "Production-ready Vite monorepo with Config, Logger, and DI Container.",
+  description: "Production-ready Vite monorepo with Config, Logger, and DI Container.",
   navItems: [
     { label: "Home", href: "/" },
     { label: "Config", href: "/config" },

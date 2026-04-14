@@ -20,7 +20,7 @@ import {
   SilentTransporter,
   ConsoleTransporter,
   StorageTransporter,
-} from '@abdokouta/ts-logger';
+} from "@abdokouta/ts-logger";
 
 /**
  * Logger configuration
@@ -46,7 +46,7 @@ const loggerConfig = defineConfig({
   | one of the channels defined in the "channels" configuration array.
   |
   */
-  default: import.meta.env.LOG_CHANNEL || 'console',
+  default: import.meta.env.LOG_CHANNEL || "console",
 
   /*
   |--------------------------------------------------------------------------
@@ -70,8 +70,8 @@ const loggerConfig = defineConfig({
         }),
       ],
       context: {
-        app: import.meta.env.APP_NAME || 'refine-app',
-        env: import.meta.env.NODE_ENV || 'development',
+        app: import.meta.env.APP_NAME || "refine-app",
+        env: import.meta.env.NODE_ENV || "development",
       },
     },
 
@@ -84,12 +84,12 @@ const loggerConfig = defineConfig({
     storage: {
       transporters: [
         new StorageTransporter({
-          key: 'app-logs',
+          key: "app-logs",
           maxEntries: Number(import.meta.env.LOG_STORAGE_MAX_ENTRIES) || 500,
         }),
       ],
       context: {
-        app: import.meta.env.APP_NAME || 'refine-app',
+        app: import.meta.env.APP_NAME || "refine-app",
       },
     },
 
@@ -105,13 +105,13 @@ const loggerConfig = defineConfig({
           level: LogLevel.Info,
         }),
         new StorageTransporter({
-          key: 'app-logs',
+          key: "app-logs",
           maxEntries: 1000,
         }),
       ],
       context: {
-        app: import.meta.env.APP_NAME || 'refine-app',
-        env: import.meta.env.NODE_ENV || 'production',
+        app: import.meta.env.APP_NAME || "refine-app",
+        env: import.meta.env.NODE_ENV || "production",
       },
     },
 
@@ -127,13 +127,13 @@ const loggerConfig = defineConfig({
           level: LogLevel.Error,
         }),
         new StorageTransporter({
-          key: 'error-logs',
+          key: "error-logs",
           maxEntries: 200,
         }),
       ],
       context: {
-        app: import.meta.env.APP_NAME || 'refine-app',
-        channel: 'errors',
+        app: import.meta.env.APP_NAME || "refine-app",
+        channel: "errors",
       },
     },
 
@@ -146,13 +146,13 @@ const loggerConfig = defineConfig({
     audit: {
       transporters: [
         new StorageTransporter({
-          key: 'audit-logs',
+          key: "audit-logs",
           maxEntries: 1000,
         }),
       ],
       context: {
-        app: import.meta.env.APP_NAME || 'refine-app',
-        channel: 'audit',
+        app: import.meta.env.APP_NAME || "refine-app",
+        channel: "audit",
       },
     },
 

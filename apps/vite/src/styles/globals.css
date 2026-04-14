@@ -19,9 +19,12 @@ html.dark {
 | Electron Desktop — title bar integration
 |--------------------------------------------------------------------------
 |
-| When running in Electron with titleBarStyle: 'hiddenInset',
-| the traffic lights (close/min/max) overlap the content.
-| These styles add a draggable region and padding to compensate.
+| With titleBarStyle: 'hiddenInset', the native title bar is replaced
+| by a thin inset area with traffic lights. Our navbar extends into
+| this area to create a seamless look.
+|
+| The navbar is the drag region (move window by dragging it).
+| Interactive elements inside are excluded from the drag region.
 |
 */
 
@@ -40,7 +43,17 @@ body.is-electron nav [role="button"] {
   -webkit-app-region: no-drag;
 }
 
-/* Add left padding for traffic lights when in Electron */
+/*
+|--------------------------------------------------------------------------
+| Electron Desktop — traffic light and safe area padding
+|--------------------------------------------------------------------------
+|
+| With hiddenInset, the traffic lights sit at { x: 15, y: 15 }.
+| The navbar needs left padding to clear them.
+| Top padding accounts for the inset title bar height (~28px on macOS).
+|
+*/
 body.is-electron nav {
   padding-left: 80px;
+  padding-top: 6px;
 }

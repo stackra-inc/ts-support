@@ -4,9 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import { bootstrapApp } from "@abdokouta/ts-application";
 import { ContainerProvider } from "@abdokouta/ts-container-react";
 
-import { AppModule } from "@/lib/app.module";
 import { Provider } from "./provider";
 import App from "./App";
+
+import { AppModule } from "@/lib/app.module";
 import "@/styles/globals.css";
 
 /**

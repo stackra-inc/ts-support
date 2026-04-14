@@ -23,6 +23,7 @@
     "@abdokouta/ts-container-react": "workspace:*",
     "@abdokouta/ts-application": "workspace:*",
     "@abdokouta/ts-desktop": "workspace:*",
+    "@abdokouta/kbd": "workspace:*",
     "@abdokouta/ts-logger": "workspace:*",
     "@abdokouta/ts-redis": "workspace:*",
     "@abdokouta/ts-cache": "workspace:*",

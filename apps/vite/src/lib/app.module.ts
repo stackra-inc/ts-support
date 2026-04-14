@@ -30,6 +30,7 @@ import { CacheModule } from "@abdokouta/ts-cache";
 import { EventsModule } from "@abdokouta/ts-events";
 import { SettingsModule } from "@abdokouta/ts-settings";
 import { DesktopModule } from "@abdokouta/ts-desktop";
+import { KbdModule } from "@abdokouta/kbd";
 
 import { configConfig } from "@/config/config.config";
 import loggerConfig from "@/config/logger.config";
@@ -116,6 +117,18 @@ import { FileMenu, EditMenu, ViewMenu } from "@/menus";
     |
     */
     SettingsModule.forRoot(defaultSettingsConfig),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Kbd — keyboard shortcut management
+    |--------------------------------------------------------------------------
+    |
+    | Registers the ShortcutRegistry as a global DI singleton.
+    | Built-in shortcuts (navigation, search, editing, etc.) are registered.
+    | DesktopModule injects ShortcutRegistry to register menu shortcuts.
+    |
+    */
+    KbdModule.forRoot({ registerBuiltIn: true }),
 
     /*
     |--------------------------------------------------------------------------

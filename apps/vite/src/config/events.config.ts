@@ -8,7 +8,7 @@
  * @category Config
  */
 
-import type { EventModuleOptions } from '@abdokouta/ts-events';
+import type { EventModuleOptions } from "@abdokouta/ts-events";
 
 /**
  * Default events configuration.
@@ -22,7 +22,7 @@ export const defaultEventsConfig: EventModuleOptions = {
   | The name of the default dispatcher. Must match a key in `dispatchers`.
   |
   */
-  default: 'memory',
+  default: "memory",
 
   /*
   |--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ export const defaultEventsConfig: EventModuleOptions = {
   */
   dispatchers: {
     memory: {
-      driver: 'memory',
+      driver: "memory",
       wildcards: true,
     },
     // redis: {

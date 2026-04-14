@@ -7,7 +7,9 @@
  */
 
 import * as React from "react";
+
 import { Navbar } from "@/components/navbar";
+import { GlobalShortcuts } from "@/components/global-shortcuts";
 
 export interface ProviderProps {
   children: React.ReactNode;
@@ -22,6 +24,7 @@ export interface ProviderProps {
 export function Provider({ children }: ProviderProps) {
   return (
     <div className="relative flex flex-col h-screen">
+      <GlobalShortcuts />
       <Navbar />
       <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">{children}</main>
       <footer className="w-full flex items-center justify-center py-3">

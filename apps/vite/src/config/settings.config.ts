@@ -6,11 +6,11 @@
  * @module @abdokouta/ts-settings
  */
 
-import type { SettingsModuleOptions } from '@abdokouta/ts-settings';
+import type { SettingsModuleOptions } from "@abdokouta/ts-settings";
 
 export const defaultSettingsConfig: SettingsModuleOptions = {
-  default: 'memory',
+  default: "memory",
   stores: {
-    memory: { driver: 'memory' },
+    memory: { driver: "memory" },
   },
 };
