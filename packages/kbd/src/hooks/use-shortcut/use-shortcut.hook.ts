@@ -1,27 +1,27 @@
 /**
  * @fileoverview Hook for registering and using keyboard shortcuts from the registry.
- * 
+ *
  * This hook provides a declarative way to register shortcuts by ID with automatic cleanup.
  * It integrates with the ShortcutRegistry to enable/disable shortcuts and handle their lifecycle.
- * 
+ *
  * @module @abdokouta/kbd
  * @category Hooks
  */
 
-import { useEffect, useCallback } from "react";
-import { KbdModule } from "@/kbd.module";
-import type { KeyboardShortcut } from "@/interfaces/keyboard-shortcut.interface";
+import { useEffect, useCallback } from 'react';
+import { shortcutRegistry } from '@/registries/shortcut.registry';
+import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
 
 /**
  * Options for the useShortcut hook.
- * 
+ *
  * @category Hooks
  * @public
  */
 export interface UseShortcutOptions {
   /**
    * The ID of the shortcut to register/use from the registry.
-   * 
+   *
    * @example
    * ```tsx
    * id: "search.open"
@@ -38,7 +38,7 @@ export interface UseShortcutOptions {
 
   /**
    * Whether the shortcut is enabled.
-   * 
+   *
    * @defaultValue true
    */
   enabled?: boolean;
@@ -58,10 +58,10 @@ export interface UseShortcutOptions {
 
 /**
  * Custom hook for using keyboard shortcuts from the registry.
- * 
+ *
  * This hook registers a shortcut by ID and automatically handles cleanup.
  * It enables the shortcut when the component mounts and disables it when unmounted.
- * 
+ *
  * @example
  * Basic usage with registered shortcut:
  * ```tsx
@@ -72,7 +72,7 @@ export interface UseShortcutOptions {
  *   },
  * });
  * ```
- * 
+ *
  * @example
  * With conditional enabling:
  * ```tsx
@@ -82,9 +82,9 @@ export interface UseShortcutOptions {
  *   enabled: isEditing && hasChanges,
  * });
  * ```
- * 
+ *
  * @param options - Hook options
- * 
+ *
  * @category Hooks
  * @public
  */
@@ -102,7 +102,7 @@ export const useShortcut = ({
     (event: KeyboardEvent) => {
       if (!enabled) return;
 
-      const shortcut = KbdModule.get(id);
+      const shortcut = shortcutRegistry.get(id);
       if (!shortcut || !shortcut.enabled) return;
 
       // Check if shortcut condition is met
@@ -114,8 +114,8 @@ export const useShortcut = ({
       if (!shortcut.allowInInput) {
         const target = event.target as HTMLElement;
         if (
-          target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
           target.isContentEditable
         ) {
           return;
@@ -123,7 +123,7 @@ export const useShortcut = ({
       }
 
       // Get platform-specific keys
-      const keys = KbdModule.resolveKeys(shortcut.keys);
+      const keys = shortcutRegistry.resolveKeys(shortcut.keys);
       if (!keys || keys.length === 0) return;
 
       // Check if all required keys are pressed
@@ -154,7 +154,10 @@ export const useShortcut = ({
         } else {
           // Check regular keys
           hasNonModifier = true;
-          if (event.key.toLowerCase() !== lowerKey && event.code.toLowerCase() !== lowerKey.toLowerCase()) {
+          if (
+            event.key.toLowerCase() !== lowerKey &&
+            event.code.toLowerCase() !== lowerKey.toLowerCase()
+          ) {
             allKeysPressed = false;
             break;
           }
@@ -185,7 +188,7 @@ export const useShortcut = ({
         }
       }
     },
-    [id, callback, enabled, preventDefault, stopPropagation],
+    [id, callback, enabled, preventDefault, stopPropagation]
   );
 
   /**
@@ -195,23 +198,23 @@ export const useShortcut = ({
     if (!enabled) return;
 
     // Check if shortcut exists
-    if (!KbdModule.has(id)) {
+    if (!shortcutRegistry.has(id)) {
       console.warn(`[useShortcut] Shortcut with id "${id}" not found in registry`);
       return;
     }
 
     // Enable the shortcut
-    KbdModule.enable(id);
+    shortcutRegistry.enable(id);
 
     // Add event listener
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       // Disable the shortcut
-      KbdModule.disable(id);
+      shortcutRegistry.disable(id);
 
       // Remove event listener
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [id, handleKeyDown, enabled]);
 };

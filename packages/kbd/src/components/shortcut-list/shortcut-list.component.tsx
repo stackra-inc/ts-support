@@ -11,7 +11,7 @@
 import React, { useState, useMemo } from 'react';
 import { RefineKbd } from '@/components/refine-kbd';
 import { useShortcutRegistry } from '@/hooks/use-shortcut-registry';
-import { KbdModule } from '@/kbd.module';
+import { shortcutRegistry } from '@/registries/shortcut.registry';
 import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
 import { ShortcutCategory, ShortcutContext } from '@/interfaces';
 
@@ -174,7 +174,7 @@ export const ShortcutList: React.FC<ShortcutListProps> = ({
   // Default item renderer
   const defaultRenderItem = (shortcut: KeyboardShortcut) => {
     // Resolve platform-specific keys
-    const resolvedKeys = KbdModule.resolveKeys(shortcut.keys);
+    const resolvedKeys = shortcutRegistry.resolveKeys(shortcut.keys);
 
     return (
       <div

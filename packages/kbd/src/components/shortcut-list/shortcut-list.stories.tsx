@@ -1,35 +1,34 @@
 /**
  * @fileoverview Storybook stories for ShortcutList component
- * 
+ *
  * This file contains interactive examples and documentation for the ShortcutList component.
- * 
+ *
  * @module @abdokouta/kbd
  * @category Stories
  */
 
-import type { Meta, StoryObj } from "@storybook/react";
-import { ShortcutList } from "./shortcut-list.component";
-import { KbdModule } from "@/kbd.module";
-import { useEffect } from "react";
+import type { Meta, StoryObj } from '@storybook/react';
+import { ShortcutList } from './shortcut-list.component';
+import { shortcutRegistry } from '@/registries/shortcut.registry';
+import { BUILT_IN_SHORTCUTS, BUILT_IN_GROUPS } from '@/shortcuts/built-in-shortcuts';
+import { useEffect } from 'react';
 
 /**
  * ShortcutList Component Stories
- * 
+ *
  * The ShortcutList component displays a searchable, filterable list of keyboard shortcuts
  * from the registry, with support for grouping by category or context.
  */
 const meta: Meta<typeof ShortcutList> = {
-  title: "Components/ShortcutList",
+  title: 'Components/ShortcutList',
   component: ShortcutList,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   decorators: [
     (Story) => {
       // Initialize KBD module with built-in shortcuts
       useEffect(() => {
-        KbdModule.configure({
-          registerBuiltIn: true,
-          debug: false,
-        });
+        for (const s of BUILT_IN_SHORTCUTS) shortcutRegistry.register(s, { onConflict: 'skip' });
+        for (const g of BUILT_IN_GROUPS) shortcutRegistry.registerGroup(g);
       }, []);
 
       return <Story />;
@@ -37,26 +36,26 @@ const meta: Meta<typeof ShortcutList> = {
   ],
   argTypes: {
     category: {
-      description: "Filter shortcuts by category",
-      control: "select",
-      options: ["navigation", "editing", "search", "view", "help", "custom"],
+      description: 'Filter shortcuts by category',
+      control: 'select',
+      options: ['navigation', 'editing', 'search', 'view', 'help', 'custom'],
     },
     context: {
-      description: "Filter shortcuts by context",
-      control: "select",
-      options: ["global", "editor", "list", "modal", "form", "custom"],
+      description: 'Filter shortcuts by context',
+      control: 'select',
+      options: ['global', 'editor', 'list', 'modal', 'form', 'custom'],
     },
     showSearch: {
-      description: "Show search input",
-      control: "boolean",
+      description: 'Show search input',
+      control: 'boolean',
     },
     groupByCategory: {
-      description: "Group shortcuts by category",
-      control: "boolean",
+      description: 'Group shortcuts by category',
+      control: 'boolean',
     },
     showDisabled: {
-      description: "Show disabled shortcuts",
-      control: "boolean",
+      description: 'Show disabled shortcuts',
+      control: 'boolean',
     },
   },
 };
@@ -66,7 +65,7 @@ type Story = StoryObj<typeof ShortcutList>;
 
 /**
  * Default ShortcutList
- * 
+ *
  * Basic usage showing all shortcuts with search.
  */
 export const Default: Story = {
@@ -79,7 +78,7 @@ export const Default: Story = {
 
 /**
  * Grouped by Category
- * 
+ *
  * Display shortcuts grouped by their category.
  */
 export const GroupedByCategory: Story = {
@@ -92,12 +91,12 @@ export const GroupedByCategory: Story = {
 
 /**
  * Navigation Shortcuts Only
- * 
+ *
  * Filter to show only navigation shortcuts.
  */
 export const NavigationOnly: Story = {
   args: {
-    category: "navigation",
+    category: 'navigation',
     showSearch: false,
     groupByCategory: false,
   },
@@ -105,12 +104,12 @@ export const NavigationOnly: Story = {
 
 /**
  * Search Shortcuts Only
- * 
+ *
  * Filter to show only search shortcuts.
  */
 export const SearchOnly: Story = {
   args: {
-    category: "search",
+    category: 'search',
     showSearch: false,
     groupByCategory: false,
   },
@@ -118,12 +117,12 @@ export const SearchOnly: Story = {
 
 /**
  * Editing Shortcuts Only
- * 
+ *
  * Filter to show only editing shortcuts.
  */
 export const EditingOnly: Story = {
   args: {
-    category: "editing",
+    category: 'editing',
     showSearch: false,
     groupByCategory: false,
   },
@@ -131,12 +130,12 @@ export const EditingOnly: Story = {
 
 /**
  * Global Context Only
- * 
+ *
  * Filter to show only global context shortcuts.
  */
 export const GlobalContextOnly: Story = {
   args: {
-    context: "global",
+    context: 'global',
     showSearch: true,
     groupByCategory: true,
   },
@@ -144,12 +143,12 @@ export const GlobalContextOnly: Story = {
 
 /**
  * Modal Context Only
- * 
+ *
  * Filter to show only modal context shortcuts.
  */
 export const ModalContextOnly: Story = {
   args: {
-    context: "modal",
+    context: 'modal',
     showSearch: false,
     groupByCategory: false,
   },
@@ -157,7 +156,7 @@ export const ModalContextOnly: Story = {
 
 /**
  * Without Search
- * 
+ *
  * Display shortcuts without the search input.
  */
 export const WithoutSearch: Story = {
@@ -169,18 +168,18 @@ export const WithoutSearch: Story = {
 
 /**
  * Custom Styling
- * 
+ *
  * Apply custom CSS classes to the list.
  */
 export const CustomStyling: Story = {
   args: {
     showSearch: true,
     groupByCategory: false,
-    className: "custom-shortcut-list",
-    itemClassName: "custom-shortcut-item",
+    className: 'custom-shortcut-list',
+    itemClassName: 'custom-shortcut-item',
   },
   render: (args) => (
-    <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
       <style>{`
         .custom-shortcut-list {
           background: #f9fafb;
@@ -200,24 +199,24 @@ export const CustomStyling: Story = {
 
 /**
  * In Sidebar
- * 
+ *
  * Display shortcuts in a sidebar layout.
  */
 export const InSidebar: Story = {
   render: () => (
-    <div style={{ display: "flex", height: "600px" }}>
+    <div style={{ display: 'flex', height: '600px' }}>
       <div
         style={{
-          width: "300px",
-          borderRight: "1px solid #e5e7eb",
-          padding: "1rem",
-          overflowY: "auto",
+          width: '300px',
+          borderRight: '1px solid #e5e7eb',
+          padding: '1rem',
+          overflowY: 'auto',
         }}
       >
         <h3 style={{ marginTop: 0 }}>Keyboard Shortcuts</h3>
         <ShortcutList groupByCategory showSearch={false} />
       </div>
-      <div style={{ flex: 1, padding: "1rem" }}>
+      <div style={{ flex: 1, padding: '1rem' }}>
         <h2>Main Content</h2>
         <p>Your application content goes here.</p>
       </div>
@@ -227,7 +226,7 @@ export const InSidebar: Story = {
 
 /**
  * Compact View
- * 
+ *
  * Display shortcuts in a compact view.
  */
 export const CompactView: Story = {
@@ -236,7 +235,7 @@ export const CompactView: Story = {
     groupByCategory: false,
   },
   render: (args) => (
-    <div style={{ maxWidth: "400px" }}>
+    <div style={{ maxWidth: '400px' }}>
       <ShortcutList {...args} />
     </div>
   ),

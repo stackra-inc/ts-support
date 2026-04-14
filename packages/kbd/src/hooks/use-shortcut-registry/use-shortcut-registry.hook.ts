@@ -1,25 +1,25 @@
 /**
  * @fileoverview Hook for accessing the keyboard shortcut registry in components.
- * 
+ *
  * This hook provides access to the ShortcutRegistry for querying, registering,
  * and managing shortcuts from within React components.
- * 
+ *
  * @module @abdokouta/kbd
  * @category Hooks
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from 'react';
 import type {
   KeyboardShortcut,
   ShortcutCategory,
   ShortcutContext,
   ShortcutQueryOptions,
-} from "@/interfaces";
-import { KbdModule } from "@/kbd.module";
+} from '@/interfaces';
+import { shortcutRegistry } from '@/registries/shortcut.registry';
 
 /**
  * Return type for the useShortcutRegistry hook.
- * 
+ *
  * @category Hooks
  * @public
  */
@@ -87,17 +87,17 @@ export interface UseShortcutRegistryReturn {
 
 /**
  * Custom hook for accessing the keyboard shortcut registry.
- * 
+ *
  * This hook provides a React-friendly interface to the ShortcutRegistry,
  * with automatic re-rendering when the registry changes.
- * 
+ *
  * @example
  * Basic usage:
  * ```tsx
  * function ShortcutList() {
  *   const registry = useShortcutRegistry();
  *   const shortcuts = registry.getAll();
- * 
+ *
  *   return (
  *     <ul>
  *       {shortcuts.map(shortcut => (
@@ -107,14 +107,14 @@ export interface UseShortcutRegistryReturn {
  *   );
  * }
  * ```
- * 
+ *
  * @example
  * With filtering:
  * ```tsx
  * function NavigationShortcuts() {
  *   const registry = useShortcutRegistry();
  *   const navShortcuts = registry.getByCategory("navigation");
- * 
+ *
  *   return (
  *     <div>
  *       {navShortcuts.map(shortcut => (
@@ -124,13 +124,13 @@ export interface UseShortcutRegistryReturn {
  *   );
  * }
  * ```
- * 
+ *
  * @example
  * With dynamic registration:
  * ```tsx
  * function CustomShortcut() {
  *   const registry = useShortcutRegistry();
- * 
+ *
  *   const handleRegister = () => {
  *     registry.register({
  *       id: "custom.action",
@@ -141,13 +141,13 @@ export interface UseShortcutRegistryReturn {
  *       context: "global",
  *     });
  *   };
- * 
+ *
  *   return <button onClick={handleRegister}>Register Shortcut</button>;
  * }
  * ```
- * 
+ *
  * @returns Registry interface with methods for managing shortcuts
- * 
+ *
  * @category Hooks
  * @public
  */
@@ -161,22 +161,22 @@ export const useShortcutRegistry = (): UseShortcutRegistryReturn => {
 
   // Subscribe to registry changes
   useEffect(() => {
-    const unsubscribe = KbdModule.subscribe(forceUpdate);
+    const unsubscribe = shortcutRegistry.subscribe(forceUpdate);
     return unsubscribe;
   }, [forceUpdate]);
 
   return {
-    get: KbdModule.get,
-    has: KbdModule.has,
-    getAll: KbdModule.getAll,
-    getByCategory: KbdModule.getByCategory,
-    getByContext: KbdModule.getByContext,
-    query: KbdModule.query,
-    register: KbdModule.register,
-    unregister: KbdModule.unregister,
-    enable: KbdModule.enable,
-    disable: KbdModule.disable,
-    toggle: KbdModule.toggle,
-    subscribe: KbdModule.subscribe,
+    get: shortcutRegistry.get.bind(shortcutRegistry),
+    has: shortcutRegistry.has.bind(shortcutRegistry),
+    getAll: shortcutRegistry.getAll.bind(shortcutRegistry),
+    getByCategory: shortcutRegistry.getByCategory.bind(shortcutRegistry),
+    getByContext: shortcutRegistry.getByContext.bind(shortcutRegistry),
+    query: shortcutRegistry.query.bind(shortcutRegistry),
+    register: shortcutRegistry.register.bind(shortcutRegistry),
+    unregister: shortcutRegistry.unregister.bind(shortcutRegistry),
+    enable: shortcutRegistry.enable.bind(shortcutRegistry),
+    disable: shortcutRegistry.disable.bind(shortcutRegistry),
+    toggle: shortcutRegistry.toggle.bind(shortcutRegistry),
+    subscribe: shortcutRegistry.subscribe.bind(shortcutRegistry),
   };
 };
