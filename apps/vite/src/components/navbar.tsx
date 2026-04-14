@@ -41,7 +41,7 @@ export const Navbar = () => {
         <div className="flex items-center gap-4">
           <a className="flex items-center gap-1" href="/">
             <Logo />
-            <p className="font-bold text-inherit">ACME</p>
+            <p className="font-bold text-inherit">{siteConfig.name.split("—")[0].trim()}</p>
           </a>
           <ul className="hidden lg:flex gap-4 ml-2">
             {siteConfig.navItems.map((item) => (
@@ -115,12 +115,7 @@ export const Navbar = () => {
             className="p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isMenuOpen ? (
                 <path
                   d="M6 18L18 6M6 6l12 12"

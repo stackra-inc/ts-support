@@ -37,6 +37,7 @@ import redisConfig from "@/config/redis.config";
 import cacheConfig from "@/config/cache.config";
 import { defaultEventsConfig } from "@/config/events.config";
 import { defaultSettingsConfig } from "@/config/settings.config";
+import { FileMenu, EditMenu, ViewMenu } from "@/menus";
 
 /**
  * AppModule — root module of the Vite application.
@@ -129,6 +130,18 @@ import { defaultSettingsConfig } from "@/config/settings.config";
       appName: "Pixielity",
       titleBarStyle: "native",
     }),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Desktop Menus — registered via forFeature
+    |--------------------------------------------------------------------------
+    |
+    | Each @Menu class defines a menu section (File, Edit, View, etc.).
+    | @MenuItem methods become menu items with accelerators and handlers.
+    | The MenuRegistry collects them and sends to the Electron main process.
+    |
+    */
+    DesktopModule.forFeature([FileMenu, EditMenu, ViewMenu]),
   ],
   providers: [],
   exports: [],
