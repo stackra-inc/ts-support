@@ -42,9 +42,10 @@ const MODE_LABELS: Record<ColorMode, string> = {
  */
 export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ showLabel = false, className }) => {
   const { mode, setMode } = useColorMode();
+  const currentMode = mode || 'system';
 
   const next = () => {
-    const idx = MODE_CYCLE.indexOf(mode || 'system');
+    const idx = MODE_CYCLE.indexOf(currentMode);
     setMode(MODE_CYCLE[(idx + 1) % MODE_CYCLE.length]);
   };
 
@@ -54,11 +55,11 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ showLabel = false, c
       variant: 'ghost',
       size: 'sm',
       onPress: next,
-      'aria-label': `Switch color mode (current: ${mode || 'system'})`,
+      'aria-label': `Switch color mode (current: ${currentMode})`,
       className,
     },
-    MODE_ICONS[mode || 'system'],
-    showLabel ? ` ${MODE_LABELS[mode || 'system']}` : null
+    MODE_ICONS[currentMode],
+    showLabel ? ` ${MODE_LABELS[currentMode]}` : null
   );
 };
 
