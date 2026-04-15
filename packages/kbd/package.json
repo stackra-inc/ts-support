@@ -34,7 +34,6 @@
     "attw": "attw --pack .",
     "build": "tsup",
     "dev": "tsup --watch",
-    "prepare": "pnpm build",
     "publint": "publint --strict=true --level=suggestion",
     "test": "vitest --run",
     "test:watch": "vitest",
