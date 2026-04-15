@@ -1,1 +1,1 @@
-{"onlyBuiltDependencies":["electron","esbuild","@tailwindcss/oxide","sharp","unrs-resolver"]}
+{ "onlyBuiltDependencies": ["electron", "esbuild", "@tailwindcss/oxide", "sharp", "unrs-resolver"] }

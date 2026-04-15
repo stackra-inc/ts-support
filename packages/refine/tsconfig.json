@@ -1,0 +1,60 @@
+{
+  "extends": "@nesvel/typescript-config/base.json",
+  "compilerOptions": {
+    /* ── Output ──────────────────────────────────────────────────────────── */
+    "outDir": "./dist",
+    "rootDir": ".",
+
+    /* ── Target & Lib ────────────────────────────────────────────────────── */
+    /* ES2020 for broad compatibility (Node 14+, modern browsers).           */
+    /* DOM + DOM.Iterable for browser API types (fetch, setTimeout, etc.).   */
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    /* ── Deprecation Silence ─────────────────────────────────────────────── */
+    /* baseUrl is deprecated in TS6 but still needed for path aliases.       */
+    /* This silences the warning. Will be removed when migrating to TS7.     */
+    "ignoreDeprecations": "6.0",
+
+    /* ── Module Resolution ───────────────────────────────────────────────── */
+    /* ESNext module format — tsup handles the actual CJS/ESM output.        */
+    /* Bundler resolution — matches how tsup/Vite/webpack resolve imports.   */
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    /* ── Decorators ──────────────────────────────────────────────────────── */
+    /* Required for @Injectable(), @Inject(), @Module() DI decorators.       */
+    /* emitDecoratorMetadata enables runtime type reflection for DI.         */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* ── Build Options ───────────────────────────────────────────────────── */
+    /* Generate .d.ts files for consumers.                                   */
+    /* declarationMap enables "Go to Definition" in IDEs.                    */
+    /* sourceMap enables debugging with original TypeScript source.          */
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    /* ── JSX ─────────────────────────────────────────────────────────────── */
+    /* react-jsx transform — no need to import React in every file.          */
+    "jsx": "react-jsx",
+
+    /* ── Testing ─────────────────────────────────────────────────────────── */
+    /* Include vitest global types (describe, it, expect, vi).               */
+    "types": ["node", "vitest/globals"],
+
+    /* ── Path Aliases ────────────────────────────────────────────────────── */
+    /* @ maps to ./src — e.g. '@/services/cache.service' → './src/services'. */
+    /* Used in source code and resolved by tsup (build) and vitest (test).   */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+
+  /* ── Include / Exclude ───────────────────────────────────────────────── */
+  /* Include source and test files. Exclude build output and config dir.   */
+  "include": ["src/**/*", "__tests__/**/*"],
+  "exclude": ["node_modules", "dist", "config"]
+}

@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <!-- Accent gradient for decorative elements -->
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+
+    <!-- Icon gradient -->
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+
+    <!-- Subtle grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" stroke-width="0.5" opacity="0.3"/>
+    </pattern>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="400" fill="url(#bg)"/>
+  <rect width="1200" height="400" fill="url(#grid)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="950" cy="80" r="180" fill="#38bdf8" opacity="0.03"/>
+  <circle cx="1000" cy="120" r="120" fill="#818cf8" opacity="0.04"/>
+  <circle cx="200" cy="350" r="150" fill="#c084fc" opacity="0.03"/>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1200" height="3" fill="url(#accent)"/>
+
+  <!-- Cache icon (layered squares representing cached data) -->
+  <g transform="translate(100, 130)" filter="url(#glow)">
+    <!-- Back layer -->
+    <rect x="24" y="0" width="96" height="72" rx="8" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.4"/>
+    <!-- Middle layer -->
+    <rect x="12" y="16" width="96" height="72" rx="8" fill="#1e293b" stroke="#818cf8" stroke-width="2" opacity="0.6"/>
+    <!-- Front layer -->
+    <rect x="0" y="32" width="96" height="72" rx="8" fill="#1e293b" stroke="url(#iconGrad)" stroke-width="2.5"/>
+    <!-- Lightning bolt (speed/cache hit) -->
+    <path d="M48 44 L36 68 L48 64 L44 92 L60 62 L48 66 Z" fill="url(#iconGrad)" opacity="0.9"/>
+  </g>
+
+  <!-- Package name -->
+  <text x="240" y="178" font-family="ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace" font-size="42" font-weight="700" fill="#f1f5f9" letter-spacing="-0.5">
+    @abdokouta/react-cache
+  </text>
+
+  <!-- Description -->
+  <text x="240" y="218" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" fill="#94a3b8">
+    Laravel-inspired caching system for React
+  </text>
+
+  <!-- Driver badges -->
+  <g transform="translate(240, 245)">
+    <!-- Memory badge -->
+    <rect x="0" y="0" width="100" height="32" rx="6" fill="#38bdf8" opacity="0.12"/>
+    <rect x="0" y="0" width="100" height="32" rx="6" fill="none" stroke="#38bdf8" stroke-width="1" opacity="0.3"/>
+    <text x="50" y="21" font-family="ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace" font-size="13" fill="#38bdf8" text-anchor="middle">Memory</text>
+
+    <!-- Redis badge -->
+    <rect x="116" y="0" width="84" height="32" rx="6" fill="#818cf8" opacity="0.12"/>
+    <rect x="116" y="0" width="84" height="32" rx="6" fill="none" stroke="#818cf8" stroke-width="1" opacity="0.3"/>
+    <text x="158" y="21" font-family="ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace" font-size="13" fill="#818cf8" text-anchor="middle">Redis</text>
+
+    <!-- Null badge -->
+    <rect x="216" y="0" width="72" height="32" rx="6" fill="#c084fc" opacity="0.12"/>
+    <rect x="216" y="0" width="72" height="32" rx="6" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.3"/>
+    <text x="252" y="21" font-family="ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace" font-size="13" fill="#c084fc" text-anchor="middle">Null</text>
+
+    <!-- Tagging badge -->
+    <rect x="304" y="0" width="96" height="32" rx="6" fill="#34d399" opacity="0.12"/>
+    <rect x="304" y="0" width="96" height="32" rx="6" fill="none" stroke="#34d399" stroke-width="1" opacity="0.3"/>
+    <text x="352" y="21" font-family="ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace" font-size="13" fill="#34d399" text-anchor="middle">Tagging</text>
+  </g>
+
+  <!-- Code snippet decoration on the right -->
+  <g transform="translate(780, 100)" opacity="0.5">
+    <text font-family="ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace" font-size="13" fill="#64748b">
+      <tspan x="0" dy="0" fill="#c084fc">const</tspan><tspan fill="#94a3b8"> cache = </tspan><tspan fill="#38bdf8">useCache</tspan><tspan fill="#94a3b8">();</tspan>
+      <tspan x="0" dy="24"/>
+      <tspan x="0" dy="24" fill="#64748b">// Store with TTL</tspan>
+      <tspan x="0" dy="24" fill="#c084fc">await</tspan><tspan fill="#94a3b8"> cache.</tspan><tspan fill="#38bdf8">put</tspan><tspan fill="#94a3b8">(</tspan><tspan fill="#34d399">'user:1'</tspan><tspan fill="#94a3b8">, data, </tspan><tspan fill="#f59e0b">3600</tspan><tspan fill="#94a3b8">);</tspan>
+      <tspan x="0" dy="24"/>
+      <tspan x="0" dy="24" fill="#64748b">// Tagged caching</tspan>
+      <tspan x="0" dy="24" fill="#c084fc">await</tspan><tspan fill="#94a3b8"> cache.</tspan><tspan fill="#38bdf8">tags</tspan><tspan fill="#94a3b8">([</tspan><tspan fill="#34d399">'users'</tspan><tspan fill="#94a3b8">])</tspan>
+      <tspan x="20" dy="24" fill="#94a3b8">.</tspan><tspan fill="#38bdf8">put</tspan><tspan fill="#94a3b8">(</tspan><tspan fill="#34d399">'key'</tspan><tspan fill="#94a3b8">, val, </tspan><tspan fill="#f59e0b">600</tspan><tspan fill="#94a3b8">);</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom accent line -->
+  <rect x="0" y="397" width="1200" height="3" fill="url(#accent)"/>
+
+  <!-- Version badge bottom-right -->
+  <g transform="translate(1080, 360)">
+    <rect x="0" y="0" width="80" height="24" rx="4" fill="#38bdf8" opacity="0.1"/>
+    <text x="40" y="16" font-family="ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace" font-size="12" fill="#38bdf8" text-anchor="middle">v1.0.2</text>
+  </g>
+</svg>
