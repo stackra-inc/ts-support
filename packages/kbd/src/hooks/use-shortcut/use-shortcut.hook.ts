@@ -10,7 +10,6 @@
 
 import { useEffect, useCallback } from 'react';
 import { shortcutRegistry } from '@/registries/shortcut.registry';
-import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
 
 /**
  * Options for the useShortcut hook.
