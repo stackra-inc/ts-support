@@ -67,7 +67,7 @@ export class NestContainer {
    * @returns The Module instance and whether it was newly inserted
    */
   public async addModule(
-    metatype: ModuleMetatype,
+    metatype: ModuleMetatype
   ): Promise<{ moduleRef: Module; inserted: boolean }> {
     // Resolve promises (for async dynamic modules)
     const resolved = metatype instanceof Promise ? await metatype : metatype;
@@ -180,16 +180,16 @@ export class NestContainer {
   // Accessors
   // ─────────────────────────────────────────────────────────────────────────
 
-  /** 
- * Get all registered modules. 
- */
+  /**
+   * Get all registered modules.
+   */
   public getModules(): Map<string, Module> {
     return this.modules;
   }
 
-  /** 
- * Get a module by its token. 
- */
+  /**
+   * Get a module by its token.
+   */
   public getModuleByToken(token: string): Module | undefined {
     return this.modules.get(token);
   }
@@ -201,16 +201,19 @@ export class NestContainer {
    * @param key - Optional specific key to retrieve (e.g., 'imports', 'providers')
    */
   public getDynamicMetadata(token: string): Partial<DynamicModule> | undefined;
-  public getDynamicMetadata<K extends keyof DynamicModule>(token: string, key: K): DynamicModule[K] | undefined;
+  public getDynamicMetadata<K extends keyof DynamicModule>(
+    token: string,
+    key: K
+  ): DynamicModule[K] | undefined;
   public getDynamicMetadata(token: string, key?: string): any {
     const metadata = this.dynamicModulesMetadata.get(token);
     if (!metadata) return key ? [] : undefined;
-    return key ? (metadata as any)[key] ?? [] : metadata;
+    return key ? ((metadata as any)[key] ?? []) : metadata;
   }
 
-  /** 
- * Clear all modules (for testing). 
- */
+  /**
+   * Clear all modules (for testing).
+   */
   public clear(): void {
     this.modules.clear();
     this.globalModules.clear();

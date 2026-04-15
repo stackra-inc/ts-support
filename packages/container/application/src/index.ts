@@ -39,7 +39,7 @@
  * @module @pixielity/application
  */
 
-export { ApplicationContext } from "./application-context";
-export { bootstrapApp } from "./bootstrap";
-export type { BootstrapOptions } from "./bootstrap";
-export type { IApplicationContext } from "./interfaces/application-context.interface";
+export { ApplicationContext } from './application-context';
+export { bootstrapApp } from './bootstrap';
+export type { BootstrapOptions } from './bootstrap';
+export type { IApplicationContext } from './interfaces/application-context.interface';

@@ -38,17 +38,17 @@ import type { Scope } from './scope.enum';
  * ```
  */
 export interface ClassProvider<T = any> {
-  /** 
- * The injection token (what consumers ask for). 
- */
+  /**
+   * The injection token (what consumers ask for).
+   */
   provide: InjectionToken;
-  /** 
- * The class to instantiate when this token is requested. 
- */
+  /**
+   * The class to instantiate when this token is requested.
+   */
   useClass: Type<T>;
-  /** 
- * Optional scope override. 
- */
+  /**
+   * Optional scope override.
+   */
   scope?: Scope;
 }
 
@@ -71,13 +71,13 @@ export interface ClassProvider<T = any> {
  * ```
  */
 export interface ValueProvider<T = any> {
-  /** 
- * The injection token. 
- */
+  /**
+   * The injection token.
+   */
   provide: InjectionToken;
-  /** 
- * The value to inject. Returned as-is, no instantiation. 
- */
+  /**
+   * The value to inject. Returned as-is, no instantiation.
+   */
   useValue: T;
 }
 
@@ -115,21 +115,21 @@ export interface ValueProvider<T = any> {
  * ```
  */
 export interface FactoryProvider<T = any> {
-  /** 
- * The injection token. 
- */
+  /**
+   * The injection token.
+   */
   provide: InjectionToken;
-  /** 
- * Factory function that creates the value. Can be async. 
- */
+  /**
+   * Factory function that creates the value. Can be async.
+   */
   useFactory: (...args: any[]) => T | Promise<T>;
-  /** 
- * Tokens to inject as arguments to the factory function. 
- */
+  /**
+   * Tokens to inject as arguments to the factory function.
+   */
   inject?: InjectionToken[];
-  /** 
- * Optional scope override. 
- */
+  /**
+   * Optional scope override.
+   */
   scope?: Scope;
 }
 
@@ -147,13 +147,13 @@ export interface FactoryProvider<T = any> {
  * ```
  */
 export interface ExistingProvider<T = any> {
-  /** 
- * The alias injection token. 
- */
+  /**
+   * The alias injection token.
+   */
   provide: InjectionToken;
-  /** 
- * The target token to resolve instead. 
- */
+  /**
+   * The target token to resolve instead.
+   */
   useExisting: InjectionToken<T>;
 }
 
@@ -189,44 +189,56 @@ export type Provider<T = any> =
 // Type guards for provider classification
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** 
- * Check if a provider is a custom provider (has a `provide` property). 
+/**
+ * Check if a provider is a custom provider (has a `provide` property).
  */
-export function isCustomProvider(provider: Provider): provider is ClassProvider | ValueProvider | FactoryProvider | ExistingProvider {
+export function isCustomProvider(
+  provider: Provider
+): provider is ClassProvider | ValueProvider | FactoryProvider | ExistingProvider {
   return provider !== null && typeof provider === 'object' && 'provide' in provider;
 }
 
-/** 
- * Check if a provider is a class shorthand (just a class reference). 
+/**
+ * Check if a provider is a class shorthand (just a class reference).
  */
 export function isClassShorthand(provider: Provider): provider is Type {
   return typeof provider === 'function';
 }
 
-/** 
- * Check if a provider uses `useClass`. 
+/**
+ * Check if a provider uses `useClass`.
  */
 export function isClassProvider(provider: Provider): provider is ClassProvider {
-  return isCustomProvider(provider) && 'useClass' in provider && (provider as any).useClass !== undefined;
+  return (
+    isCustomProvider(provider) && 'useClass' in provider && (provider as any).useClass !== undefined
+  );
 }
 
-/** 
- * Check if a provider uses `useValue`. 
+/**
+ * Check if a provider uses `useValue`.
  */
 export function isValueProvider(provider: Provider): provider is ValueProvider {
   return isCustomProvider(provider) && 'useValue' in provider;
 }
 
-/** 
- * Check if a provider uses `useFactory`. 
+/**
+ * Check if a provider uses `useFactory`.
  */
 export function isFactoryProvider(provider: Provider): provider is FactoryProvider {
-  return isCustomProvider(provider) && 'useFactory' in provider && typeof (provider as any).useFactory === 'function';
+  return (
+    isCustomProvider(provider) &&
+    'useFactory' in provider &&
+    typeof (provider as any).useFactory === 'function'
+  );
 }
 
-/** 
- * Check if a provider uses `useExisting`. 
+/**
+ * Check if a provider uses `useExisting`.
  */
 export function isExistingProvider(provider: Provider): provider is ExistingProvider {
-  return isCustomProvider(provider) && 'useExisting' in provider && (provider as any).useExisting !== undefined;
+  return (
+    isCustomProvider(provider) &&
+    'useExisting' in provider &&
+    (provider as any).useExisting !== undefined
+  );
 }

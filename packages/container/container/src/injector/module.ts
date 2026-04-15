@@ -48,24 +48,24 @@ import { InstanceWrapper } from './instance-wrapper';
  * the module graph traversal.
  */
 export class Module {
-  /** 
- * Unique identifier for this module instance. 
- */
+  /**
+   * Unique identifier for this module instance.
+   */
   public readonly id: string;
 
-  /** 
- * The original class decorated with @Module(). 
- */
+  /**
+   * The original class decorated with @Module().
+   */
   public readonly metatype: Type<any>;
 
-  /** 
- * Whether this module is global (its exports are available everywhere). 
- */
+  /**
+   * Whether this module is global (its exports are available everywhere).
+   */
   public isGlobal: boolean = false;
 
-  /** 
- * The opaque token used to identify this module in the container. 
- */
+  /**
+   * The opaque token used to identify this module in the container.
+   */
   public token: string = '';
 
   /**
@@ -74,14 +74,14 @@ export class Module {
    */
   private readonly _providers = new Map<InjectionToken, InstanceWrapper>();
 
-  /** 
- * Imported modules (their exports are available to this module). 
- */
+  /**
+   * Imported modules (their exports are available to this module).
+   */
   private readonly _imports = new Set<Module>();
 
-  /** 
- * Tokens that this module exports (available to modules that import this one). 
- */
+  /**
+   * Tokens that this module exports (available to modules that import this one).
+   */
   private readonly _exports = new Set<InjectionToken>();
 
   constructor(metatype: Type<any>) {
@@ -145,7 +145,7 @@ export class Module {
         isResolved: false,
         scope,
         host: this,
-      }),
+      })
     );
 
     return classRef;
@@ -155,7 +155,7 @@ export class Module {
    * Register a custom provider (one with a `provide` property).
    */
   private addCustomProvider(
-    provider: ClassProvider | ValueProvider | FactoryProvider | ExistingProvider,
+    provider: ClassProvider | ValueProvider | FactoryProvider | ExistingProvider
   ): InjectionToken {
     if (isClassProvider(provider)) {
       this.addClassProvider(provider);
@@ -185,7 +185,7 @@ export class Module {
         isResolved: false,
         scope,
         host: this,
-      }),
+      })
     );
   }
 
@@ -205,7 +205,7 @@ export class Module {
         isResolved: true,
         async: provider.useValue instanceof Promise,
         host: this,
-      }),
+      })
     );
   }
 
@@ -227,7 +227,7 @@ export class Module {
         inject: provider.inject ?? [],
         scope: provider.scope ?? Scope.DEFAULT,
         host: this,
-      }),
+      })
     );
   }
 
@@ -248,7 +248,7 @@ export class Module {
         inject: [provider.useExisting],
         isAlias: true,
         host: this,
-      }),
+      })
     );
   }
 
@@ -256,9 +256,9 @@ export class Module {
   // Imports & Exports
   // ─────────────────────────────────────────────────────────────────────────
 
-  /** 
- * Add an imported module. 
- */
+  /**
+   * Add an imported module.
+   */
   public addImport(moduleRef: Module): void {
     this._imports.add(moduleRef);
   }

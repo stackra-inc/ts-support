@@ -37,8 +37,8 @@
  * @module @abdokouta/ts-application
  */
 
-import type { Type } from "@abdokouta/ts-container";
-import { ApplicationContext } from "./application-context";
+import type { Type } from '@abdokouta/ts-container';
+import { ApplicationContext } from './application-context';
 
 /**
  * Options for bootstrapApp().
@@ -75,9 +75,9 @@ export interface BootstrapOptions {
  */
 export async function bootstrapApp(
   rootModule: Type<any>,
-  options: BootstrapOptions = {},
+  options: BootstrapOptions = {}
 ): Promise<ApplicationContext> {
-  const { debug, globalName = "__APP_CONTEXT__", onReady } = options;
+  const { debug, globalName = '__APP_CONTEXT__', onReady } = options;
 
   /*
   |--------------------------------------------------------------------------
@@ -100,9 +100,9 @@ export async function bootstrapApp(
   |
   */
   const isDev =
-    debug ?? (typeof process !== "undefined" ? process.env?.NODE_ENV !== "production" : true);
+    debug ?? (typeof process !== 'undefined' ? process.env?.NODE_ENV !== 'production' : true);
 
-  if (isDev && typeof window !== "undefined") {
+  if (isDev && typeof window !== 'undefined') {
     (window as any)[globalName] = app;
   }
 

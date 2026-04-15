@@ -53,10 +53,5 @@ export interface ModuleMetadata {
    * - Provider tokens (class, string, symbol)
    * - Entire modules (re-exporting their exports)
    */
-  exports?: Array<
-    | InjectionToken
-    | Provider
-    | DynamicModule
-    | ForwardReference
-  >;
+  exports?: Array<InjectionToken | Provider | DynamicModule | ForwardReference>;
 }

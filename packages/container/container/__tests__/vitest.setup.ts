@@ -5,15 +5,14 @@
  * @category Configuration
  */
 
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
-vi.mock("inversiland", async () => {
-  const actual = await vi.importActual("inversiland");
+vi.mock('inversiland', async () => {
+  const actual = await vi.importActual('inversiland');
   return {
     ...actual,
     Injectable: () => (target: any) => target,
-    Inject:
-      () => (_target: any, _propertyKey: string, _parameterIndex: number) => {},
+    Inject: () => (_target: any, _propertyKey: string, _parameterIndex: number) => {},
     Module: (_metadata: any) => (target: any) => target,
   };
 });

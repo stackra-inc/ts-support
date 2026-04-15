@@ -86,10 +86,7 @@ export class Injector {
    * @param wrapper - The InstanceWrapper to resolve
    * @param moduleRef - The module context for dependency lookup
    */
-  public async resolveInstance<T>(
-    wrapper: InstanceWrapper<T>,
-    moduleRef: Module,
-  ): Promise<T> {
+  public async resolveInstance<T>(wrapper: InstanceWrapper<T>, moduleRef: Module): Promise<T> {
     // Already resolved singleton — return cached instance
     if (wrapper.isResolved && !wrapper.isTransient) {
       return wrapper.instance!;
@@ -97,9 +94,7 @@ export class Injector {
 
     // Circular dependency detection
     if (this.resolutionStack.has(wrapper.token)) {
-      throw new Error(
-        `Circular dependency detected: ${this.formatResolutionStack(wrapper.token)}`,
-      );
+      throw new Error(`Circular dependency detected: ${this.formatResolutionStack(wrapper.token)}`);
     }
 
     this.resolutionStack.add(wrapper.token);
@@ -144,7 +139,7 @@ export class Injector {
    */
   public lookupProvider(
     token: InjectionToken,
-    moduleRef: Module,
+    moduleRef: Module
   ): { wrapper: InstanceWrapper; host: Module } | undefined {
     // 1. Check own providers
     if (moduleRef.providers.has(token)) {
@@ -166,10 +161,7 @@ export class Injector {
    * 3. Calling `new Class(...deps)`
    * 4. Applying property injection
    */
-  private async resolveClass<T>(
-    wrapper: InstanceWrapper<T>,
-    moduleRef: Module,
-  ): Promise<T> {
+  private async resolveClass<T>(wrapper: InstanceWrapper<T>, moduleRef: Module): Promise<T> {
     const metatype = wrapper.metatype as Type<T>;
 
     // Get constructor dependencies
@@ -184,7 +176,7 @@ export class Injector {
           if (optionalIndices.includes(index)) return undefined;
           throw new Error(
             `Cannot resolve dependency at index [${index}] of ${metatype.name}. ` +
-            `The dependency is undefined — this usually means a circular import or missing @Inject() decorator.`,
+              `The dependency is undefined — this usually means a circular import or missing @Inject() decorator.`
           );
         }
 
@@ -195,10 +187,10 @@ export class Injector {
           if (optionalIndices.includes(index)) return undefined;
           throw new Error(
             `Cannot resolve dependency '${this.getTokenName(dep)}' at index [${index}] of ${metatype.name}. ` +
-            `Make sure it is provided in the module or imported. Original: ${(err as Error).message}`,
+              `Make sure it is provided in the module or imported. Original: ${(err as Error).message}`
           );
         }
-      }),
+      })
     );
 
     // Instantiate
@@ -224,10 +216,7 @@ export class Injector {
    * are resolved in the factory's host module, not the consumer's module.
    * This ensures cross-module aliases work correctly.
    */
-  private async resolveFactory<T>(
-    wrapper: InstanceWrapper<T>,
-    moduleRef: Module,
-  ): Promise<T> {
+  private async resolveFactory<T>(wrapper: InstanceWrapper<T>, moduleRef: Module): Promise<T> {
     const factory = wrapper.metatype as Function;
     const injectTokens = wrapper.inject ?? [];
 
@@ -245,10 +234,10 @@ export class Injector {
         } catch (err) {
           throw new Error(
             `Cannot resolve factory dependency '${this.getTokenName(token)}' ` +
-            `for provider '${wrapper.name}'. ${(err as Error).message}`,
+              `for provider '${wrapper.name}'. ${(err as Error).message}`
           );
         }
-      }),
+      })
     );
 
     // Call the factory
@@ -267,16 +256,13 @@ export class Injector {
    *
    * Looks up the provider, resolves it if needed, and returns the instance.
    */
-  private async resolveDependency(
-    token: InjectionToken,
-    moduleRef: Module,
-  ): Promise<any> {
+  private async resolveDependency(token: InjectionToken, moduleRef: Module): Promise<any> {
     const result = this.lookupProvider(token, moduleRef);
 
     if (!result) {
       throw new Error(
         `Provider '${this.getTokenName(token)}' not found. ` +
-        `Is it provided in the current module or an imported module?`,
+          `Is it provided in the current module or an imported module?`
       );
     }
 
@@ -304,7 +290,7 @@ export class Injector {
   private lookupInImports(
     token: InjectionToken,
     moduleRef: Module,
-    visited: Set<string>,
+    visited: Set<string>
   ): { wrapper: InstanceWrapper; host: Module } | undefined {
     for (const importedModule of moduleRef.imports) {
       if (visited.has(importedModule.id)) continue;
@@ -349,9 +335,9 @@ export class Injector {
     // Auto-detected types from TypeScript's emitDecoratorMetadata
     // Try the class itself first, then its prototype chain
     const paramTypes: any[] = [
-      ...(Reflect.getMetadata(PARAMTYPES_METADATA, type)
-        ?? Reflect.getOwnMetadata(PARAMTYPES_METADATA, type)
-        ?? []),
+      ...(Reflect.getMetadata(PARAMTYPES_METADATA, type) ??
+        Reflect.getOwnMetadata(PARAMTYPES_METADATA, type) ??
+        []),
     ];
 
     // Explicit overrides from @Inject() decorators
@@ -381,11 +367,7 @@ export class Injector {
   /**
    * Resolve property-injected dependencies and assign them to the instance.
    */
-  private async resolveProperties<T>(
-    instance: T,
-    type: Type<T>,
-    moduleRef: Module,
-  ): Promise<void> {
+  private async resolveProperties<T>(instance: T, type: Type<T>, moduleRef: Module): Promise<void> {
     const properties: Array<{ key: string | symbol; type: InjectionToken }> =
       Reflect.getMetadata(PROPERTY_DEPS_METADATA, type) || [];
 
@@ -414,7 +396,7 @@ export class Injector {
    */
   private formatResolutionStack(token: InjectionToken): string {
     const stack = [...this.resolutionStack, token];
-    return stack.map(t => this.getTokenName(t)).join(' → ');
+    return stack.map((t) => this.getTokenName(t)).join(' → ');
   }
 
   /**

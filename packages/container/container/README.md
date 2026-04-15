@@ -1,6 +1,7 @@
 # @abdokouta/ts-container
 
-NestJS-style IoC container and dependency injection for TypeScript. Built from scratch — no Inversify, no heavy runtime.
+NestJS-style IoC container and dependency injection for TypeScript. Built from
+scratch — no Inversify, no heavy runtime.
 
 ## Installation
 
@@ -34,7 +35,7 @@ pnpm add @abdokouta/ts-container
  * | Mark classes with @Injectable() for DI management.
  * |-------------------------------------------------------------------
  */
-import { Injectable, Inject, Optional } from "@abdokouta/ts-container";
+import { Injectable, Inject, Optional } from '@abdokouta/ts-container';
 
 @Injectable()
 class LoggerService {
@@ -47,8 +48,8 @@ class LoggerService {
 class UserService {
   constructor(
     private logger: LoggerService,
-    @Inject("API_URL") private apiUrl: string,
-    @Optional() private analytics?: AnalyticsService,
+    @Inject('API_URL') private apiUrl: string,
+    @Optional() private analytics?: AnalyticsService
   ) {}
 }
 ```
@@ -61,7 +62,7 @@ class UserService {
  * | Use @Module() to group providers and declare dependencies.
  * |-------------------------------------------------------------------
  */
-import { Module } from "@abdokouta/ts-container";
+import { Module } from '@abdokouta/ts-container';
 
 @Module({
   providers: [LoggerService, UserService],
@@ -84,7 +85,7 @@ class AppModule {}
  * | forRoot() / forFeature() return DynamicModule for configuration.
  * |-------------------------------------------------------------------
  */
-import { Module, type DynamicModule } from "@abdokouta/ts-container";
+import { Module, type DynamicModule } from '@abdokouta/ts-container';
 
 @Module({})
 class CacheModule {
@@ -115,7 +116,7 @@ const providers = [
   { provide: UserService, useClass: UserService },
 
   // Value provider
-  { provide: "API_URL", useValue: "https://api.example.com" },
+  { provide: 'API_URL', useValue: 'https://api.example.com' },
 
   // Factory provider
   {

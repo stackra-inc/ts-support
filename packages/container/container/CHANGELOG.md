@@ -17,6 +17,7 @@
 - 🔗 `Injector` — resolves constructor dependencies across module boundaries
 - 📦 `InstanceWrapper` — tracks provider state (resolved, transient, instance)
 - 🔗 `forwardRef()` utility for circular dependency resolution
-- 🎭 Four provider types: `ClassProvider`, `ValueProvider`, `FactoryProvider`, `ExistingProvider`
+- 🎭 Four provider types: `ClassProvider`, `ValueProvider`, `FactoryProvider`,
+  `ExistingProvider`
 - 🔄 Lifecycle hooks: `OnModuleInit`, `OnModuleDestroy`
 - 🏷️ Metadata constants exported for library authors

@@ -66,7 +66,7 @@ import type { InjectionToken, ForwardReference } from '@/interfaces';
  * ```
  */
 export function Inject(
-  token?: InjectionToken | ForwardReference,
+  token?: InjectionToken | ForwardReference
 ): PropertyDecorator & ParameterDecorator {
   const hasExplicitToken = arguments.length > 0;
 
@@ -94,24 +94,22 @@ export function Inject(
     if (index !== undefined) {
       // ── Constructor parameter injection ──────────────────────────────
       // Store in self:paramtypes — these override design:paramtypes
-      const existingDeps =
-        Reflect.getMetadata(SELF_DECLARED_DEPS_METADATA, target) || [];
+      const existingDeps = Reflect.getMetadata(SELF_DECLARED_DEPS_METADATA, target) || [];
 
       Reflect.defineMetadata(
         SELF_DECLARED_DEPS_METADATA,
         [...existingDeps, { index, param: resolvedToken }],
-        target,
+        target
       );
     } else {
       // ── Property injection ───────────────────────────────────────────
       // Store in self:properties_metadata
-      const existingProps =
-        Reflect.getMetadata(PROPERTY_DEPS_METADATA, target.constructor) || [];
+      const existingProps = Reflect.getMetadata(PROPERTY_DEPS_METADATA, target.constructor) || [];
 
       Reflect.defineMetadata(
         PROPERTY_DEPS_METADATA,
         [...existingProps, { key, type: resolvedToken }],
-        target.constructor,
+        target.constructor
       );
     }
   };

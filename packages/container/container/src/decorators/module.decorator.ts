@@ -28,8 +28,8 @@
 import 'reflect-metadata';
 import type { ModuleMetadata } from '@/interfaces';
 
-/** 
- * Valid keys for @Module() metadata. 
+/**
+ * Valid keys for @Module() metadata.
  */
 const VALID_MODULE_KEYS = new Set(['imports', 'providers', 'exports']);
 
@@ -50,11 +50,11 @@ const VALID_MODULE_KEYS = new Set(['imports', 'providers', 'exports']);
  */
 export function Module(metadata: ModuleMetadata): ClassDecorator {
   // Validate that only known keys are used
-  const invalidKeys = Object.keys(metadata).filter(key => !VALID_MODULE_KEYS.has(key));
+  const invalidKeys = Object.keys(metadata).filter((key) => !VALID_MODULE_KEYS.has(key));
   if (invalidKeys.length > 0) {
     throw new Error(
       `Invalid property '${invalidKeys.join("', '")}' passed into the @Module() decorator. ` +
-      `Valid properties are: ${[...VALID_MODULE_KEYS].join(', ')}.`,
+        `Valid properties are: ${[...VALID_MODULE_KEYS].join(', ')}.`
     );
   }
 

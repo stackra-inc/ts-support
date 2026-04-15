@@ -34,8 +34,4 @@ import type { Type } from './type.interface';
  *
  * 4. **Function** — for factory-based tokens or abstract classes.
  */
-export type InjectionToken<T = any> =
-  | string
-  | symbol
-  | Type<T>
-  | Function;
+export type InjectionToken<T = any> = string | symbol | Type<T> | Function;

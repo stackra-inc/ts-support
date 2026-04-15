@@ -168,7 +168,7 @@ export class ApplicationContext implements IApplicationContext {
 
     throw new Error(
       `Provider '${this.getTokenName(token)}' not found in any module. ` +
-      `Make sure it is provided in a module that has been imported.`,
+        `Make sure it is provided in a module that has been imported.`
     );
   }
 
@@ -220,7 +220,7 @@ export class ApplicationContext implements IApplicationContext {
           return wrapper.instance as T;
         }
         throw new Error(
-          `Provider '${this.getTokenName(token)}' not found in module '${moduleClass.name}'.`,
+          `Provider '${this.getTokenName(token)}' not found in module '${moduleClass.name}'.`
         );
       }
     }
@@ -253,7 +253,7 @@ export class ApplicationContext implements IApplicationContext {
   private assertInitialized(): void {
     if (!this.isInitialized) {
       throw new Error(
-        'ApplicationContext is not initialized. Call ApplicationContext.create() first.',
+        'ApplicationContext is not initialized. Call ApplicationContext.create() first.'
       );
     }
   }

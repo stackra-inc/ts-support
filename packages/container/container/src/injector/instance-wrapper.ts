@@ -26,14 +26,14 @@ import type { Module } from './module';
  * @typeParam T - The type of the provider instance
  */
 export class InstanceWrapper<T = any> {
-  /** 
- * The injection token used to look up this provider. 
- */
+  /**
+   * The injection token used to look up this provider.
+   */
   public readonly token: InjectionToken;
 
-  /** 
- * Human-readable name (class name or token string). 
- */
+  /**
+   * Human-readable name (class name or token string).
+   */
   public readonly name: string;
 
   /**
@@ -52,14 +52,14 @@ export class InstanceWrapper<T = any> {
    */
   public instance: T | null = null;
 
-  /** 
- * Whether this provider has been fully resolved (instance created). 
- */
+  /**
+   * Whether this provider has been fully resolved (instance created).
+   */
   public isResolved: boolean = false;
 
-  /** 
- * The scope of this provider. 
- */
+  /**
+   * The scope of this provider.
+   */
   public scope: Scope = Scope.DEFAULT;
 
   /**
@@ -74,14 +74,14 @@ export class InstanceWrapper<T = any> {
    */
   public isAlias: boolean = false;
 
-  /** 
- * Whether the instance is a Promise (async factory). 
- */
+  /**
+   * Whether the instance is a Promise (async factory).
+   */
   public async: boolean = false;
 
-  /** 
- * The module this provider belongs to. 
- */
+  /**
+   * The module this provider belongs to.
+   */
   public host: Module | null = null;
 
   /**

@@ -8,10 +8,7 @@
  */
 
 import 'reflect-metadata';
-import {
-  OPTIONAL_DEPS_METADATA,
-  OPTIONAL_PROPERTY_DEPS_METADATA,
-} from '@/constants';
+import { OPTIONAL_DEPS_METADATA, OPTIONAL_PROPERTY_DEPS_METADATA } from '@/constants';
 
 /**
  * Marks a constructor parameter or property dependency as optional.
@@ -36,13 +33,8 @@ export function Optional(): PropertyDecorator & ParameterDecorator {
   return (target: object, key: string | symbol | undefined, index?: number) => {
     if (index !== undefined) {
       // Constructor parameter — store the index
-      const existingOptional =
-        Reflect.getMetadata(OPTIONAL_DEPS_METADATA, target) || [];
-      Reflect.defineMetadata(
-        OPTIONAL_DEPS_METADATA,
-        [...existingOptional, index],
-        target,
-      );
+      const existingOptional = Reflect.getMetadata(OPTIONAL_DEPS_METADATA, target) || [];
+      Reflect.defineMetadata(OPTIONAL_DEPS_METADATA, [...existingOptional, index], target);
     } else {
       // Property — store the property key
       const existingOptional =
@@ -50,7 +42,7 @@ export function Optional(): PropertyDecorator & ParameterDecorator {
       Reflect.defineMetadata(
         OPTIONAL_PROPERTY_DEPS_METADATA,
         [...existingOptional, key],
-        target.constructor,
+        target.constructor
       );
     }
   };

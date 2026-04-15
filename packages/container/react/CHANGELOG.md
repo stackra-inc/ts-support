@@ -11,4 +11,5 @@
 - 🔧 `useContainer()` hook for raw `ContainerResolver` access
 - 🔗 `ContainerContext` React context for advanced use cases
 - 📐 `ContainerProviderProps` interface for type-safe provider props
-- 🏗️ Full compatibility with `ApplicationContext` from `@abdokouta/ts-application`
+- 🏗️ Full compatibility with `ApplicationContext` from
+  `@abdokouta/ts-application`

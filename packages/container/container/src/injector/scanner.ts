@@ -78,7 +78,7 @@ export class DependenciesScanner {
    */
   private async scanForModules(
     moduleDefinition: ModuleMetatype,
-    ctxRegistry: any[],
+    ctxRegistry: any[]
   ): Promise<void> {
     // Resolve forward references
     const resolved = this.resolveForwardRef(moduleDefinition);
@@ -100,7 +100,7 @@ export class DependenciesScanner {
         const moduleName = this.getModuleName(resolved);
         throw new Error(
           `An undefined module was imported by ${moduleName}. ` +
-          `This is usually caused by a circular dependency. Use forwardRef() to resolve it.`,
+            `This is usually caused by a circular dependency. Use forwardRef() to resolve it.`
         );
       }
       await this.scanForModules(importedModule, ctxRegistry);
@@ -136,10 +136,8 @@ export class DependenciesScanner {
    * Merges static @Module({ imports }) with dynamic module imports.
    */
   private async reflectImports(metatype: Type<any>, token: string): Promise<void> {
-    const staticImports: any[] =
-      Reflect.getMetadata(MODULE_METADATA.IMPORTS, metatype) || [];
-    const dynamicImports: any[] =
-      this.container.getDynamicMetadata(token, 'imports' as any) || [];
+    const staticImports: any[] = Reflect.getMetadata(MODULE_METADATA.IMPORTS, metatype) || [];
+    const dynamicImports: any[] = this.container.getDynamicMetadata(token, 'imports' as any) || [];
 
     const allImports = [...staticImports, ...dynamicImports];
 
@@ -175,10 +173,8 @@ export class DependenciesScanner {
    * Merges static @Module({ exports }) with dynamic module exports.
    */
   private reflectExports(metatype: Type<any>, token: string): void {
-    const staticExports: any[] =
-      Reflect.getMetadata(MODULE_METADATA.EXPORTS, metatype) || [];
-    const dynamicExports: any[] =
-      this.container.getDynamicMetadata(token, 'exports' as any) || [];
+    const staticExports: any[] = Reflect.getMetadata(MODULE_METADATA.EXPORTS, metatype) || [];
+    const dynamicExports: any[] = this.container.getDynamicMetadata(token, 'exports' as any) || [];
 
     const allExports = [...staticExports, ...dynamicExports];
 

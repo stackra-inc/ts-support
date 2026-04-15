@@ -11,7 +11,8 @@ pnpm add @abdokouta/ts-application
 ## Features
 
 - 🚀 `bootstrapApp()` convenience factory for app startup
-- 🏗️ `ApplicationContext` — scans module tree, resolves providers, runs lifecycle hooks
+- 🏗️ `ApplicationContext` — scans module tree, resolves providers, runs
+  lifecycle hooks
 - 🔍 `get()` / `getOptional()` / `has()` for provider resolution
 - 🎯 `select(module, token)` for module-scoped resolution
 - 🔄 Lifecycle: `onModuleInit()` on bootstrap, `onModuleDestroy()` on `close()`
@@ -28,19 +29,19 @@ pnpm add @abdokouta/ts-application
  * | bootstrapApp() handles the full bootstrap sequence.
  * |-------------------------------------------------------------------
  */
-import { bootstrapApp } from "@abdokouta/ts-application";
-import { ContainerProvider } from "@abdokouta/ts-container-react";
-import { AppModule } from "./app.module";
+import { bootstrapApp } from '@abdokouta/ts-application';
+import { ContainerProvider } from '@abdokouta/ts-container-react';
+import { AppModule } from './app.module';
 
 const app = await bootstrapApp(AppModule, {
   debug: true,
-  onReady: (ctx) => console.log("App ready!"),
+  onReady: (ctx) => console.log('App ready!'),
 });
 
 ReactDOM.createRoot(root).render(
   <ContainerProvider context={app}>
     <App />
-  </ContainerProvider>,
+  </ContainerProvider>
 );
 ```
 
@@ -52,8 +53,8 @@ ReactDOM.createRoot(root).render(
  * | ApplicationContext.create() for lower-level control.
  * |-------------------------------------------------------------------
  */
-import { ApplicationContext } from "@abdokouta/ts-application";
-import { AppModule } from "./app.module";
+import { ApplicationContext } from '@abdokouta/ts-application';
+import { AppModule } from './app.module';
 
 const app = await ApplicationContext.create(AppModule);
 
