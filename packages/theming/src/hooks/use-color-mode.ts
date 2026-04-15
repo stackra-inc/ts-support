@@ -19,7 +19,7 @@ import type { ColorMode } from '@/types/theme.types';
 
 export interface UseColorModeReturn {
   /** Current mode setting (may be "system") */
-  mode: ColorMode | undefined;
+  mode: ColorMode;
   /** Set the color mode */
   setMode: (mode: ColorMode) => void;
   /** Resolved mode — always "light" or "dark", never "system" */
