@@ -840,6 +840,9 @@ importers:
       '@abdokouta/ts-container':
         specifier: workspace:*
         version: link:../container/container
+      lucide-react:
+        specifier: ^1.7.0
+        version: 1.8.0(react@19.2.5)
     devDependencies:
       '@nesvel/eslint-config':
         specifier: ^1.0.5

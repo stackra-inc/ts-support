@@ -82,5 +82,8 @@
     "node": ">=18.0.0",
     "pnpm": ">=9.0.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "lucide-react": "^1.7.0"
+  }
 }
