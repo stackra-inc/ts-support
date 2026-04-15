@@ -1,6 +1,6 @@
 /**
  * @fileoverview Shortcut group configuration interface
- * 
+ *
  * @module interfaces/ShortcutGroup
  */
 

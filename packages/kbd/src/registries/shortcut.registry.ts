@@ -17,8 +17,8 @@ import type {
   ShortcutQueryOptions,
   Platform,
   PlatformKeys,
-} from "@/interfaces";
-import type { KeyValue } from "@/types";
+} from '@/interfaces';
+import type { KeyValue } from '@/types';
 
 /**
  * Keyboard Shortcut Registry Service
@@ -81,25 +81,25 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    * @returns The detected platform
    */
   private detectPlatform(): Platform {
-    if (typeof window === "undefined") {
-      return "all";
+    if (typeof window === 'undefined') {
+      return 'all';
     }
 
     const userAgent = window.navigator.userAgent.toLowerCase();
 
-    if (userAgent.includes("mac")) {
-      return "mac";
+    if (userAgent.includes('mac')) {
+      return 'mac';
     }
 
-    if (userAgent.includes("win")) {
-      return "windows";
+    if (userAgent.includes('win')) {
+      return 'windows';
     }
 
-    if (userAgent.includes("linux")) {
-      return "linux";
+    if (userAgent.includes('linux')) {
+      return 'linux';
     }
 
-    return "all";
+    return 'all';
   }
 
   /**
@@ -118,7 +118,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    */
   public setPlatform(platform: Platform): void {
     this.platform = platform;
-    this.emit({ type: "platform-changed", platform });
+    this.emit({ type: 'platform-changed', platform });
   }
 
   // ============================================================================
@@ -144,9 +144,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    * }); // Returns ['command', 'K'] on Mac, ['ctrl', 'K'] on Windows
    * ```
    */
-  public resolveKeys(
-    keys: (KeyValue | string)[] | PlatformKeys,
-  ): (KeyValue | string)[] {
+  public resolveKeys(keys: (KeyValue | string)[] | PlatformKeys): (KeyValue | string)[] {
     // If it's a simple array, return as-is
     if (Array.isArray(keys)) {
       return keys;
@@ -156,15 +154,15 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
     const platformKeys = keys as PlatformKeys;
 
     // Try platform-specific keys first
-    if (this.platform === "mac" && platformKeys.mac) {
+    if (this.platform === 'mac' && platformKeys.mac) {
       return platformKeys.mac;
     }
 
-    if (this.platform === "windows" && platformKeys.windows) {
+    if (this.platform === 'windows' && platformKeys.windows) {
       return platformKeys.windows;
     }
 
-    if (this.platform === "linux" && platformKeys.linux) {
+    if (this.platform === 'linux' && platformKeys.linux) {
       return platformKeys.linux;
     }
 
@@ -189,10 +187,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    * @param keys2 - Second key combination
    * @returns True if keys are equal
    */
-  private areKeysEqual(
-    keys1: (KeyValue | string)[],
-    keys2: (KeyValue | string)[],
-  ): boolean {
+  private areKeysEqual(keys1: (KeyValue | string)[], keys2: (KeyValue | string)[]): boolean {
     const normalized1 = this.normalizeKeys(keys1);
     const normalized2 = this.normalizeKeys(keys2);
 
@@ -229,12 +224,12 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    */
   public override register(
     shortcut: KeyboardShortcut,
-    options?: ShortcutRegistrationOptions,
+    options?: ShortcutRegistrationOptions
   ): KeyboardShortcut;
   public override register(key: string, item: KeyboardShortcut): void;
   public override register(
     shortcutOrKey: KeyboardShortcut | string,
-    optionsOrItem?: ShortcutRegistrationOptions | KeyboardShortcut,
+    optionsOrItem?: ShortcutRegistrationOptions | KeyboardShortcut
   ): KeyboardShortcut | void {
     // Handle BaseRegistry's (key, item) signature
     if (typeof shortcutOrKey === 'string') {
@@ -247,7 +242,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
     const {
       override = false,
       checkConflicts = true,
-      onConflict = "warn",
+      onConflict = 'warn',
       enabled = true,
     } = options;
 
@@ -255,15 +250,15 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
     if (this.has(shortcut.id) && !override) {
       const message = `Shortcut with ID "${shortcut.id}" already exists`;
 
-      if (onConflict === "error") {
+      if (onConflict === 'error') {
         throw new Error(message);
       }
 
-      if (onConflict === "warn") {
+      if (onConflict === 'warn') {
         console.warn(message);
       }
 
-      if (onConflict === "skip") {
+      if (onConflict === 'skip') {
         return this.get(shortcut.id)!;
       }
     }
@@ -273,21 +268,19 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
       const conflicts = this.findConflicts(shortcut);
 
       if (conflicts.length > 0) {
-        const message = `Shortcut "${
-          shortcut.id
-        }" conflicts with existing shortcuts: ${conflicts
+        const message = `Shortcut "${shortcut.id}" conflicts with existing shortcuts: ${conflicts
           .map((c) => c.existingShortcut.id)
-          .join(", ")}`;
+          .join(', ')}`;
 
-        if (onConflict === "error") {
+        if (onConflict === 'error') {
           throw new Error(message);
         }
 
-        if (onConflict === "warn") {
+        if (onConflict === 'warn') {
           console.warn(message, conflicts);
         }
 
-        if (onConflict === "skip") {
+        if (onConflict === 'skip') {
           return shortcut;
         }
       }
@@ -299,7 +292,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
       enabled: enabled ?? shortcut.enabled ?? true,
       preventDefault: shortcut.preventDefault ?? true,
       stopPropagation: shortcut.stopPropagation ?? false,
-      priority: shortcut.priority ?? "normal",
+      priority: shortcut.priority ?? 'normal',
       allowRepeat: shortcut.allowRepeat ?? false,
       allowInInput: shortcut.allowInInput ?? false,
       showInHelp: shortcut.showInHelp ?? true,
@@ -311,7 +304,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
     this.storage.set(shortcut.id, completeShortcut);
 
     // Emit event
-    this.emit({ type: "registered", shortcut: completeShortcut });
+    this.emit({ type: 'registered', shortcut: completeShortcut });
 
     return completeShortcut;
   }
@@ -325,7 +318,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    */
   public registerMany(
     shortcuts: KeyboardShortcut[],
-    options: ShortcutRegistrationOptions = {},
+    options: ShortcutRegistrationOptions = {}
   ): KeyboardShortcut[] {
     return shortcuts.map((shortcut) => this.register(shortcut, options));
   }
@@ -344,7 +337,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
     }
 
     this.storage.delete(id);
-    this.emit({ type: "unregistered", shortcut });
+    this.emit({ type: 'unregistered', shortcut });
 
     return true;
   }
@@ -372,7 +365,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    */
   public clear(): void {
     super.clear();
-    this.emit({ type: "cleared" });
+    this.emit({ type: 'cleared' });
   }
 
   // ============================================================================
@@ -385,9 +378,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    * @param category - Category to filter by
    * @returns Array of shortcuts in the category
    */
-  public getByCategory(
-    category: KeyboardShortcut["category"],
-  ): KeyboardShortcut[] {
+  public getByCategory(category: KeyboardShortcut['category']): KeyboardShortcut[] {
     return this.getAll().filter((shortcut) => shortcut.category === category);
   }
 
@@ -397,9 +388,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    * @param context - Context to filter by
    * @returns Array of shortcuts in the context
    */
-  public getByContext(
-    context: KeyboardShortcut["context"],
-  ): KeyboardShortcut[] {
+  public getByContext(context: KeyboardShortcut['context']): KeyboardShortcut[] {
     return this.getAll().filter((shortcut) => shortcut.context === context);
   }
 
@@ -424,17 +413,13 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
 
     // Filter by category
     if (options.category) {
-      const categories = Array.isArray(options.category)
-        ? options.category
-        : [options.category];
+      const categories = Array.isArray(options.category) ? options.category : [options.category];
       results = results.filter((s) => categories.includes(s.category));
     }
 
     // Filter by context
     if (options.context) {
-      const contexts = Array.isArray(options.context)
-        ? options.context
-        : [options.context];
+      const contexts = Array.isArray(options.context) ? options.context : [options.context];
       results = results.filter((s) => contexts.includes(s.context));
     }
 
@@ -445,9 +430,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
 
     // Filter by tags
     if (options.tags && options.tags.length > 0) {
-      results = results.filter((s) =>
-        s.tags?.some((tag) => options.tags!.includes(tag)),
-      );
+      results = results.filter((s) => s.tags?.some((tag) => options.tags!.includes(tag)));
     }
 
     // Filter by group
@@ -465,8 +448,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
       const search = options.search.toLowerCase();
       results = results.filter(
         (s) =>
-          s.name.toLowerCase().includes(search) ||
-          s.description?.toLowerCase().includes(search),
+          s.name.toLowerCase().includes(search) || s.description?.toLowerCase().includes(search)
       );
     }
 
@@ -495,8 +477,8 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
 
       // Check if contexts overlap
       if (
-        shortcut.context !== "global" &&
-        existing.context !== "global" &&
+        shortcut.context !== 'global' &&
+        existing.context !== 'global' &&
         shortcut.context !== existing.context
       ) {
         continue;
@@ -510,11 +492,8 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
           newShortcut: shortcut,
           existingShortcut: existing,
           conflictingKeys: newKeys,
-          canResolve: shortcut.priority! > (existing.priority ?? "normal"),
-          resolution:
-            shortcut.priority! > (existing.priority ?? "normal")
-              ? "override"
-              : "skip",
+          canResolve: shortcut.priority! > (existing.priority ?? 'normal'),
+          resolution: shortcut.priority! > (existing.priority ?? 'normal') ? 'override' : 'skip',
         });
       }
 
@@ -529,7 +508,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
               existingShortcut: existing,
               conflictingKeys: resolvedAltKeys,
               canResolve: false,
-              resolution: "alternative",
+              resolution: 'alternative',
             });
           }
         }
@@ -550,7 +529,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    */
   public registerGroup(group: ShortcutGroup): void {
     this.groups.set(group.id, group);
-    this.emit({ type: "group-registered", group });
+    this.emit({ type: 'group-registered', group });
   }
 
   /**
@@ -569,9 +548,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
    * @returns Array of all groups
    */
   public getAllGroups(): ShortcutGroup[] {
-    return Array.from(this.groups.values()).sort(
-      (a, b) => (a.order ?? 0) - (b.order ?? 0),
-    );
+    return Array.from(this.groups.values()).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
   // ============================================================================
@@ -593,7 +570,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
 
     shortcut.enabled = true;
     this.storage.set(id, shortcut);
-    this.emit({ type: "enabled", shortcut });
+    this.emit({ type: 'enabled', shortcut });
 
     return true;
   }
@@ -613,7 +590,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
 
     shortcut.enabled = false;
     this.storage.set(id, shortcut);
-    this.emit({ type: "disabled", shortcut });
+    this.emit({ type: 'disabled', shortcut });
 
     return true;
   }
@@ -634,7 +611,7 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
     shortcut.enabled = !shortcut.enabled;
     this.storage.set(id, shortcut);
     this.emit({
-      type: shortcut.enabled ? "enabled" : "disabled",
+      type: shortcut.enabled ? 'enabled' : 'disabled',
       shortcut,
     });
 
@@ -675,13 +652,13 @@ export class ShortcutRegistry extends BaseRegistry<KeyboardShortcut> {
  * Registry event types
  */
 export type RegistryEvent =
-  | { type: "registered"; shortcut: KeyboardShortcut }
-  | { type: "unregistered"; shortcut: KeyboardShortcut }
-  | { type: "enabled"; shortcut: KeyboardShortcut }
-  | { type: "disabled"; shortcut: KeyboardShortcut }
-  | { type: "cleared" }
-  | { type: "group-registered"; group: ShortcutGroup }
-  | { type: "platform-changed"; platform: Platform };
+  | { type: 'registered'; shortcut: KeyboardShortcut }
+  | { type: 'unregistered'; shortcut: KeyboardShortcut }
+  | { type: 'enabled'; shortcut: KeyboardShortcut }
+  | { type: 'disabled'; shortcut: KeyboardShortcut }
+  | { type: 'cleared' }
+  | { type: 'group-registered'; group: ShortcutGroup }
+  | { type: 'platform-changed'; platform: Platform };
 
 /**
  * Global shortcut registry instance

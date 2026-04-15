@@ -11,7 +11,7 @@ npm install @abdokouta/kbd
 ## Step 1: Import the Component
 
 ```tsx
-import { RefineKbd } from "@abdokouta/kbd";
+import { RefineKbd } from '@abdokouta/kbd';
 ```
 
 ## Step 2: Display a Keyboard Shortcut
@@ -20,7 +20,7 @@ import { RefineKbd } from "@abdokouta/kbd";
 function MyComponent() {
   return (
     <p>
-      Press <RefineKbd keys={["command", "K"]} /> to search
+      Press <RefineKbd keys={['command', 'K']} /> to search
     </p>
   );
 }
@@ -33,7 +33,7 @@ That's it! You now have a beautiful keyboard shortcut display.
 ### 1. Multiple Keys
 
 ```tsx
-<RefineKbd keys={["ctrl", "shift", "P"]} />
+<RefineKbd keys={['ctrl', 'shift', 'P']} />
 ```
 
 ### 2. Navigation Keys
@@ -46,25 +46,25 @@ That's it! You now have a beautiful keyboard shortcut display.
 ### 3. Light Variant
 
 ```tsx
-<RefineKbd keys={["command", "S"]} variant="light" />
+<RefineKbd keys={['command', 'S']} variant="light" />
 ```
 
 ### 4. Custom Separator
 
 ```tsx
-<RefineKbd keys={["command", "K"]} separator=" + " />
+<RefineKbd keys={['command', 'K']} separator=" + " />
 ```
 
 ## Bonus: Register Keyboard Shortcuts
 
 ```tsx
-import { useKeyboardShortcut } from "@abdokouta/kbd";
+import { useKeyboardShortcut } from '@abdokouta/kbd';
 
 function MyComponent() {
   useKeyboardShortcut({
-    keys: ["command", "K"],
+    keys: ['command', 'K'],
     callback: () => {
-      console.log("Shortcut triggered!");
+      console.log('Shortcut triggered!');
     },
   });
 

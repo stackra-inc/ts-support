@@ -1,6 +1,6 @@
 /**
  * @fileoverview Platform-specific key combination interface
- * 
+ *
  * @module interfaces/PlatformKeys
  */
 

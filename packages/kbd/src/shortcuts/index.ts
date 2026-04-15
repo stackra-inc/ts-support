@@ -23,7 +23,6 @@ export { VIEW_SHORTCUTS } from './view.shortcut';
 export { HELP_SHORTCUTS } from './help.shortcut';
 export { MODAL_SHORTCUTS } from './modal.shortcut';
 
-
 /**
  * All built-in shortcuts
  */

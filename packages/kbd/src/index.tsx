@@ -65,9 +65,20 @@ export { Kbd } from '@heroui/react';
 // ============================================================================
 // Components
 // ============================================================================
-export { RefineKbd, ShortcutList, ShortcutHelp, ShortcutHint, KbdVisibilityProvider } from './components';
+export {
+  RefineKbd,
+  ShortcutList,
+  ShortcutHelp,
+  ShortcutHint,
+  KbdVisibilityProvider,
+} from './components';
 
-export type { ShortcutListProps, ShortcutHelpProps, ShortcutHintProps, KbdVisibilityProviderProps } from './components';
+export type {
+  ShortcutListProps,
+  ShortcutHelpProps,
+  ShortcutHintProps,
+  KbdVisibilityProviderProps,
+} from './components';
 
 // ============================================================================
 // Hooks

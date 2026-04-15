@@ -1,21 +1,21 @@
-import { defineConfig } from "tsup";
-import { NodeResolvePlugin } from "@esbuild-plugins/node-resolve";
+import { defineConfig } from 'tsup';
+import { NodeResolvePlugin } from '@esbuild-plugins/node-resolve';
 
 export default defineConfig((options) => ({
-  entry: ["src/index.tsx"],
+  entry: ['src/index.tsx'],
   splitting: false,
   sourcemap: true,
   clean: false,
   dts: true,
   minify: false,
-  format: ["cjs", "esm"],
-  outExtension: ({ format }) => ({ js: format === "cjs" ? ".cjs" : ".mjs" }),
-  platform: "browser",
+  format: ['cjs', 'esm'],
+  outExtension: ({ format }) => ({ js: format === 'cjs' ? '.cjs' : '.mjs' }),
+  platform: 'browser',
   esbuildPlugins: [
     NodeResolvePlugin({
-      extensions: [".js", "ts", "tsx", "jsx"],
+      extensions: ['.js', 'ts', 'tsx', 'jsx'],
       onResolved: (resolved) => {
-        if (resolved.includes("node_modules")) {
+        if (resolved.includes('node_modules')) {
           return {
             external: true,
           };
@@ -40,5 +40,5 @@ export default defineConfig((options) => ({
       js: '"use client"',
     };
   },
-  onSuccess: options.watch ? "pnpm types" : undefined,
+  onSuccess: options.watch ? 'pnpm types' : undefined,
 }));

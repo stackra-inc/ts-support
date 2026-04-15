@@ -1,6 +1,7 @@
 # @abdokouta/kbd
 
-Keyboard shortcut management with DI integration, registry pattern, platform-specific keys, and React components.
+Keyboard shortcut management with DI integration, registry pattern,
+platform-specific keys, and React components.
 
 ## Installation
 
@@ -18,7 +19,8 @@ pnpm add @abdokouta/kbd
 - 🎭 Priority system for conflict resolution
 - 🔄 Alternative key combinations per shortcut
 - 📦 Built-in shortcuts for navigation, editing, search, view, help, modals
-- 🪝 React hooks: `useShortcut`, `useShortcuts`, `useShortcutRegistry`, `useKeyboardShortcut`
+- 🪝 React hooks: `useShortcut`, `useShortcuts`, `useShortcutRegistry`,
+  `useKeyboardShortcut`
 - 🧩 Components: `RefineKbd`, `ShortcutList`, `ShortcutHelp`, `ShortcutHint`
 - ♿ ARIA-compliant keyboard shortcut displays
 
@@ -32,8 +34,8 @@ pnpm add @abdokouta/kbd
  * | Register KbdModule in your root AppModule.
  * |-------------------------------------------------------------------
  */
-import { Module } from "@abdokouta/ts-container";
-import { KbdModule } from "@abdokouta/kbd";
+import { Module } from '@abdokouta/ts-container';
+import { KbdModule } from '@abdokouta/kbd';
 
 @Module({
   imports: [KbdModule.forRoot({ registerBuiltIn: true, debug: false })],
@@ -53,11 +55,11 @@ export class AppModule {}
   imports: [
     KbdModule.forFeature([
       {
-        id: "pos:scan",
-        name: "Scan Barcode",
-        category: "custom",
-        context: "global",
-        keys: { mac: ["F2"], windows: ["F2"], linux: ["F2"] },
+        id: 'pos:scan',
+        name: 'Scan Barcode',
+        category: 'custom',
+        context: 'global',
+        keys: { mac: ['F2'], windows: ['F2'], linux: ['F2'] },
         callback: () => scanBarcode(),
       },
     ]),
@@ -74,8 +76,8 @@ export class PosModule {}
  * | Inject ShortcutRegistry via DI to register/query shortcuts.
  * |-------------------------------------------------------------------
  */
-import { Injectable, Inject } from "@abdokouta/ts-container";
-import { ShortcutRegistry, SHORTCUT_REGISTRY } from "@abdokouta/kbd";
+import { Injectable, Inject } from '@abdokouta/ts-container';
+import { ShortcutRegistry, SHORTCUT_REGISTRY } from '@abdokouta/kbd';
 
 @Injectable()
 export class EditorService {
@@ -83,11 +85,11 @@ export class EditorService {
 
   init() {
     this.shortcuts.register({
-      id: "editor.save",
-      name: "Save",
-      category: "editing",
-      context: "editor",
-      keys: { mac: ["command", "S"], windows: ["ctrl", "S"] },
+      id: 'editor.save',
+      name: 'Save',
+      category: 'editing',
+      context: 'editor',
+      keys: { mac: ['command', 'S'], windows: ['ctrl', 'S'] },
       callback: () => this.save(),
     });
   }
@@ -102,15 +104,15 @@ export class EditorService {
  * | useShortcut registers a shortcut with automatic cleanup.
  * |-------------------------------------------------------------------
  */
-import { useShortcut, useShortcutRegistry, RefineKbd } from "@abdokouta/kbd";
+import { useShortcut, useShortcutRegistry, RefineKbd } from '@abdokouta/kbd';
 
 function SaveButton() {
-  useShortcut({ id: "editor.save", callback: () => handleSave() });
+  useShortcut({ id: 'editor.save', callback: () => handleSave() });
   const registry = useShortcutRegistry();
 
   return (
     <button onClick={handleSave}>
-      Save <RefineKbd keys={["command", "S"]} />
+      Save <RefineKbd keys={['command', 'S']} />
     </button>
   );
 }

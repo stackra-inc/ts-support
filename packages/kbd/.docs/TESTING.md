@@ -2,7 +2,8 @@
 
 ## Overview
 
-The `@abdokouta/kbd` package includes comprehensive test coverage using Vitest and React Testing Library.
+The `@abdokouta/kbd` package includes comprehensive test coverage using Vitest
+and React Testing Library.
 
 ## Running Tests
 
@@ -68,17 +69,17 @@ src/
 ### Example: Testing a Utility Function
 
 ```typescript
-import { describe, it, expect } from "vitest";
-import { isKeyValue } from "./key-mappings.util";
+import { describe, it, expect } from 'vitest';
+import { isKeyValue } from './key-mappings.util';
 
-describe("isKeyValue", () => {
-  it("should return true for valid key values", () => {
-    expect(isKeyValue("command")).toBe(true);
-    expect(isKeyValue("ctrl")).toBe(true);
+describe('isKeyValue', () => {
+  it('should return true for valid key values', () => {
+    expect(isKeyValue('command')).toBe(true);
+    expect(isKeyValue('ctrl')).toBe(true);
   });
 
-  it("should return false for invalid key values", () => {
-    expect(isKeyValue("invalid")).toBe(false);
+  it('should return false for invalid key values', () => {
+    expect(isKeyValue('invalid')).toBe(false);
   });
 });
 ```
@@ -93,7 +94,7 @@ import { RefineKbd } from "./refine-kbd.component";
 describe("RefineKbd", () => {
   it("should render keyboard keys", () => {
     render(<RefineKbd keys={["command", "K"]} />);
-    
+
     expect(screen.getByText("⌘")).toBeInTheDocument();
     expect(screen.getByText("K")).toBeInTheDocument();
   });
@@ -103,17 +104,17 @@ describe("RefineKbd", () => {
 ### Example: Testing with Mocks
 
 ```typescript
-import { describe, it, expect, vi } from "vitest";
-import { KbdModule } from "./kbd.module";
+import { describe, it, expect, vi } from 'vitest';
+import { KbdModule } from './kbd.module';
 
-describe("KbdModule", () => {
-  it("should register a shortcut with callback", () => {
+describe('KbdModule', () => {
+  it('should register a shortcut with callback', () => {
     const callback = vi.fn();
-    
+
     KbdModule.register({
-      id: "test",
-      name: "Test",
-      keys: ["ctrl", "T"],
+      id: 'test',
+      name: 'Test',
+      keys: ['ctrl', 'T'],
       callback,
     });
 
@@ -153,6 +154,7 @@ describe("KbdModule", () => {
 ## CI/CD Integration
 
 Tests run automatically on:
+
 - Pull requests
 - Commits to main branch
 - Pre-publish checks

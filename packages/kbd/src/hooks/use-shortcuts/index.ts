@@ -1,1 +1,1 @@
-export * from "./use-shortcuts.hook";
+export * from './use-shortcuts.hook';

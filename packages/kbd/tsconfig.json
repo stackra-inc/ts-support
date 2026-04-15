@@ -32,11 +32,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
 
-     /* Decorators - Required for DI container */
+    /* Decorators - Required for DI container */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    
-     /* Path aliases */
+
+    /* Path aliases */
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {

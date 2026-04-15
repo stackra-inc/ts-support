@@ -42,7 +42,9 @@ export function KbdVisibilityProvider({
       try {
         const stored = localStorage.getItem(storageKey);
         if (stored !== null) return stored === 'true';
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     return defaultVisible;
   });
@@ -52,21 +54,16 @@ export function KbdVisibilityProvider({
     if (storageKey && typeof window !== 'undefined') {
       try {
         localStorage.setItem(storageKey, String(visible));
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }, [visible, storageKey]);
 
   const toggle = useCallback(() => setVisibleState((v) => !v), []);
   const setVisible = useCallback((v: boolean) => setVisibleState(v), []);
 
-  const value = useMemo(
-    () => ({ visible, toggle, setVisible }),
-    [visible, toggle, setVisible],
-  );
+  const value = useMemo(() => ({ visible, toggle, setVisible }), [visible, toggle, setVisible]);
 
-  return (
-    <KbdVisibilityContext.Provider value={value}>
-      {children}
-    </KbdVisibilityContext.Provider>
-  );
+  return <KbdVisibilityContext.Provider value={value}>{children}</KbdVisibilityContext.Provider>;
 }

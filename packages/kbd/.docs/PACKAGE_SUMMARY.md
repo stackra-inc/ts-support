@@ -2,7 +2,10 @@
 
 ## Overview
 
-The `@abdokouta/kbd` package is a production-ready keyboard shortcut display component library for refine applications, built on top of HeroUI's Kbd component. It provides a simple, accessible, and visually appealing way to display keyboard shortcuts in your UI.
+The `@abdokouta/kbd` package is a production-ready keyboard shortcut display
+component library for refine applications, built on top of HeroUI's Kbd
+component. It provides a simple, accessible, and visually appealing way to
+display keyboard shortcuts in your UI.
 
 ## Package Information
 
@@ -14,14 +17,15 @@ The `@abdokouta/kbd` package is a production-ready keyboard shortcut display com
 
 ## Key Features
 
-✅ **100% Compatible with Refine**: Follows the same patterns as @abdokouta/kbar and other refine packages
-✅ **Full HeroUI Integration**: Built on HeroUI v3 Kbd component with complete theming support
-✅ **TypeScript Support**: Comprehensive type definitions for all APIs
-✅ **Production Ready**: Complete with tests, documentation, and examples
-✅ **Accessible**: ARIA attributes and semantic HTML for screen readers
-✅ **Customizable**: Multiple variants, custom separators, and Tailwind CSS support
-✅ **Keyboard Hook**: Includes `useKeyboardShortcut` hook for registering shortcuts
-✅ **Comprehensive Documentation**: API docs, integration guide, and examples
+✅ **100% Compatible with Refine**: Follows the same patterns as @abdokouta/kbar
+and other refine packages ✅ **Full HeroUI Integration**: Built on HeroUI v3 Kbd
+component with complete theming support ✅ **TypeScript Support**: Comprehensive
+type definitions for all APIs ✅ **Production Ready**: Complete with tests,
+documentation, and examples ✅ **Accessible**: ARIA attributes and semantic HTML
+for screen readers ✅ **Customizable**: Multiple variants, custom separators,
+and Tailwind CSS support ✅ **Keyboard Hook**: Includes `useKeyboardShortcut`
+hook for registering shortcuts ✅ **Comprehensive Documentation**: API docs,
+integration guide, and examples
 
 ## Package Structure
 
@@ -94,6 +98,7 @@ packages/kbd/
 ## Supported Keys
 
 ### Modifier Keys
+
 - command (⌘)
 - shift (⇧)
 - ctrl (⌃)
@@ -102,6 +107,7 @@ packages/kbd/
 - win (⊞)
 
 ### Special Keys
+
 - enter (↵)
 - delete (⌫)
 - escape (⎋)
@@ -112,6 +118,7 @@ packages/kbd/
 - fn (fn)
 
 ### Navigation Keys
+
 - up (↑)
 - down (↓)
 - left (←)
@@ -126,29 +133,29 @@ packages/kbd/
 ### Basic Usage
 
 ```tsx
-import { RefineKbd } from "@abdokouta/kbd";
+import { RefineKbd } from '@abdokouta/kbd';
 
-<RefineKbd keys={["command", "K"]} />
+<RefineKbd keys={['command', 'K']} />;
 ```
 
 ### With Keyboard Hook
 
 ```tsx
-import { RefineKbd, useKeyboardShortcut } from "@abdokouta/kbd";
+import { RefineKbd, useKeyboardShortcut } from '@abdokouta/kbd';
 
 useKeyboardShortcut({
-  keys: ["command", "K"],
-  callback: () => console.log("Triggered!"),
+  keys: ['command', 'K'],
+  callback: () => console.log('Triggered!'),
 });
 
-<RefineKbd keys={["command", "K"]} />
+<RefineKbd keys={['command', 'K']} />;
 ```
 
 ### Custom Styling
 
 ```tsx
-<RefineKbd 
-  keys={["ctrl", "shift", "P"]} 
+<RefineKbd
+  keys={['ctrl', 'shift', 'P']}
   variant="light"
   separator=" + "
   className="custom-class"
@@ -158,16 +165,19 @@ useKeyboardShortcut({
 ## Dependencies
 
 ### Runtime Dependencies
+
 - `@heroui/react`: ^3.0.1
 - `tslib`: ^2.6.2
 
 ### Peer Dependencies
+
 - `@heroui/react`: ^3.0.0
 - `@abdokouta/core`: ^5.0.0
 - `react`: ^18.0.0 || ^19.0.0
 - `react-dom`: ^18.0.0 || ^19.0.0
 
 ### Dev Dependencies
+
 - TypeScript 5.8.3
 - Vitest 2.1.8
 - Testing Library
@@ -188,12 +198,13 @@ useKeyboardShortcut({
 - **Framework**: Vitest
 - **Environment**: jsdom
 - **Coverage**: v8 provider
-- **Test Files**: 
+- **Test Files**:
   - Component tests
   - Hook tests
   - Utility tests
 
 Run tests:
+
 ```bash
 pnpm test          # Run once
 pnpm test:watch    # Watch mode
@@ -225,24 +236,28 @@ pnpm test:watch    # Watch mode
 ## Code Quality
 
 ### Documentation
+
 - ✅ Comprehensive JSDoc comments on all public APIs
 - ✅ Inline code examples in documentation
 - ✅ Type annotations for all functions and components
 - ✅ Category tags for better organization
 
 ### Testing
+
 - ✅ Unit tests for components
 - ✅ Unit tests for hooks
 - ✅ Unit tests for utilities
 - ✅ Test setup with proper cleanup
 
 ### TypeScript
+
 - ✅ Strict type checking
 - ✅ Exported type definitions
 - ✅ Type guards for runtime checks
 - ✅ Proper generic types
 
 ### Accessibility
+
 - ✅ ARIA attributes
 - ✅ Semantic HTML
 - ✅ Screen reader support
@@ -250,24 +265,26 @@ pnpm test:watch    # Watch mode
 
 ## Comparison with @abdokouta/kbar
 
-| Feature | @abdokouta/kbar | @abdokouta/kbd |
-|---------|----------------|----------------|
-| Purpose | Command palette | Keyboard shortcut display |
-| Main Component | RefineKbar | RefineKbd |
-| Hook | useRefineKbar | useKeyboardShortcut |
-| External Dependency | kbar | @heroui/react |
-| Use Case | Interactive command menu | Static shortcut documentation |
-| Complexity | Higher | Lower |
+| Feature             | @abdokouta/kbar          | @abdokouta/kbd                |
+| ------------------- | ------------------------ | ----------------------------- |
+| Purpose             | Command palette          | Keyboard shortcut display     |
+| Main Component      | RefineKbar               | RefineKbd                     |
+| Hook                | useRefineKbar            | useKeyboardShortcut           |
+| External Dependency | kbar                     | @heroui/react                 |
+| Use Case            | Interactive command menu | Static shortcut documentation |
+| Complexity          | Higher                   | Lower                         |
 
 ## Integration Points
 
 ### Works Well With
+
 - ✅ @abdokouta/kbar (command palette)
 - ✅ @abdokouta/heroui (UI components)
 - ✅ @abdokouta/core (refine core)
 - ✅ All refine UI packages
 
 ### Use Cases
+
 1. Displaying keyboard shortcuts in documentation
 2. Help panels and modals
 3. Inline shortcut hints
@@ -295,6 +312,7 @@ pnpm test:watch    # Watch mode
 ## Future Enhancements
 
 Potential features for future versions:
+
 - [ ] Animation support for key presses
 - [ ] Custom key symbol mappings
 - [ ] Platform-specific key display (Mac vs Windows)

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Shortcut conflict information interface
- * 
+ *
  * @module interfaces/ShortcutConflict
  */
 

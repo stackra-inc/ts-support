@@ -45,7 +45,6 @@ export interface KeyboardShortcut {
   // Identification
   // ============================================================================
 
-
   /**
    * Unique identifier for the shortcut
    * Used for registration and lookup

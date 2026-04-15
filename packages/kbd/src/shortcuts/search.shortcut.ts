@@ -7,9 +7,9 @@
  * @module shortcuts/search
  */
 
-import { Search, FileSearch } from "lucide-react";
-import type { KeyboardShortcut } from "@/interfaces/keyboard-shortcut.interface";
-import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from "@/constants";
+import { Search, FileSearch } from 'lucide-react';
+import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
+import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from '@/constants';
 
 /**
  * Built-in Search Shortcuts

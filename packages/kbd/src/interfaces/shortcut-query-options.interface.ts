@@ -1,6 +1,6 @@
 /**
  * @fileoverview Shortcut query options interface
- * 
+ *
  * @module interfaces/ShortcutQueryOptions
  */
 

@@ -7,9 +7,9 @@
  * @module shortcuts/navigation
  */
 
-import { ArrowLeft, ArrowRight, Home } from "lucide-react";
-import type { KeyboardShortcut } from "@/interfaces/keyboard-shortcut.interface";
-import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from "@/constants";
+import { ArrowLeft, ArrowRight, Home } from 'lucide-react';
+import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
+import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from '@/constants';
 
 /**
  * Built-in Navigation Shortcuts

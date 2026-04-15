@@ -7,29 +7,22 @@
  * @module shortcuts/builtIn
  */
 
-import {
-  ArrowRight,
-  Search,
-  Save,
-  Maximize,
-  HelpCircle,
-  X,
-} from "lucide-react";
-import type { KeyboardShortcut } from "@/interfaces/keyboard-shortcut.interface";
-import { NAVIGATION_SHORTCUTS } from "./navigation.shortcut";
-import { SEARCH_SHORTCUTS } from "./search.shortcut";
-import { EDITING_SHORTCUTS } from "./editing.shortcut";
-import { VIEW_SHORTCUTS } from "./view.shortcut";
-import { HELP_SHORTCUTS } from "./help.shortcut";
-import { MODAL_SHORTCUTS } from "./modal.shortcut";
+import { ArrowRight, Search, Save, Maximize, HelpCircle, X } from 'lucide-react';
+import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
+import { NAVIGATION_SHORTCUTS } from './navigation.shortcut';
+import { SEARCH_SHORTCUTS } from './search.shortcut';
+import { EDITING_SHORTCUTS } from './editing.shortcut';
+import { VIEW_SHORTCUTS } from './view.shortcut';
+import { HELP_SHORTCUTS } from './help.shortcut';
+import { MODAL_SHORTCUTS } from './modal.shortcut';
 
 // Re-export individual shortcut sets
-export { NAVIGATION_SHORTCUTS } from "./navigation.shortcut";
-export { SEARCH_SHORTCUTS } from "./search.shortcut";
-export { EDITING_SHORTCUTS } from "./editing.shortcut";
-export { VIEW_SHORTCUTS } from "./view.shortcut";
-export { HELP_SHORTCUTS } from "./help.shortcut";
-export { MODAL_SHORTCUTS } from "./modal.shortcut";
+export { NAVIGATION_SHORTCUTS } from './navigation.shortcut';
+export { SEARCH_SHORTCUTS } from './search.shortcut';
+export { EDITING_SHORTCUTS } from './editing.shortcut';
+export { VIEW_SHORTCUTS } from './view.shortcut';
+export { HELP_SHORTCUTS } from './help.shortcut';
+export { MODAL_SHORTCUTS } from './modal.shortcut';
 
 /**
  * All built-in shortcuts

@@ -25,7 +25,7 @@ npm install @heroui/react @abdokouta/core react react-dom
 ### 1. Import the Component
 
 ```tsx
-import { RefineKbd } from "@abdokouta/kbd";
+import { RefineKbd } from '@abdokouta/kbd';
 ```
 
 ### 2. Use in Your Components
@@ -35,7 +35,7 @@ function MyComponent() {
   return (
     <div>
       <p>
-        Press <RefineKbd keys={["command", "K"]} /> to open search
+        Press <RefineKbd keys={['command', 'K']} /> to open search
       </p>
     </div>
   );
@@ -47,18 +47,18 @@ function MyComponent() {
 ### Example: Adding Keyboard Shortcuts to a List Page
 
 ```tsx
-import { useList } from "@abdokouta/core";
-import { RefineKbd, useKeyboardShortcut } from "@abdokouta/kbd";
+import { useList } from '@abdokouta/core';
+import { RefineKbd, useKeyboardShortcut } from '@abdokouta/kbd';
 
 export const ProductList = () => {
-  const { data, isLoading } = useList({ resource: "products" });
+  const { data, isLoading } = useList({ resource: 'products' });
 
   // Register keyboard shortcut for creating new product
   useKeyboardShortcut({
-    keys: ["command", "N"],
+    keys: ['command', 'N'],
     callback: () => {
       // Navigate to create page
-      window.location.href = "/products/create";
+      window.location.href = '/products/create';
     },
   });
 
@@ -67,7 +67,7 @@ export const ProductList = () => {
       <div className="flex justify-between items-center mb-4">
         <h1>Products</h1>
         <div className="text-sm text-gray-600">
-          Press <RefineKbd keys={["command", "N"]} /> to create new product
+          Press <RefineKbd keys={['command', 'N']} /> to create new product
         </div>
       </div>
       {/* Rest of your list component */}
@@ -81,8 +81,8 @@ export const ProductList = () => {
 Create a reusable shortcuts panel component:
 
 ```tsx
-import { RefineKbd } from "@abdokouta/kbd";
-import { Modal } from "@heroui/react";
+import { RefineKbd } from '@abdokouta/kbd';
+import { Modal } from '@heroui/react';
 
 interface Shortcut {
   description: string;
@@ -90,10 +90,10 @@ interface Shortcut {
 }
 
 const shortcuts: Shortcut[] = [
-  { description: "Open search", keys: ["command", "K"] },
-  { description: "Create new", keys: ["command", "N"] },
-  { description: "Save", keys: ["command", "S"] },
-  { description: "Close", keys: ["escape"] },
+  { description: 'Open search', keys: ['command', 'K'] },
+  { description: 'Create new', keys: ['command', 'N'] },
+  { description: 'Save', keys: ['command', 'S'] },
+  { description: 'Close', keys: ['escape'] },
 ];
 
 export const ShortcutsPanel = ({ isOpen, onClose }) => {
@@ -106,10 +106,7 @@ export const ShortcutsPanel = ({ isOpen, onClose }) => {
         <Modal.Body>
           <div className="space-y-3">
             {shortcuts.map((shortcut, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between"
-              >
+              <div key={index} className="flex items-center justify-between">
                 <span>{shortcut.description}</span>
                 <RefineKbd keys={shortcut.keys} />
               </div>
@@ -125,15 +122,15 @@ export const ShortcutsPanel = ({ isOpen, onClose }) => {
 ### Example: Form with Save Shortcut
 
 ```tsx
-import { useForm } from "@abdokouta/core";
-import { RefineKbd, useKeyboardShortcut } from "@abdokouta/kbd";
+import { useForm } from '@abdokouta/core';
+import { RefineKbd, useKeyboardShortcut } from '@abdokouta/kbd';
 
 export const ProductEdit = () => {
   const { onFinish, formLoading } = useForm();
 
   // Register save shortcut
   useKeyboardShortcut({
-    keys: ["command", "S"],
+    keys: ['command', 'S'],
     callback: () => {
       if (!formLoading) {
         onFinish();
@@ -144,7 +141,7 @@ export const ProductEdit = () => {
   return (
     <form onSubmit={onFinish}>
       <div className="mb-4 text-sm text-gray-600">
-        Press <RefineKbd keys={["command", "S"]} /> to save
+        Press <RefineKbd keys={['command', 'S']} /> to save
       </div>
       {/* Form fields */}
     </form>
@@ -157,13 +154,13 @@ export const ProductEdit = () => {
 The Kbd component automatically inherits your HeroUI theme settings.
 
 ```tsx
-import { HeroUIProvider } from "@heroui/react";
-import { RefineKbd } from "@abdokouta/kbd";
+import { HeroUIProvider } from '@heroui/react';
+import { RefineKbd } from '@abdokouta/kbd';
 
 function App() {
   return (
     <HeroUIProvider>
-      <RefineKbd keys={["command", "K"]} />
+      <RefineKbd keys={['command', 'K']} />
     </HeroUIProvider>
   );
 }
@@ -174,10 +171,7 @@ function App() {
 ### Using Tailwind CSS
 
 ```tsx
-<RefineKbd 
-  keys={["command", "K"]} 
-  className="text-sm font-medium"
-/>
+<RefineKbd keys={['command', 'K']} className="text-sm font-medium" />
 ```
 
 ### Custom Variants
@@ -208,28 +202,28 @@ function App() {
 ### Context-Aware Shortcuts
 
 ```tsx
-import { useKeyboardShortcut } from "@abdokouta/kbd";
-import { useNavigate } from "react-router-dom";
+import { useKeyboardShortcut } from '@abdokouta/kbd';
+import { useNavigate } from 'react-router-dom';
 
 export const useGlobalShortcuts = () => {
   const navigate = useNavigate();
 
   // Search
   useKeyboardShortcut({
-    keys: ["command", "K"],
-    callback: () => navigate("/search"),
+    keys: ['command', 'K'],
+    callback: () => navigate('/search'),
   });
 
   // Dashboard
   useKeyboardShortcut({
-    keys: ["command", "H"],
-    callback: () => navigate("/"),
+    keys: ['command', 'H'],
+    callback: () => navigate('/'),
   });
 
   // Settings
   useKeyboardShortcut({
-    keys: ["command", ","],
-    callback: () => navigate("/settings"),
+    keys: ['command', ','],
+    callback: () => navigate('/settings'),
   });
 };
 ```
@@ -242,14 +236,14 @@ export const EditableField = () => {
 
   // Only active when editing
   useKeyboardShortcut({
-    keys: ["escape"],
+    keys: ['escape'],
     callback: () => setIsEditing(false),
     enabled: isEditing,
   });
 
   // Only active when not editing
   useKeyboardShortcut({
-    keys: ["enter"],
+    keys: ['enter'],
     callback: () => setIsEditing(true),
     enabled: !isEditing,
   });
@@ -259,7 +253,9 @@ export const EditableField = () => {
       {isEditing ? (
         <input autoFocus />
       ) : (
-        <span>Press <RefineKbd keys={["enter"]} /> to edit</span>
+        <span>
+          Press <RefineKbd keys={['enter']} /> to edit
+        </span>
       )}
     </div>
   );
@@ -278,7 +274,8 @@ The component is built with accessibility in mind:
 ## Performance Tips
 
 1. **Memoize callbacks**: Use `useCallback` for keyboard shortcut callbacks
-2. **Conditional registration**: Only register shortcuts when needed using the `enabled` prop
+2. **Conditional registration**: Only register shortcuts when needed using the
+   `enabled` prop
 3. **Cleanup**: The hook automatically cleans up event listeners on unmount
 
 ```tsx
@@ -287,7 +284,7 @@ const handleSave = useCallback(() => {
 }, [dependencies]);
 
 useKeyboardShortcut({
-  keys: ["command", "S"],
+  keys: ['command', 'S'],
   callback: handleSave,
   enabled: isDirty, // Only active when form is dirty
 });
@@ -302,7 +299,7 @@ export const HelpModal = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useKeyboardShortcut({
-    keys: ["command", "?"],
+    keys: ['command', '?'],
     callback: () => setIsOpen(true),
   });
 
@@ -317,14 +314,14 @@ export const HelpModal = () => {
 ### Command Palette Integration
 
 ```tsx
-import { RefineKbd } from "@abdokouta/kbd";
+import { RefineKbd } from '@abdokouta/kbd';
 
 export const CommandPalette = () => {
   return (
     <div>
       <input placeholder="Type a command..." />
       <div className="shortcuts-hint">
-        <RefineKbd keys={["up"]} /> <RefineKbd keys={["down"]} /> to navigate
+        <RefineKbd keys={['up']} /> <RefineKbd keys={['down']} /> to navigate
       </div>
     </div>
   );
@@ -353,11 +350,11 @@ export const CommandPalette = () => {
 // Before (react-hotkeys)
 <HotKeys keyMap={keyMap} handlers={handlers}>
   <div>Content</div>
-</HotKeys>
+</HotKeys>;
 
 // After (@abdokouta/kbd)
 useKeyboardShortcut({
-  keys: ["command", "K"],
+  keys: ['command', 'K'],
   callback: handlers.SEARCH,
 });
 ```
@@ -367,8 +364,8 @@ useKeyboardShortcut({
 The @abdokouta/kbd package complements @abdokouta/kbar. Use them together:
 
 ```tsx
-import { RefineKbarProvider, RefineKbar } from "@abdokouta/kbar";
-import { RefineKbd } from "@abdokouta/kbd";
+import { RefineKbarProvider, RefineKbar } from '@abdokouta/kbar';
+import { RefineKbd } from '@abdokouta/kbd';
 
 function App() {
   return (
@@ -376,7 +373,7 @@ function App() {
       <Refine>
         <RefineKbar />
         <div>
-          Press <RefineKbd keys={["command", "K"]} /> to open command palette
+          Press <RefineKbd keys={['command', 'K']} /> to open command palette
         </div>
       </Refine>
     </RefineKbarProvider>

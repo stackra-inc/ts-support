@@ -7,9 +7,9 @@
  * @module shortcuts/help
  */
 
-import { HelpCircle, BookOpen } from "lucide-react";
-import type { KeyboardShortcut } from "@/interfaces/keyboard-shortcut.interface";
-import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from "@/constants";
+import { HelpCircle, BookOpen } from 'lucide-react';
+import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
+import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from '@/constants';
 
 /**
  * Built-in Help Shortcuts

@@ -1,12 +1,12 @@
 /**
  * Basic usage examples for @abdokouta/kbd
- * 
+ *
  * This file demonstrates various ways to use the Kbd component
  * in your refine application.
  */
 
-import React from "react";
-import { RefineKbd, Kbd, useKeyboardShortcut } from "@abdokouta/kbd";
+import React from 'react';
+import { RefineKbd, Kbd, useKeyboardShortcut } from '@abdokouta/kbd';
 
 /**
  * Example 1: Simple keyboard shortcut display
@@ -15,7 +15,7 @@ export const SimpleExample = () => {
   return (
     <div>
       <p>
-        Press <RefineKbd keys={["command", "K"]} /> to open search
+        Press <RefineKbd keys={['command', 'K']} /> to open search
       </p>
     </div>
   );
@@ -28,16 +28,16 @@ export const MultipleShortcutsExample = () => {
   return (
     <div className="space-y-2">
       <p>
-        Save: <RefineKbd keys={["command", "S"]} />
+        Save: <RefineKbd keys={['command', 'S']} />
       </p>
       <p>
-        Copy: <RefineKbd keys={["command", "C"]} />
+        Copy: <RefineKbd keys={['command', 'C']} />
       </p>
       <p>
-        Paste: <RefineKbd keys={["command", "V"]} />
+        Paste: <RefineKbd keys={['command', 'V']} />
       </p>
       <p>
-        Undo: <RefineKbd keys={["command", "Z"]} />
+        Undo: <RefineKbd keys={['command', 'Z']} />
       </p>
     </div>
   );
@@ -50,14 +50,14 @@ export const NavigationExample = () => {
   return (
     <div className="space-y-2">
       <p>
-        Navigate: <RefineKbd keys={["up"]} /> <RefineKbd keys={["down"]} />{" "}
-        <RefineKbd keys={["left"]} /> <RefineKbd keys={["right"]} />
+        Navigate: <RefineKbd keys={['up']} /> <RefineKbd keys={['down']} />{' '}
+        <RefineKbd keys={['left']} /> <RefineKbd keys={['right']} />
       </p>
       <p>
-        Page Up: <RefineKbd keys={["pageup"]} />
+        Page Up: <RefineKbd keys={['pageup']} />
       </p>
       <p>
-        Page Down: <RefineKbd keys={["pagedown"]} />
+        Page Down: <RefineKbd keys={['pagedown']} />
       </p>
     </div>
   );
@@ -70,10 +70,10 @@ export const LightVariantExample = () => {
   return (
     <div className="space-y-2">
       <p>
-        Default: <RefineKbd keys={["command", "K"]} />
+        Default: <RefineKbd keys={['command', 'K']} />
       </p>
       <p>
-        Light: <RefineKbd keys={["command", "K"]} variant="light" />
+        Light: <RefineKbd keys={['command', 'K']} variant="light" />
       </p>
     </div>
   );
@@ -86,15 +86,13 @@ export const CustomSeparatorExample = () => {
   return (
     <div className="space-y-2">
       <p>
-        Default separator: <RefineKbd keys={["ctrl", "shift", "P"]} />
+        Default separator: <RefineKbd keys={['ctrl', 'shift', 'P']} />
       </p>
       <p>
-        Custom separator:{" "}
-        <RefineKbd keys={["ctrl", "shift", "P"]} separator=" + " />
+        Custom separator: <RefineKbd keys={['ctrl', 'shift', 'P']} separator=" + " />
       </p>
       <p>
-        Arrow separator:{" "}
-        <RefineKbd keys={["ctrl", "shift", "P"]} separator=" → " />
+        Arrow separator: <RefineKbd keys={['ctrl', 'shift', 'P']} separator=" → " />
       </p>
     </div>
   );
@@ -107,11 +105,11 @@ export const DirectKbdExample = () => {
   return (
     <div>
       <p>
-        Press{" "}
+        Press{' '}
         <Kbd>
           <Kbd.Abbr keyValue="command" />
           <Kbd.Content>K</Kbd.Content>
-        </Kbd>{" "}
+        </Kbd>{' '}
         to open search
       </p>
     </div>
@@ -126,17 +124,17 @@ export const KeyboardShortcutHookExample = () => {
 
   // Register keyboard shortcut
   useKeyboardShortcut({
-    keys: ["command", "K"],
+    keys: ['command', 'K'],
     callback: () => {
       setCount((prev) => prev + 1);
-      console.log("Command+K pressed!");
+      console.log('Command+K pressed!');
     },
   });
 
   return (
     <div>
       <p>
-        Press <RefineKbd keys={["command", "K"]} /> to increment counter
+        Press <RefineKbd keys={['command', 'K']} /> to increment counter
       </p>
       <p>Count: {count}</p>
     </div>
@@ -148,13 +146,13 @@ export const KeyboardShortcutHookExample = () => {
  */
 export const ConditionalShortcutExample = () => {
   const [isEnabled, setIsEnabled] = React.useState(true);
-  const [message, setMessage] = React.useState("");
+  const [message, setMessage] = React.useState('');
 
   useKeyboardShortcut({
-    keys: ["command", "S"],
+    keys: ['command', 'S'],
     callback: () => {
-      setMessage("Saved!");
-      setTimeout(() => setMessage(""), 2000);
+      setMessage('Saved!');
+      setTimeout(() => setMessage(''), 2000);
     },
     enabled: isEnabled,
   });
@@ -162,10 +160,10 @@ export const ConditionalShortcutExample = () => {
   return (
     <div className="space-y-2">
       <p>
-        Press <RefineKbd keys={["command", "S"]} /> to save
+        Press <RefineKbd keys={['command', 'S']} /> to save
       </p>
       <button onClick={() => setIsEnabled(!isEnabled)}>
-        {isEnabled ? "Disable" : "Enable"} Shortcut
+        {isEnabled ? 'Disable' : 'Enable'} Shortcut
       </button>
       {message && <p className="text-green-600">{message}</p>}
     </div>
@@ -182,23 +180,23 @@ export const ShortcutsDocumentationExample = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span>Open search</span>
-          <RefineKbd keys={["command", "K"]} />
+          <RefineKbd keys={['command', 'K']} />
         </div>
         <div className="flex items-center justify-between">
           <span>Toggle sidebar</span>
-          <RefineKbd keys={["command", "B"]} />
+          <RefineKbd keys={['command', 'B']} />
         </div>
         <div className="flex items-center justify-between">
           <span>New file</span>
-          <RefineKbd keys={["command", "N"]} />
+          <RefineKbd keys={['command', 'N']} />
         </div>
         <div className="flex items-center justify-between">
           <span>Save</span>
-          <RefineKbd keys={["command", "S"]} />
+          <RefineKbd keys={['command', 'S']} />
         </div>
         <div className="flex items-center justify-between">
           <span>Close tab</span>
-          <RefineKbd keys={["command", "W"]} />
+          <RefineKbd keys={['command', 'W']} />
         </div>
       </div>
     </div>
@@ -212,13 +210,13 @@ export const ComplexCombinationsExample = () => {
   return (
     <div className="space-y-2">
       <p>
-        Redo: <RefineKbd keys={["command", "shift", "Z"]} />
+        Redo: <RefineKbd keys={['command', 'shift', 'Z']} />
       </p>
       <p>
-        Force quit: <RefineKbd keys={["command", "option", "escape"]} />
+        Force quit: <RefineKbd keys={['command', 'option', 'escape']} />
       </p>
       <p>
-        Screenshot: <RefineKbd keys={["command", "shift", "4"]} />
+        Screenshot: <RefineKbd keys={['command', 'shift', '4']} />
       </p>
     </div>
   );

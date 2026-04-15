@@ -7,9 +7,9 @@
  * @module shortcuts/modal
  */
 
-import { X, Check } from "lucide-react";
-import type { KeyboardShortcut } from "@/interfaces/keyboard-shortcut.interface";
-import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from "@/constants";
+import { X, Check } from 'lucide-react';
+import type { KeyboardShortcut } from '@/interfaces/keyboard-shortcut.interface';
+import { SHORTCUT_CATEGORIES, SHORTCUT_CONTEXTS } from '@/constants';
 
 /**
  * Built-in Modal/Dialog Shortcuts

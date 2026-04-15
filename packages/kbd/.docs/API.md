@@ -32,11 +32,14 @@ KbdModule.configure({
 ```
 
 **Parameters:**
-- `config.registerBuiltIn` (boolean): Whether to register built-in shortcuts (default: `true`)
+
+- `config.registerBuiltIn` (boolean): Whether to register built-in shortcuts
+  (default: `true`)
 - `config.debug` (boolean): Enable debug logging (default: `false`)
 - `config.shortcuts` (KeyboardShortcut[]): Initial shortcuts to register
 - `config.groups` (ShortcutGroup[]): Initial groups to register
-- `config.defaultOptions` (ShortcutRegistrationOptions): Default registration options
+- `config.defaultOptions` (ShortcutRegistrationOptions): Default registration
+  options
 
 #### `register(shortcut: KeyboardShortcut, options?: ShortcutRegistrationOptions): KeyboardShortcut`
 
@@ -44,14 +47,15 @@ Register a keyboard shortcut.
 
 ```tsx
 const shortcut = KbdModule.register({
-  id: "search.open",
-  name: "Open Search",
-  keys: ["command", "K"],
+  id: 'search.open',
+  name: 'Open Search',
+  keys: ['command', 'K'],
   callback: () => openSearch(),
 });
 ```
 
 **Parameters:**
+
 - `shortcut` (KeyboardShortcut): Shortcut configuration
 - `options` (ShortcutRegistrationOptions): Registration options
 
@@ -63,8 +67,8 @@ Register multiple shortcuts at once.
 
 ```tsx
 KbdModule.registerMany([
-  { id: "save", name: "Save", keys: ["command", "S"], callback: save },
-  { id: "undo", name: "Undo", keys: ["command", "Z"], callback: undo },
+  { id: 'save', name: 'Save', keys: ['command', 'S'], callback: save },
+  { id: 'undo', name: 'Undo', keys: ['command', 'Z'], callback: undo },
 ]);
 ```
 
@@ -73,7 +77,7 @@ KbdModule.registerMany([
 Unregister a keyboard shortcut.
 
 ```tsx
-KbdModule.unregister("search.open");
+KbdModule.unregister('search.open');
 ```
 
 **Returns:** `true` if shortcut was unregistered
@@ -83,7 +87,7 @@ KbdModule.unregister("search.open");
 Unregister multiple shortcuts.
 
 ```tsx
-KbdModule.unregisterMany(["save", "undo", "redo"]);
+KbdModule.unregisterMany(['save', 'undo', 'redo']);
 ```
 
 **Returns:** Number of shortcuts unregistered
@@ -101,7 +105,7 @@ KbdModule.clear();
 Get a shortcut by ID.
 
 ```tsx
-const shortcut = KbdModule.get("search.open");
+const shortcut = KbdModule.get('search.open');
 ```
 
 #### `has(id: string): boolean`
@@ -109,7 +113,7 @@ const shortcut = KbdModule.get("search.open");
 Check if a shortcut exists.
 
 ```tsx
-if (KbdModule.has("search.open")) {
+if (KbdModule.has('search.open')) {
   // Shortcut exists
 }
 ```
@@ -127,7 +131,7 @@ const allShortcuts = KbdModule.getAll();
 Get shortcuts by category.
 
 ```tsx
-const searchShortcuts = KbdModule.getByCategory("search");
+const searchShortcuts = KbdModule.getByCategory('search');
 ```
 
 #### `getByContext(context: ShortcutContext): KeyboardShortcut[]`
@@ -135,7 +139,7 @@ const searchShortcuts = KbdModule.getByCategory("search");
 Get shortcuts by context.
 
 ```tsx
-const globalShortcuts = KbdModule.getByContext("global");
+const globalShortcuts = KbdModule.getByContext('global');
 ```
 
 #### `getByGroup(group: string): KeyboardShortcut[]`
@@ -143,7 +147,7 @@ const globalShortcuts = KbdModule.getByContext("global");
 Get shortcuts by group.
 
 ```tsx
-const navShortcuts = KbdModule.getByGroup("Navigation");
+const navShortcuts = KbdModule.getByGroup('Navigation');
 ```
 
 #### `query(options: ShortcutQueryOptions): KeyboardShortcut[]`
@@ -152,10 +156,10 @@ Query shortcuts with filters.
 
 ```tsx
 const shortcuts = KbdModule.query({
-  category: "search",
-  context: "global",
+  category: 'search',
+  context: 'global',
   enabled: true,
-  tags: ["important"],
+  tags: ['important'],
 });
 ```
 
@@ -164,7 +168,7 @@ const shortcuts = KbdModule.query({
 Enable a shortcut.
 
 ```tsx
-KbdModule.enable("search.open");
+KbdModule.enable('search.open');
 ```
 
 #### `disable(id: string): boolean`
@@ -172,7 +176,7 @@ KbdModule.enable("search.open");
 Disable a shortcut.
 
 ```tsx
-KbdModule.disable("search.open");
+KbdModule.disable('search.open');
 ```
 
 #### `toggle(id: string): boolean | undefined`
@@ -180,7 +184,7 @@ KbdModule.disable("search.open");
 Toggle a shortcut's enabled state.
 
 ```tsx
-const newState = KbdModule.toggle("search.open");
+const newState = KbdModule.toggle('search.open');
 ```
 
 #### `registerGroup(group: ShortcutGroup): void`
@@ -201,7 +205,7 @@ KbdModule.registerGroup({
 Get a group by ID.
 
 ```tsx
-const group = KbdModule.getGroup("navigation");
+const group = KbdModule.getGroup('navigation');
 ```
 
 #### `getAllGroups(): ShortcutGroup[]`
@@ -225,7 +229,7 @@ const platform = KbdModule.getPlatform(); // "mac" | "windows" | "linux"
 Set the platform manually.
 
 ```tsx
-KbdModule.setPlatform("mac");
+KbdModule.setPlatform('mac');
 ```
 
 #### `resolveKeys(keys: string[] | PlatformKeys): string[]`
@@ -234,8 +238,8 @@ Resolve platform-specific keys.
 
 ```tsx
 const keys = KbdModule.resolveKeys({
-  mac: ["command", "K"],
-  windows: ["ctrl", "K"],
+  mac: ['command', 'K'],
+  windows: ['ctrl', 'K'],
 });
 ```
 
@@ -245,7 +249,7 @@ Subscribe to registry events.
 
 ```tsx
 const unsubscribe = KbdModule.subscribe((event) => {
-  console.log("Registry event:", event);
+  console.log('Registry event:', event);
 });
 
 // Later...
@@ -261,7 +265,7 @@ Register a single shortcut with automatic cleanup.
 ```tsx
 function MyComponent() {
   useShortcut({
-    id: "search.open",
+    id: 'search.open',
     callback: () => openSearch(),
     enabled: true,
     preventDefault: true,
@@ -271,6 +275,7 @@ function MyComponent() {
 ```
 
 **Parameters:**
+
 - `id` (string): Shortcut ID from registry
 - `callback` (function): Callback to execute (overrides registry callback)
 - `enabled` (boolean): Whether shortcut is enabled (default: `true`)
@@ -285,9 +290,9 @@ Register multiple shortcuts at once.
 function MyComponent() {
   useShortcuts({
     shortcuts: [
-      "search.open",
-      { id: "save", callback: handleSave },
-      { id: "undo", callback: handleUndo, enabled: hasHistory },
+      'search.open',
+      { id: 'save', callback: handleSave },
+      { id: 'undo', callback: handleUndo, enabled: hasHistory },
     ],
     enabled: true,
   });
@@ -295,7 +300,9 @@ function MyComponent() {
 ```
 
 **Parameters:**
-- `shortcuts` (Array<string | UseShortcutOptions>): Array of shortcut IDs or options
+
+- `shortcuts` (Array<string | UseShortcutOptions>): Array of shortcut IDs or
+  options
 - `enabled` (boolean): Global enabled state (default: `true`)
 
 ### useShortcutRegistry
@@ -307,14 +314,15 @@ function MyComponent() {
   const registry = useShortcutRegistry();
 
   const shortcuts = registry.getAll();
-  const searchShortcuts = registry.getByCategory("search");
+  const searchShortcuts = registry.getByCategory('search');
 
-  registry.enable("search.open");
-  registry.disable("search.open");
+  registry.enable('search.open');
+  registry.disable('search.open');
 }
 ```
 
 **Returns:**
+
 - `get(id: string)`: Get shortcut by ID
 - `has(id: string)`: Check if shortcut exists
 - `getAll()`: Get all shortcuts
@@ -335,8 +343,8 @@ Low-level hook for custom shortcuts.
 ```tsx
 function MyComponent() {
   useKeyboardShortcut({
-    keys: ["command", "K"],
-    callback: () => console.log("Pressed!"),
+    keys: ['command', 'K'],
+    callback: () => console.log('Pressed!'),
     enabled: true,
     preventDefault: true,
   });
@@ -344,6 +352,7 @@ function MyComponent() {
 ```
 
 **Parameters:**
+
 - `keys` (Array<KeyValue | string>): Array of keys
 - `callback` (function): Callback to execute
 - `enabled` (boolean): Whether shortcut is enabled (default: `true`)
@@ -357,7 +366,7 @@ Display keyboard shortcuts.
 
 ```tsx
 <RefineKbd
-  keys={["command", "K"]}
+  keys={['command', 'K']}
   variant="default"
   separator="+"
   className="custom-class"
@@ -365,6 +374,7 @@ Display keyboard shortcuts.
 ```
 
 **Props:**
+
 - `keys` (Array<KeyValue | string>): Array of keys to display
 - `variant` ("default" | "light"): Visual variant (default: `"default"`)
 - `separator` (ReactNode): Separator between keys (default: `"+"`)
@@ -378,7 +388,7 @@ Display a list of shortcuts with filtering.
 <ShortcutList
   category="search"
   context="global"
-  tags={["important"]}
+  tags={['important']}
   showSearch={true}
   groupByCategory={false}
   showDisabled={false}
@@ -389,6 +399,7 @@ Display a list of shortcuts with filtering.
 ```
 
 **Props:**
+
 - `category` (ShortcutCategory): Filter by category
 - `context` (ShortcutContext): Filter by context
 - `tags` (string[]): Filter by tags
@@ -416,6 +427,7 @@ Display a help modal with shortcuts.
 ```
 
 **Props:**
+
 - `isOpen` (boolean): Whether modal is open
 - `onClose` (function): Callback when modal closes
 - `registerShortcut` (boolean): Register help shortcut (default: `true`)
@@ -450,7 +462,7 @@ interface KeyboardShortcut {
   enabled?: boolean;
   preventDefault?: boolean;
   stopPropagation?: boolean;
-  priority?: "low" | "normal" | "high" | "critical";
+  priority?: 'low' | 'normal' | 'high' | 'critical';
   allowRepeat?: boolean;
   condition?: () => boolean;
   scope?: string;
@@ -508,13 +520,13 @@ interface ShortcutQueryOptions {
 
 ```tsx
 const SHORTCUT_CATEGORIES = {
-  NAVIGATION: "navigation",
-  EDITING: "editing",
-  SEARCH: "search",
-  VIEW: "view",
-  FILE: "file",
-  HELP: "help",
-  CUSTOM: "custom",
+  NAVIGATION: 'navigation',
+  EDITING: 'editing',
+  SEARCH: 'search',
+  VIEW: 'view',
+  FILE: 'file',
+  HELP: 'help',
+  CUSTOM: 'custom',
 };
 ```
 
@@ -522,12 +534,12 @@ const SHORTCUT_CATEGORIES = {
 
 ```tsx
 const SHORTCUT_CONTEXTS = {
-  GLOBAL: "global",
-  EDITOR: "editor",
-  LIST: "list",
-  MODAL: "modal",
-  FORM: "form",
-  CUSTOM: "custom",
+  GLOBAL: 'global',
+  EDITOR: 'editor',
+  LIST: 'list',
+  MODAL: 'modal',
+  FORM: 'form',
+  CUSTOM: 'custom',
 };
 ```
 
@@ -535,10 +547,10 @@ const SHORTCUT_CONTEXTS = {
 
 ```tsx
 const PLATFORMS = {
-  MAC: "mac",
-  WINDOWS: "windows",
-  LINUX: "linux",
-  ALL: "all",
+  MAC: 'mac',
+  WINDOWS: 'windows',
+  LINUX: 'linux',
+  ALL: 'all',
 };
 ```
 
@@ -546,10 +558,10 @@ const PLATFORMS = {
 
 ```tsx
 const SHORTCUT_PRIORITIES = {
-  LOW: "low",
-  NORMAL: "normal",
-  HIGH: "high",
-  CRITICAL: "critical",
+  LOW: 'low',
+  NORMAL: 'normal',
+  HIGH: 'high',
+  CRITICAL: 'critical',
 };
 ```
 
@@ -575,40 +587,57 @@ Supported keyboard key values.
 
 ```tsx
 type KeyValue =
-  | "command" | "shift" | "ctrl" | "option" | "alt" | "win"
-  | "enter" | "delete" | "escape" | "tab" | "space"
-  | "capslock" | "help" | "fn"
-  | "up" | "down" | "left" | "right"
-  | "pageup" | "pagedown" | "home" | "end";
+  | 'command'
+  | 'shift'
+  | 'ctrl'
+  | 'option'
+  | 'alt'
+  | 'win'
+  | 'enter'
+  | 'delete'
+  | 'escape'
+  | 'tab'
+  | 'space'
+  | 'capslock'
+  | 'help'
+  | 'fn'
+  | 'up'
+  | 'down'
+  | 'left'
+  | 'right'
+  | 'pageup'
+  | 'pagedown'
+  | 'home'
+  | 'end';
 ```
 
 ### ShortcutCategory
 
 ```tsx
 type ShortcutCategory =
-  | "navigation"
-  | "editing"
-  | "search"
-  | "view"
-  | "file"
-  | "help"
-  | "custom";
+  | 'navigation'
+  | 'editing'
+  | 'search'
+  | 'view'
+  | 'file'
+  | 'help'
+  | 'custom';
 ```
 
 ### ShortcutContext
 
 ```tsx
 type ShortcutContext =
-  | "global"
-  | "editor"
-  | "list"
-  | "modal"
-  | "form"
-  | "custom";
+  | 'global'
+  | 'editor'
+  | 'list'
+  | 'modal'
+  | 'form'
+  | 'custom';
 ```
 
 ### Platform
 
 ```tsx
-type Platform = "mac" | "windows" | "linux" | "all";
+type Platform = 'mac' | 'windows' | 'linux' | 'all';
 ```

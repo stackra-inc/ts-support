@@ -3,6 +3,7 @@
 ## Package Created Successfully ✅
 
 The `@abdokouta/kbd` package has been created at:
+
 ```
 packages/kbd/
 ```
@@ -33,6 +34,7 @@ pnpm build --scope @abdokouta/kbd
 ```
 
 Expected output:
+
 - `dist/index.cjs` - CommonJS bundle
 - `dist/index.mjs` - ESM bundle
 - `dist/index.d.ts` - Type declarations
@@ -93,13 +95,13 @@ This will watch for changes and rebuild automatically.
 3. Use the component:
 
 ```tsx
-import { RefineKbd } from "@abdokouta/kbd";
+import { RefineKbd } from '@abdokouta/kbd';
 
 function App() {
   return (
     <div>
       <p>
-        Press <RefineKbd keys={["command", "K"]} /> to search
+        Press <RefineKbd keys={['command', 'K']} /> to search
       </p>
     </div>
   );
@@ -169,22 +171,29 @@ packages/kbd/
 ## Common Issues and Solutions
 
 ### Issue: Dependencies not installed
+
 **Solution**: Run `pnpm install` from the root directory
 
 ### Issue: Build fails
-**Solution**: 
+
+**Solution**:
+
 1. Check if all peer dependencies are installed
 2. Verify TypeScript version (should be 5.8.3)
 3. Check for syntax errors in source files
 
 ### Issue: Tests fail
+
 **Solution**:
+
 1. Ensure vitest is installed
 2. Check if @testing-library packages are installed
 3. Verify test setup file exists
 
 ### Issue: Import errors
+
 **Solution**:
+
 1. Make sure the package is built (`pnpm build`)
 2. Check if consuming app has correct peer dependencies
 3. Verify package.json exports field
@@ -227,6 +236,5 @@ If you encounter any issues:
 
 ---
 
-**Package Status**: ✅ Ready for Testing and Integration
-**Created**: 2026-03-29
+**Package Status**: ✅ Ready for Testing and Integration **Created**: 2026-03-29
 **Version**: 1.0.0

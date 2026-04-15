@@ -1,9 +1,9 @@
-import { useEffect, useCallback } from "react";
-import type { KeyValue } from "@/types";
+import { useEffect, useCallback } from 'react';
+import type { KeyValue } from '@/types';
 
 /**
  * Options for the useKeyboardShortcut hook.
- * 
+ *
  * @category Hooks
  * @public
  */
@@ -11,7 +11,7 @@ export interface UseKeyboardShortcutOptions {
   /**
    * Array of keys that must be pressed to trigger the callback.
    * Can include modifier keys and regular keys.
-   * 
+   *
    * @example
    * ```tsx
    * keys: ["command", "K"]
@@ -27,14 +27,14 @@ export interface UseKeyboardShortcutOptions {
 
   /**
    * Whether the shortcut is enabled.
-   * 
+   *
    * @defaultValue true
    */
   enabled?: boolean;
 
   /**
    * Whether to prevent the default browser behavior for this shortcut.
-   * 
+   *
    * @defaultValue true
    */
   preventDefault?: boolean;
@@ -42,10 +42,10 @@ export interface UseKeyboardShortcutOptions {
 
 /**
  * Custom hook for handling keyboard shortcuts in refine applications.
- * 
+ *
  * This hook provides a declarative way to register keyboard shortcuts
  * and execute callbacks when they are triggered.
- * 
+ *
  * @example
  * Basic usage:
  * ```tsx
@@ -56,7 +56,7 @@ export interface UseKeyboardShortcutOptions {
  *   },
  * });
  * ```
- * 
+ *
  * @example
  * With conditional enabling:
  * ```tsx
@@ -67,9 +67,9 @@ export interface UseKeyboardShortcutOptions {
  *   preventDefault: true,
  * });
  * ```
- * 
+ *
  * @param options - Hook options
- * 
+ *
  * @category Hooks
  * @public
  */
@@ -123,7 +123,7 @@ export const useKeyboardShortcut = ({
         callback();
       }
     },
-    [keys, callback, enabled, preventDefault],
+    [keys, callback, enabled, preventDefault]
   );
 
   /**
@@ -132,10 +132,10 @@ export const useKeyboardShortcut = ({
   useEffect(() => {
     if (!enabled) return;
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [handleKeyDown, enabled]);
 };

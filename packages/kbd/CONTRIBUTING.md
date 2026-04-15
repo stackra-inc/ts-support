@@ -1,21 +1,25 @@
 # Contributing to @abdokouta/kbd
 
-Thank you for your interest in contributing to @abdokouta/kbd! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to @abdokouta/kbd! This document
+provides guidelines and instructions for contributing.
 
 ## Development Setup
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 3. Build the package:
+
    ```bash
    pnpm build
    ```
 
 4. Run tests:
+
    ```bash
    pnpm test
    ```
@@ -70,4 +74,5 @@ packages/kbd/
 
 ## Questions?
 
-Feel free to open an issue or reach out to the refine team on [Discord](https://discord.gg/refine).
+Feel free to open an issue or reach out to the refine team on
+[Discord](https://discord.gg/refine).

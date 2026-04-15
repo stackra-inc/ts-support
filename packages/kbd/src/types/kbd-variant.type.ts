@@ -10,4 +10,4 @@
  * @category Types
  * @public
  */
-export type KbdVariant = "default" | "light";
+export type KbdVariant = 'default' | 'light';
