@@ -56,7 +56,7 @@ export const SEARCH_SHORTCUTS: KeyboardShortcut[] = [
       linux: ['ctrl', 'F'],
       default: ['ctrl', 'F'],
     },
-    callback: (event) => {
+    callback: () => {
       // Let browser handle this
     },
     preventDefault: false,
