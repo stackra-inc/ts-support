@@ -1,0 +1,117 @@
+/**
+ * Global Styles for @repo/ui Package
+ *
+ * This file imports and configures the core styling system for the UI package.
+ * It combines Tailwind CSS v4 with HeroUI's theme system to provide a
+ * comprehensive design system.
+ *
+ * Import Order:
+ * 1. Tailwind CSS - Base utility framework
+ * 2. HeroUI Styles - Component styles and theme variables
+ *
+ * Usage:
+ * Import this file in your application's root layout:
+ *
+ * ```tsx
+ * // app/layout.tsx
+ * import '@repo/ui/styles';
+ * ```
+ *
+ * @see {@link https://tailwindcss.com/docs} - Tailwind CSS Documentation
+ * @see {@link https://heroui.com/docs/react/getting-started/theming} - HeroUI Theming Guide
+ */
+
+/**
+ * Tailwind CSS v4 Base Import
+ *
+ * Imports Tailwind's base styles, components, and utilities.
+ * This provides the foundation for utility-first CSS.
+ *
+ * IMPORTANT: Import order matters - always import tailwindcss first.
+ */
+@import 'tailwindcss';
+
+/**
+ * HeroUI v3 Styles
+ *
+ * Import HeroUI component styles and theme variables.
+ * This includes all component styles and CSS variables for theming.
+ */
+@import '@heroui/styles';
+
+/**
+ * Custom Theme Overrides
+ *
+ * You can override HeroUI's default theme variables here.
+ * Use CSS custom properties to customize colors, spacing, etc.
+ *
+ * @example
+ * ```css
+ * :root {
+ *   // Override primary color
+ *   --accent: oklch(0.7 0.25 260);
+ *   --accent-foreground: oklch(0.98 0 0);
+ *
+ *   // Override success color
+ *   --success: oklch(0.65 0.15 155);
+ *   --success-foreground: oklch(0.98 0 0);
+ * }
+ * ```
+ */
+
+/**
+ * Custom Component Styles
+ *
+ * Override component styles using BEM classes.
+ * Place custom styles in the components layer.
+ *
+ * @example
+ * ```css
+ * @layer components {
+ *   // Customize all buttons
+ *   .button {
+ *     @apply font-semibold tracking-wide;
+ *   }
+ *
+ *   // Customize primary button variant
+ *   .button--primary {
+ *     @apply bg-blue-600 hover:bg-blue-700;
+ *   }
+ *
+ *   // Customize card component
+ *   .card {
+ *     @apply shadow-lg;
+ *   }
+ * }
+ * ```
+ */
+
+/**
+ * Dark Mode Support
+ *
+ * HeroUI automatically handles dark mode through CSS variables.
+ * Theme variables are defined for both light and dark modes.
+ *
+ * To enable dark mode:
+ * 1. Add 'dark' class to html element
+ * 2. Set data-theme="dark" attribute
+ *
+ * @example
+ * ```tsx
+ * // Dark mode
+ * <html className="dark" data-theme="dark">
+ *   <body className="bg-background text-foreground">
+ *     <App />
+ *   </body>
+ * </html>
+ * ```
+ *
+ * For Next.js with next-themes:
+ * ```tsx
+ * import { ThemeProvider } from 'next-themes';
+ *
+ * <ThemeProvider attribute="class" defaultTheme="light">
+ *   <App />
+ * </ThemeProvider>
+ * ```
+ */
