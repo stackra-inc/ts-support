@@ -1,6 +1,9 @@
 ---
 name: heroui-migration
-description: "HeroUI v2 to v3 migration guide for agents. Use when migrating HeroUI v2 apps to v3, upgrading components, or accessing migration documentation. Keywords: HeroUI migration, v2 to v3, migration guide, upgrade HeroUI."
+description:
+  "HeroUI v2 to v3 migration guide for agents. Use when migrating HeroUI v2 apps
+  to v3, upgrading components, or accessing migration documentation. Keywords:
+  HeroUI migration, v2 to v3, migration guide, upgrade HeroUI."
 metadata:
   author: heroui
   version: "2.0.0"
@@ -9,7 +12,9 @@ metadata:
 
 # HeroUI v2 to v3 Migration Guide
 
-This skill helps agents migrate HeroUI v2 applications to v3. HeroUI v3 introduces breaking changes: compound components, no Provider, Tailwind v4, and removed hooks.
+This skill helps agents migrate HeroUI v2 applications to v3. HeroUI v3
+introduces breaking changes: compound components, no Provider, Tailwind v4, and
+removed hooks.
 
 ---
 
@@ -23,24 +28,26 @@ curl -fsSL https://heroui.com/install | bash -s heroui-migration
 
 ## CRITICAL: Always Fetch Migration Docs Before Applying
 
-**Do NOT assume v2 patterns work in v3.** Always fetch migration guides before implementing changes.
+**Do NOT assume v2 patterns work in v3.** Always fetch migration guides before
+implementing changes.
 
 ### Key v2 → v3 Changes
 
-| Feature       | v2 (Migrate From)          | v3 (Migrate To)                        |
-| ------------- | -------------------------- | -------------------------------------- |
-| Provider      | `<HeroUIProvider>` required | **No Provider needed**                 |
-| Component API | Flat props: `<Card title="x">` | Compound: `<Card><Card.Header>`      |
-| Event handlers | `onClick`                 | `onPress`                              |
-| Styling       | `classNames` prop         | `className` prop                       |
-| Hooks         | `useSwitch`, `useDisclosure`, etc. | Compound components, `useOverlayState` |
-| Packages      | `@heroui/system`, `@heroui/theme` | `@heroui/react`, `@heroui/styles` |
+| Feature        | v2 (Migrate From)                  | v3 (Migrate To)                        |
+| -------------- | ---------------------------------- | -------------------------------------- |
+| Provider       | `<HeroUIProvider>` required        | **No Provider needed**                 |
+| Component API  | Flat props: `<Card title="x">`     | Compound: `<Card><Card.Header>`        |
+| Event handlers | `onClick`                          | `onPress`                              |
+| Styling        | `classNames` prop                  | `className` prop                       |
+| Hooks          | `useSwitch`, `useDisclosure`, etc. | Compound components, `useOverlayState` |
+| Packages       | `@heroui/system`, `@heroui/theme`  | `@heroui/react`, `@heroui/styles`      |
 
 ---
 
 ## Accessing Migration Documentation
 
-**For migration details, examples, and step-by-step guides, always fetch documentation:**
+**For migration details, examples, and step-by-step guides, always fetch
+documentation:**
 
 ### Using Scripts
 
@@ -65,7 +72,8 @@ node scripts/get_hooks_migration_guide.mjs
 
 ### Direct URLs
 
-Migration docs (preview): `https://heroui-git-docs-migration-heroui.vercel.app/docs/react/migration/{filename}`
+Migration docs (preview):
+`https://heroui-git-docs-migration-heroui.vercel.app/docs/react/migration/{filename}`
 
 Examples:
 
@@ -75,11 +83,13 @@ Examples:
 - Styling: `.../styling.mdx`
 - Hooks: `.../hooks.mdx`
 
-Override base URL with `HEROUI_MIGRATION_DOCS_BASE` when docs are merged to production.
+Override base URL with `HEROUI_MIGRATION_DOCS_BASE` when docs are merged to
+production.
 
 ### MCP Alternative
 
-When using Cursor or other MCP clients, configure the Migration MCP server for tool-based access:
+When using Cursor or other MCP clients, configure the Migration MCP server for
+tool-based access:
 
 ```json
 {
@@ -97,26 +107,30 @@ When using Cursor or other MCP clients, configure the Migration MCP server for t
 
 ### Full Migration
 
-- Best for: Projects that can dedicate focused time; teams comfortable with temporarily broken code
+- Best for: Projects that can dedicate focused time; teams comfortable with
+  temporarily broken code
 - Migrate all component code first (project broken during migration)
 - Switch dependencies to v3
 - Complete styling migration
 
 ### Incremental Migration
 
-- Best for: Projects that must stay functional; large codebases migrating gradually
+- Best for: Projects that must stay functional; large codebases migrating
+  gradually
 - Set up coexistence (pnpm aliases or component packages)
 - Migrate components one-by-one
 - Both v2 and v3 coexist during migration
 
-**Always fetch the agent guide before starting:** `node scripts/get_migration_guide.mjs full` or `incremental`
+**Always fetch the agent guide before starting:**
+`node scripts/get_migration_guide.mjs full` or `incremental`
 
 ---
 
 ## Core Principles
 
 1. **Fetch first**: Use scripts to get migration guides before applying changes
-2. **Compound components**: v3 uses `Card.Header`, `Card.Title`, `Button` with children—not flat props
+2. **Compound components**: v3 uses `Card.Header`, `Card.Title`, `Button` with
+   children—not flat props
 3. **No Provider**: Remove `HeroUIProvider` when migrating
 4. **onPress not onClick**: All interactive components use `onPress`
 5. **Workflow**: Analyze → Migrate components → Switch deps → Styling migration
@@ -137,4 +151,7 @@ When using Cursor or other MCP clients, configure the Migration MCP server for t
 
 ## Preview Mode
 
-This skill targets the staging deployment of the `docs/migration` branch. Once docs are merged to main and live on heroui.com, set `HEROUI_MIGRATION_DOCS_BASE=https://heroui.com/docs/react/migration` or update the default in scripts.
+This skill targets the staging deployment of the `docs/migration` branch. Once
+docs are merged to main and live on heroui.com, set
+`HEROUI_MIGRATION_DOCS_BASE=https://heroui.com/docs/react/migration` or update
+the default in scripts.

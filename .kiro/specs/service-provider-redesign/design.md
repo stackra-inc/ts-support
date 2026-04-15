@@ -2,9 +2,15 @@
 
 ## Introduction
 
-This document describes the technical design for redesigning the Pixielity service provider package. The redesigned package replaces property/flag-based configuration with PHP 8.5 attributes, consolidates ~20 concern traits into 7, uses `composer-attribute-collector` for zero-reflection attribute reading, and `pixielity/laravel-discovery` for cached auto-discovery. All code is Octane-safe.
+This document describes the technical design for redesigning the Pixielity
+service provider package. The redesigned package replaces property/flag-based
+configuration with PHP 8.5 attributes, consolidates ~20 concern traits into 7,
+uses `composer-attribute-collector` for zero-reflection attribute reading, and
+`pixielity/laravel-discovery` for cached auto-discovery. All code is
+Octane-safe.
 
-The new package lives at `packages/service-provider/` with namespace `Pixielity\ServiceProvider`.
+The new package lives at `packages/service-provider/` with namespace
+`Pixielity\ServiceProvider`.
 
 ## High-Level Architecture
 
@@ -51,6 +57,7 @@ The new package lives at `packages/service-provider/` with namespace `Pixielity\
 ## Data Flow
 
 ### Register Sequence
+
 ```
 registerApplication()
   ├── resolveAttributes()          ← ReadsAttributes: Attributes::forClass()
@@ -64,6 +71,7 @@ registerApplication()
 ```
 
 ### Boot Sequence
+
 ```
 bootApplication()
   ├── resolveAttributes()          ← ReadsAttributes (cached from register)
@@ -107,6 +115,7 @@ bootApplication()
 ### 1. Attributes
 
 #### `#[Module]` Attribute
+
 ```php
 namespace Pixielity\ServiceProvider\Attributes;
 
@@ -125,9 +134,11 @@ final readonly class Module
     ) {}
 }
 ```
+
 Covers: Requirement 1
 
 #### `#[LoadsResources]` Attribute
+
 ```php
 namespace Pixielity\ServiceProvider\Attributes;
 
@@ -156,12 +167,15 @@ final readonly class LoadsResources
     public function loadsNone(): bool { /* check all false */ }
 }
 ```
+
 Covers: Requirement 2
 
 ### 2. Concern Traits
 
 #### `ReadsAttributes` Trait
-Responsible for reading `#[Module]` and `#[LoadsResources]` from cached attributes.
+
+Responsible for reading `#[Module]` and `#[LoadsResources]` from cached
+attributes.
 
 ```php
 namespace Pixielity\ServiceProvider\Concerns;
@@ -287,12 +301,18 @@ trait ReadsAttributes
     }
 }
 ```
+
 Covers: Requirements 1, 2, 3, 5
 
-Note: `detectModulePath()` is the ONE place where reflection is used — only for file path detection (not attribute reading). This is a boot-time operation, not a hot path. The `ReflectionClass::getFileName()` call is unavoidable for path auto-detection.
+Note: `detectModulePath()` is the ONE place where reflection is used — only for
+file path detection (not attribute reading). This is a boot-time operation, not
+a hot path. The `ReflectionClass::getFileName()` call is unavoidable for path
+auto-detection.
 
 #### `LoadsResources` Trait
-Consolidates HasResourceLoading + HasRoutes. Loads migrations, config, views, translations, routes.
+
+Consolidates HasResourceLoading + HasRoutes. Loads migrations, config, views,
+translations, routes.
 
 ```php
 namespace Pixielity\ServiceProvider\Concerns;
@@ -409,9 +429,11 @@ trait LoadsResources
     }
 }
 ```
+
 Covers: Requirements 9, 13
 
 #### `DiscoversResources` Trait
+
 Consolidates HasResourceDiscovery. Uses Discovery facade exclusively.
 
 ```php
@@ -533,9 +555,11 @@ trait DiscoversResources
     }
 }
 ```
+
 Covers: Requirements 4, 6
 
 #### `PublishesResources` Trait
+
 Consolidates HasPublishing.
 
 ```php
@@ -608,9 +632,11 @@ trait PublishesResources
     }
 }
 ```
+
 Covers: Requirement 10
 
 #### `ManagesLifecycle` Trait
+
 Consolidates HasModuleLifecycle + HasDebugging.
 
 ```php
@@ -663,9 +689,11 @@ trait ManagesLifecycle
     }
 }
 ```
+
 Covers: Requirements 8, 16
 
 #### `RegistersHooks` Trait
+
 Consolidates all hook interface dispatch into one trait.
 
 ```php
@@ -739,6 +767,7 @@ trait RegistersHooks
     }
 }
 ```
+
 Covers: Requirement 7
 
 #### `SupportsDeferredLoading` Trait
@@ -761,6 +790,7 @@ trait SupportsDeferredLoading
     }
 }
 ```
+
 Covers: Requirement 15
 
 #### `ProvidesServices` Trait (Composition)
@@ -818,6 +848,7 @@ trait ProvidesServices
     }
 }
 ```
+
 Covers: Requirements 6, 11
 
 ### 3. Base ServiceProvider Class
@@ -844,6 +875,7 @@ abstract class ServiceProvider extends BaseServiceProvider implements ServicePro
     }
 }
 ```
+
 Covers: Requirement 12
 
 ### 4. ModuleConstants Interface
@@ -882,6 +914,7 @@ interface ModuleConstants
     public const PATH_PREFIX = 'pixielity';
 }
 ```
+
 Covers: Requirement 14
 
 ### 5. Contracts (Hook Interfaces)
@@ -951,6 +984,7 @@ interface Terminatable
     public function terminating(): void;
 }
 ```
+
 Covers: Requirement 7
 
 ### 6. Enums
@@ -983,6 +1017,7 @@ enum ModuleLifecycleEvent: string
     case BOOTED = 'module.booted';
 }
 ```
+
 Covers: Requirement 8
 
 ## File Structure
@@ -1025,32 +1060,33 @@ packages/service-provider/
 
 ```json
 {
-    "name": "pixielity/laravel-service-provider",
-    "description": "Attribute-based modular service provider for Laravel 13",
-    "require": {
-        "php": "^8.5",
-        "illuminate/support": "^13.0",
-        "illuminate/routing": "^13.0",
-        "illuminate/console": "^13.0",
-        "koriym/attributes": "^1.0",
-        "pixielity/laravel-discovery": "^1.0",
-        "pixielity/laravel-enum": "^1.0"
-    },
-    "suggest": {
-        "spatie/laravel-health": "Required for health check registration",
-        "pixielity/laravel-routing": "Required for controller/middleware discovery via #[AsController]/#[AsMiddleware]"
-    },
-    "autoload": {
-        "psr-4": {
-            "Pixielity\\ServiceProvider\\": "src/"
-        }
+  "name": "pixielity/laravel-service-provider",
+  "description": "Attribute-based modular service provider for Laravel 13",
+  "require": {
+    "php": "^8.5",
+    "illuminate/support": "^13.0",
+    "illuminate/routing": "^13.0",
+    "illuminate/console": "^13.0",
+    "koriym/attributes": "^1.0",
+    "pixielity/laravel-discovery": "^1.0",
+    "pixielity/laravel-enum": "^1.0"
+  },
+  "suggest": {
+    "spatie/laravel-health": "Required for health check registration",
+    "pixielity/laravel-routing": "Required for controller/middleware discovery via #[AsController]/#[AsMiddleware]"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pixielity\\ServiceProvider\\": "src/"
     }
+  }
 }
 ```
 
 ## Usage Example
 
 ### Minimal Service Provider
+
 ```php
 use Pixielity\ServiceProvider\Attributes\Module;
 use Pixielity\ServiceProvider\Providers\ServiceProvider;
@@ -1063,6 +1099,7 @@ class TenancyServiceProvider extends ServiceProvider
 ```
 
 ### Selective Resource Loading
+
 ```php
 use Pixielity\ServiceProvider\Attributes\Module;
 use Pixielity\ServiceProvider\Attributes\LoadsResources;
@@ -1077,6 +1114,7 @@ class ApiServiceProvider extends ServiceProvider
 ```
 
 ### Full-Featured with Hooks
+
 ```php
 use Pixielity\ServiceProvider\Attributes\Module;
 use Pixielity\ServiceProvider\Attributes\LoadsResources;
@@ -1107,6 +1145,7 @@ class TenancyServiceProvider extends ServiceProvider implements HasBindings, Has
 ```
 
 ### Using ProvidesServices Trait (Different Base Class)
+
 ```php
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Pixielity\ServiceProvider\Attributes\Module;
@@ -1131,21 +1170,21 @@ class CustomServiceProvider extends BaseServiceProvider
 
 ## Requirements Traceability
 
-| Requirement | Design Component |
-|---|---|
-| R1: Module Attribute | `#[Module]` attribute + `ReadsAttributes` trait |
-| R2: Resource Configuration | `#[LoadsResources]` attribute + `ReadsAttributes.shouldLoad()` |
-| R3: Zero Reflection | `Attributes::forClass()` in `ReadsAttributes` |
-| R4: Discovery-Based Registration | `DiscoversResources` trait + Discovery facade |
-| R5: Octane-Safe | Instance properties only, no static mutable state |
-| R6: Consolidated Traits | 7 traits in `ProvidesServices` |
-| R7: Hook Interface Dispatch | `RegistersHooks` trait + instanceof checks |
-| R8: Lifecycle Events | `ManagesLifecycle` trait + `ModuleLifecycleEvent` enum |
-| R9: Resource Loading | `LoadsResources` trait |
-| R10: Resource Publishing | `PublishesResources` trait |
-| R11: ProvidesServices Composition | `ProvidesServices` trait |
-| R12: Base ServiceProvider | `Providers\ServiceProvider` abstract class |
-| R13: Vendor Overrides | `LoadsResources.loadModuleViews()` + `loadModuleTranslations()` |
-| R14: Module Constants | `ModuleConstants` interface |
-| R15: Deferred Loading | `SupportsDeferredLoading` trait |
-| R16: Debug Logging | `ManagesLifecycle.debugLog()` |
+| Requirement                       | Design Component                                                |
+| --------------------------------- | --------------------------------------------------------------- |
+| R1: Module Attribute              | `#[Module]` attribute + `ReadsAttributes` trait                 |
+| R2: Resource Configuration        | `#[LoadsResources]` attribute + `ReadsAttributes.shouldLoad()`  |
+| R3: Zero Reflection               | `Attributes::forClass()` in `ReadsAttributes`                   |
+| R4: Discovery-Based Registration  | `DiscoversResources` trait + Discovery facade                   |
+| R5: Octane-Safe                   | Instance properties only, no static mutable state               |
+| R6: Consolidated Traits           | 7 traits in `ProvidesServices`                                  |
+| R7: Hook Interface Dispatch       | `RegistersHooks` trait + instanceof checks                      |
+| R8: Lifecycle Events              | `ManagesLifecycle` trait + `ModuleLifecycleEvent` enum          |
+| R9: Resource Loading              | `LoadsResources` trait                                          |
+| R10: Resource Publishing          | `PublishesResources` trait                                      |
+| R11: ProvidesServices Composition | `ProvidesServices` trait                                        |
+| R12: Base ServiceProvider         | `Providers\ServiceProvider` abstract class                      |
+| R13: Vendor Overrides             | `LoadsResources.loadModuleViews()` + `loadModuleTranslations()` |
+| R14: Module Constants             | `ModuleConstants` interface                                     |
+| R15: Deferred Loading             | `SupportsDeferredLoading` trait                                 |
+| R16: Debug Logging                | `ManagesLifecycle.debugLog()`                                   |

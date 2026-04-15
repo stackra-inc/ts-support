@@ -1,14 +1,15 @@
 # Changelog — frontend-monorepo
 
-All notable changes are documented here.
-Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+All notable changes are documented here. Format:
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) Versioning:
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
 ## [Unreleased]
 
 ### Added
+
 - Initial monorepo scaffold via `create-turbo`
 - `apps/web` and `apps/docs` — Next.js applications
 - `packages/ui` — shared React component library

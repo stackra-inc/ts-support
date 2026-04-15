@@ -2,23 +2,39 @@
 
 ## Overview
 
-This design covers the refactoring of the `@cart/*` package suite (`@cart/core`, `@cart/react`, `@cart/ui`, `@cart/plugins`) into a production-grade, publishable npm package suite for enterprise POS systems. The refactor addresses critical bugs in the current implementation — missing state machine enforcement, unguarded transitions, and absent event-driven reactivity — while introducing new capabilities: formal finite state machine, multi-cart session management, undo/redo history, offline action queue, split payment, partial checkout, B2B account support, real-time sync, and a plugin architecture with loyalty and coupon plugins.
+This design covers the refactoring of the `@cart/*` package suite (`@cart/core`,
+`@cart/react`, `@cart/ui`, `@cart/plugins`) into a production-grade, publishable
+npm package suite for enterprise POS systems. The refactor addresses critical
+bugs in the current implementation — missing state machine enforcement,
+unguarded transitions, and absent event-driven reactivity — while introducing
+new capabilities: formal finite state machine, multi-cart session management,
+undo/redo history, offline action queue, split payment, partial checkout, B2B
+account support, real-time sync, and a plugin architecture with loyalty and
+coupon plugins.
 
-The existing codebase already has the correct package structure and many of the core modules (engine, pipeline, serialization, manager, history, queue, sync, plugins, payment, slots). The refactor focuses on:
+The existing codebase already has the correct package structure and many of the
+core modules (engine, pipeline, serialization, manager, history, queue, sync,
+plugins, payment, slots). The refactor focuses on:
 
-1. Adding a formal state machine with enforced transition guards to the engine (currently missing — the engine has no status checks before mutations)
+1. Adding a formal state machine with enforced transition guards to the engine
+   (currently missing — the engine has no status checks before mutations)
 2. Adding an event emitter system for reactive state change notifications
-3. Extending the `Customer` type with `tier`, `loyaltyPoints`, and `preferences` fields
+3. Extending the `Customer` type with `tier`, `loyaltyPoints`, and `preferences`
+   fields
 4. Adding B2B account support with credit limits and contract pricing
 5. Upgrading error classes to extend a base `CartError` with a `code` property
-6. Enhancing the coupon plugin to support synchronous validation, discount application, and removal
-7. Enhancing the loyalty plugin to compute earned points via `afterCalculate` hooks
+6. Enhancing the coupon plugin to support synchronous validation, discount
+   application, and removal
+7. Enhancing the loyalty plugin to compute earned points via `afterCalculate`
+   hooks
 8. Adding `splitCart` to the cart manager
 9. Ensuring all public APIs have multiline JSDoc documentation
 
 ## Architecture
 
-The system follows a layered, framework-agnostic architecture with React bindings as a separate package. All state is immutable — every mutation returns a new object.
+The system follows a layered, framework-agnostic architecture with React
+bindings as a separate package. All state is immutable — every mutation returns
+a new object.
 
 ```mermaid
 graph TB
@@ -75,21 +91,38 @@ graph TB
 
 ### Key Architectural Decisions
 
-1. **Immutable state**: Every engine function returns a new `Cart` object. This enables undo/redo via snapshot stacking and simplifies sync conflict resolution.
+1. **Immutable state**: Every engine function returns a new `Cart` object. This
+   enables undo/redo via snapshot stacking and simplifies sync conflict
+   resolution.
 
-2. **State machine as a guard layer**: The state machine is implemented as a validation layer inside the engine functions, not as a separate orchestrator. Each mutation function checks the current cart status against the allowed transition/operation map before proceeding. This keeps the API surface unchanged while adding enforcement.
+2. **State machine as a guard layer**: The state machine is implemented as a
+   validation layer inside the engine functions, not as a separate orchestrator.
+   Each mutation function checks the current cart status against the allowed
+   transition/operation map before proceeding. This keeps the API surface
+   unchanged while adding enforcement.
 
-3. **Event emitter as a side-channel**: The event emitter is synchronous and fires after each successful mutation. It does not affect the return value of engine functions — it is a notification mechanism for UI and external systems.
+3. **Event emitter as a side-channel**: The event emitter is synchronous and
+   fires after each successful mutation. It does not affect the return value of
+   engine functions — it is a notification mechanism for UI and external
+   systems.
 
-4. **Plugin hooks are synchronous**: Plugin lifecycle hooks are invoked synchronously in registration order. Async operations (e.g., coupon validation against a remote API) are handled by the plugin internally via fire-and-forget patterns or by exposing async methods on the plugin instance.
+4. **Plugin hooks are synchronous**: Plugin lifecycle hooks are invoked
+   synchronously in registration order. Async operations (e.g., coupon
+   validation against a remote API) are handled by the plugin internally via
+   fire-and-forget patterns or by exposing async methods on the plugin instance.
 
-5. **B2B as an optional overlay**: B2B account support is implemented as an optional module that can be loaded into the cart via `loadB2BAccount`. It does not change the core `Cart` type — it stores account data in `cart.metadata.b2bAccount` and uses `beforeAddItem` hooks for credit limit enforcement.
+5. **B2B as an optional overlay**: B2B account support is implemented as an
+   optional module that can be loaded into the cart via `loadB2BAccount`. It
+   does not change the core `Cart` type — it stores account data in
+   `cart.metadata.b2bAccount` and uses `beforeAddItem` hooks for credit limit
+   enforcement.
 
 ## Components and Interfaces
 
 ### 1. Cart State Machine (`@cart/core`)
 
-The state machine enforces valid lifecycle transitions. It is not a standalone class — it is a set of constants and guard functions used by the engine.
+The state machine enforces valid lifecycle transitions. It is not a standalone
+class — it is a set of constants and guard functions used by the engine.
 
 ```typescript
 /**
@@ -137,9 +170,8 @@ function assertNotCompleted(cart: Cart): void;
 - @param to - The target status.
 - @returns A new Cart with the updated status and updatedAt timestamp.
 - @throws {InvalidTransitionError} If the transition is disallowed.
-- @throws {CartCompletedError} If the cart is already completed.
-  \*/
-  function transitionStatus(cart: Cart, to: CartStatus): Cart;
+- @throws {CartCompletedError} If the cart is already completed. \*/ function
+  transitionStatus(cart: Cart, to: CartStatus): Cart;
 
 ````
 
@@ -219,7 +251,9 @@ function createEventEmitter(): CartEventEmitter;
 
 ### 3. Cart Engine (enhanced) (`@cart/core`)
 
-The existing engine functions (`addItem`, `updateItem`, `removeItem`, `applyDiscount`, `applyCoupon`, `removeCoupon`, `attachCustomer`, `detachCustomer`, `clearCart`) are enhanced with:
+The existing engine functions (`addItem`, `updateItem`, `removeItem`,
+`applyDiscount`, `applyCoupon`, `removeCoupon`, `attachCustomer`,
+`detachCustomer`, `clearCart`) are enhanced with:
 
 - State machine guards at the top of each function
 - Event emission after each successful mutation

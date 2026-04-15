@@ -2,22 +2,28 @@
 
 ## Overview
 
-This design covers eight improvements to the Drawer composite component system at `packages/ui/src/components/drawer-stack/`. The changes span renaming, new sub-components, loading states, layout enhancements, slot additions, and scoped slot names. All changes are additive and backward-compatible.
+This design covers eight improvements to the Drawer composite component system
+at `packages/ui/src/components/drawer-stack/`. The changes span renaming, new
+sub-components, loading states, layout enhancements, slot additions, and scoped
+slot names. All changes are additive and backward-compatible.
 
 Key changes:
 
 1. Rename `DrawerBody` → `DrawerContent` (with deprecated alias)
 2. New `DrawerLoading` component (spinner / skeleton / overlay variants)
 3. `isLoading` prop on `DrawerFooter` (disables actions, shows spinner)
-4. `isLoading` prop on `DrawerHeader` (spinner next to title, controls stay interactive)
-5. `startContent` / `endContent` props on `DrawerFooter` (flexible action layout)
+4. `isLoading` prop on `DrawerHeader` (spinner next to title, controls stay
+   interactive)
+5. `startContent` / `endContent` props on `DrawerFooter` (flexible action
+   layout)
 6. New `DrawerAlert` component (info / success / warning / danger banners)
 7. Slot positions on `DrawerSection` and `DrawerDivider`
 8. Drawer-ID-scoped slot names (`drawer.<id>.<component>.<position>`)
 
 ## Architecture
 
-All changes live within the existing `packages/ui/src/components/drawer-stack/` module and follow its established patterns:
+All changes live within the existing `packages/ui/src/components/drawer-stack/`
+module and follow its established patterns:
 
 ```
 drawer-stack/
@@ -46,11 +52,22 @@ drawer-stack/
 
 ### Design Decisions
 
-1. **DrawerIdContext over extending DrawerPositionContext**: A new `DrawerIdContext` is introduced rather than adding `drawerId` to `DrawerPositionValue`. This keeps concerns separated — position data stays pure, and drawer ID is independently consumable. The context is provided by `DesktopPanel` and `MobilePanel` alongside the existing `DrawerPositionContext.Provider`.
+1. **DrawerIdContext over extending DrawerPositionContext**: A new
+   `DrawerIdContext` is introduced rather than adding `drawerId` to
+   `DrawerPositionValue`. This keeps concerns separated — position data stays
+   pure, and drawer ID is independently consumable. The context is provided by
+   `DesktopPanel` and `MobilePanel` alongside the existing
+   `DrawerPositionContext.Provider`.
 
-2. **ScopedSlot helper component**: Rather than modifying the `Slot` component itself (which is used across the entire app), a `ScopedSlot` wrapper renders both the global slot and the scoped slot side-by-side. This avoids coupling the generic slot system to drawer-specific logic.
+2. **ScopedSlot helper component**: Rather than modifying the `Slot` component
+   itself (which is used across the entire app), a `ScopedSlot` wrapper renders
+   both the global slot and the scoped slot side-by-side. This avoids coupling
+   the generic slot system to drawer-specific logic.
 
-3. **Deprecated aliases via re-export**: `DrawerBody` remains as a re-export of `DrawerContent`, and `DRAWER_SLOTS.BODY` remains as a reference to the same strings as `DRAWER_SLOTS.CONTENT`. No runtime deprecation warnings — just JSDoc `@deprecated` tags.
+3. **Deprecated aliases via re-export**: `DrawerBody` remains as a re-export of
+   `DrawerContent`, and `DRAWER_SLOTS.BODY` remains as a reference to the same
+   strings as `DRAWER_SLOTS.CONTENT`. No runtime deprecation warnings — just
+   JSDoc `@deprecated` tags.
 
 ```mermaid
 graph TD
@@ -89,7 +106,9 @@ graph TD
 
 **File**: `components/drawer-content/drawer-content.component.tsx`
 
-The component is functionally identical to the current `DrawerBody`. The old `drawer-body/` directory re-exports from `drawer-content/` for backward compatibility.
+The component is functionally identical to the current `DrawerBody`. The old
+`drawer-body/` directory re-exports from `drawer-content/` for backward
+compatibility.
 
 ```tsx
 // drawer-content.component.tsx
@@ -143,10 +162,12 @@ export function DrawerLoading(
 
 Rendering logic:
 
-- `isLoading === false` → returns `null` (or just `children` for overlay variant)
+- `isLoading === false` → returns `null` (or just `children` for overlay
+  variant)
 - `variant === "spinner"` → centered spinner + optional label
 - `variant === "skeleton"` → animated pulse lines (configurable count)
-- `variant === "overlay"` → renders `children` with a semi-transparent overlay + centered spinner on top
+- `variant === "overlay"` → renders `children` with a semi-transparent overlay +
+  centered spinner on top
 
 ### 3. DrawerHeader (modified)
 
@@ -155,7 +176,8 @@ Rendering logic:
 When `isLoading` is true:
 
 - A small spinner (16×16 animated SVG) renders adjacent to the title text
-- Close button and back button remain fully interactive (no pointer-events changes)
+- Close button and back button remain fully interactive (no pointer-events
+  changes)
 - No `aria-busy` on header — the header is not "busy", it's informational
 
 ### 4. DrawerFooter (modified)
@@ -178,9 +200,11 @@ export interface DrawerFooterProps {
 
 Layout logic:
 
-- When `startContent` or `endContent` is provided, the footer uses `justify-between` with three zones: start | center (children) | end
+- When `startContent` or `endContent` is provided, the footer uses
+  `justify-between` with three zones: start | center (children) | end
 - When neither is provided, the current layout (flex row with gap) is preserved
-- When `isLoading` is true: `pointer-events-none`, `opacity-50` on the action container, a small spinner rendered, and `aria-busy="true"` on the footer root
+- When `isLoading` is true: `pointer-events-none`, `opacity-50` on the action
+  container, a small spinner rendered, and `aria-busy="true"` on the footer root
 
 ### 5. DrawerAlert
 
@@ -214,7 +238,8 @@ Each variant maps to a color scheme and default icon:
 - `warning` → amber, ⚠ triangle icon
 - `danger` → red, ✕ x-circle icon
 
-Renders `ScopedSlot` at `drawer.alert.before` and `drawer.alert.after` positions.
+Renders `ScopedSlot` at `drawer.alert.before` and `drawer.alert.after`
+positions.
 
 ### 6. ScopedSlot Helper
 
@@ -233,7 +258,8 @@ Internally:
 
 1. Reads `drawerId` from `DrawerIdContext`
 2. Renders `<Slot name={name} />` (global)
-3. If `drawerId` exists, also renders `<Slot name={buildScopedName(name, drawerId)} />` (scoped)
+3. If `drawerId` exists, also renders
+   `<Slot name={buildScopedName(name, drawerId)} />` (scoped)
 
 The scoped name is built by inserting the drawer ID after `"drawer."`:
 
@@ -248,7 +274,8 @@ The scoped name is built by inserting the drawer ID after `"drawer."`:
 export const DrawerIdContext = createContext<string | null>(null);
 ```
 
-Provided by `DesktopPanel` and `MobilePanel` in `DrawerContainer`, wrapping the existing `DrawerPositionContext.Provider`:
+Provided by `DesktopPanel` and `MobilePanel` in `DrawerContainer`, wrapping the
+existing `DrawerPositionContext.Provider`:
 
 ```tsx
 <DrawerIdContext.Provider value={entry.config.id}>
@@ -368,65 +395,90 @@ function buildScopedSlotName(globalName: string, drawerId: string): string {
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: DrawerContent padding mapping
 
-_For any_ valid padding value in `["none", "compact", "default", "spacious"]` and _for any_ className string, `DrawerContent` should render with the correct CSS padding class from the padding map and include the provided className.
+_For any_ valid padding value in `["none", "compact", "default", "spacious"]`
+and _for any_ className string, `DrawerContent` should render with the correct
+CSS padding class from the padding map and include the provided className.
 
 **Validates: Requirements 1.4**
 
 ### Property 2: DrawerLoading spinner label rendering
 
-_For any_ non-empty string label, when `isLoading` is `true` and `variant` is `"spinner"`, the `DrawerLoading` component should render a spinner element and the label text should be present in the rendered output.
+_For any_ non-empty string label, when `isLoading` is `true` and `variant` is
+`"spinner"`, the `DrawerLoading` component should render a spinner element and
+the label text should be present in the rendered output.
 
 **Validates: Requirements 2.1, 2.5**
 
 ### Property 3: DrawerLoading skeleton line count
 
-_For any_ positive integer `n` (1–20), when `isLoading` is `true` and `variant` is `"skeleton"` with `lines={n}`, the `DrawerLoading` component should render exactly `n` skeleton line elements.
+_For any_ positive integer `n` (1–20), when `isLoading` is `true` and `variant`
+is `"skeleton"` with `lines={n}`, the `DrawerLoading` component should render
+exactly `n` skeleton line elements.
 
 **Validates: Requirements 2.2**
 
 ### Property 4: DrawerLoading off-state renders nothing
 
-_For any_ variant value in `["spinner", "skeleton", "overlay"]` and _for any_ label string, when `isLoading` is `false`, the `DrawerLoading` component should not render any loading UI (no spinner, no skeleton lines, no overlay).
+_For any_ variant value in `["spinner", "skeleton", "overlay"]` and _for any_
+label string, when `isLoading` is `false`, the `DrawerLoading` component should
+not render any loading UI (no spinner, no skeleton lines, no overlay).
 
 **Validates: Requirements 2.4**
 
 ### Property 5: DrawerFooter aria-busy reflects loading state
 
-_For any_ children content, when `isLoading` is `true`, the `DrawerFooter` container element should have `aria-busy="true"`. When `isLoading` is `false` or not provided, `aria-busy` should not be present.
+_For any_ children content, when `isLoading` is `true`, the `DrawerFooter`
+container element should have `aria-busy="true"`. When `isLoading` is `false` or
+not provided, `aria-busy` should not be present.
 
 **Validates: Requirements 3.3, 3.4**
 
 ### Property 6: DrawerHeader loading spinner adjacent to title
 
-_For any_ non-empty title string, when `isLoading` is `true`, the `DrawerHeader` component should render both the title text and a spinner element. When `isLoading` is `false`, no spinner should be present.
+_For any_ non-empty title string, when `isLoading` is `true`, the `DrawerHeader`
+component should render both the title text and a spinner element. When
+`isLoading` is `false`, no spinner should be present.
 
 **Validates: Requirements 4.1, 4.3**
 
 ### Property 7: DrawerAlert variant color and icon mapping
 
-_For any_ variant in `["info", "success", "warning", "danger"]`, the `DrawerAlert` component should render with the color scheme and icon corresponding to that variant, and each variant should produce a distinct visual treatment.
+_For any_ variant in `["info", "success", "warning", "danger"]`, the
+`DrawerAlert` component should render with the color scheme and icon
+corresponding to that variant, and each variant should produce a distinct visual
+treatment.
 
 **Validates: Requirements 6.1, 6.2**
 
 ### Property 8: DrawerAlert title rendering
 
-_For any_ non-empty title string and _for any_ variant, when a `title` prop is provided, the `DrawerAlert` component should render the title text in a bold-styled element above the children content.
+_For any_ non-empty title string and _for any_ variant, when a `title` prop is
+provided, the `DrawerAlert` component should render the title text in a
+bold-styled element above the children content.
 
 **Validates: Requirements 6.3**
 
 ### Property 9: Scoped slot name builder
 
-_For any_ global slot name matching the pattern `drawer.<component>.<position>` and _for any_ non-empty drawer ID string, `buildScopedSlotName` should produce a string matching `drawer.<drawerId>.<component>.<position>`.
+_For any_ global slot name matching the pattern `drawer.<component>.<position>`
+and _for any_ non-empty drawer ID string, `buildScopedSlotName` should produce a
+string matching `drawer.<drawerId>.<component>.<position>`.
 
 **Validates: Requirements 8.2**
 
 ### Property 10: Slot scoping correctness
 
-_For any_ drawer ID, content registered at a global slot name should render in all drawer instances, content registered at a scoped slot name should render only in the drawer with the matching ID, and when both global and scoped content are registered at the same position, both should render in the matching drawer.
+_For any_ drawer ID, content registered at a global slot name should render in
+all drawer instances, content registered at a scoped slot name should render
+only in the drawer with the matching ID, and when both global and scoped content
+are registered at the same position, both should render in the matching drawer.
 
 **Validates: Requirements 8.1, 8.3, 8.4, 8.5**
 
@@ -451,19 +503,30 @@ _For any_ drawer ID, content registered at a global slot name should render in a
 
 Unit tests cover structural checks, specific behaviors, and integration points:
 
-- **Namespace structure**: Verify `Drawer.Content`, `Drawer.Body`, `Drawer.Loading`, `Drawer.Alert` exist and reference correct components
-- **Barrel exports**: Verify `DrawerBody` re-export, `DrawerLoading` export, `DrawerAlert` export
-- **DRAWER_SLOTS constants**: Verify `CONTENT`, `BODY` (alias), `ALERT`, `SECTION`, `DIVIDER` keys and values
-- **DrawerFooter layout**: Test `startContent`/`endContent` rendering positions and `justify-between` class
-- **DrawerFooter isLoading**: Test `pointer-events-none`, `opacity` reduction, spinner presence
-- **DrawerHeader isLoading**: Test close/back buttons remain interactive during loading
-- **DrawerAlert dismiss**: Test `dismissible` flag, `onDismiss` callback invocation
-- **DrawerSection/DrawerDivider slots**: Test slot content injection at all positions
-- **Scoped slot isolation**: Test that scoped content only renders in matching drawer
+- **Namespace structure**: Verify `Drawer.Content`, `Drawer.Body`,
+  `Drawer.Loading`, `Drawer.Alert` exist and reference correct components
+- **Barrel exports**: Verify `DrawerBody` re-export, `DrawerLoading` export,
+  `DrawerAlert` export
+- **DRAWER_SLOTS constants**: Verify `CONTENT`, `BODY` (alias), `ALERT`,
+  `SECTION`, `DIVIDER` keys and values
+- **DrawerFooter layout**: Test `startContent`/`endContent` rendering positions
+  and `justify-between` class
+- **DrawerFooter isLoading**: Test `pointer-events-none`, `opacity` reduction,
+  spinner presence
+- **DrawerHeader isLoading**: Test close/back buttons remain interactive during
+  loading
+- **DrawerAlert dismiss**: Test `dismissible` flag, `onDismiss` callback
+  invocation
+- **DrawerSection/DrawerDivider slots**: Test slot content injection at all
+  positions
+- **Scoped slot isolation**: Test that scoped content only renders in matching
+  drawer
 
 ### Property-Based Tests
 
-Property-based tests use `fast-check` (already available in the project's test toolchain) to verify universal properties across generated inputs. Each test runs a minimum of 100 iterations.
+Property-based tests use `fast-check` (already available in the project's test
+toolchain) to verify universal properties across generated inputs. Each test
+runs a minimum of 100 iterations.
 
 | Property    | Test Description                                                             | Tag                                                                                                  |
 | ----------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -480,6 +543,7 @@ Property-based tests use `fast-check` (already available in the project's test t
 
 ### Test Configuration
 
-- **Library**: `fast-check` for property-based testing, `vitest` + `@testing-library/react` for unit tests
+- **Library**: `fast-check` for property-based testing, `vitest` +
+  `@testing-library/react` for unit tests
 - **Minimum iterations**: 100 per property test
 - **Test location**: `packages/ui/src/components/drawer-stack/__tests__/`

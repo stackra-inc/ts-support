@@ -2,10 +2,10 @@
 
 ## Prerequisites
 
-| Tool    | Minimum | Install              |
-|---------|---------|----------------------|
-| Node.js | 18      | https://nodejs.org   |
-| npm     | 10      | bundled with Node    |
+| Tool    | Minimum | Install            |
+| ------- | ------- | ------------------ |
+| Node.js | 18      | https://nodejs.org |
+| npm     | 10      | bundled with Node  |
 
 ## Getting started
 

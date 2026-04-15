@@ -1,6 +1,11 @@
 ---
 name: heroui-react
-description: "HeroUI v3 React component library (Tailwind CSS v4 + React Aria). Use when building UIs with HeroUI — creating Buttons, Modals, Forms, Cards; installing @heroui/react; configuring dark/light themes with oklch variables; or fetching component docs. Keywords: HeroUI, Hero UI, heroui, @heroui/react, @heroui/styles."
+description:
+  "HeroUI v3 React component library (Tailwind CSS v4 + React Aria). Use when
+  building UIs with HeroUI — creating Buttons, Modals, Forms, Cards; installing
+  @heroui/react; configuring dark/light themes with oklch variables; or fetching
+  component docs. Keywords: HeroUI, Hero UI, heroui, @heroui/react,
+  @heroui/styles."
 metadata:
   author: heroui
   version: "3.0.1"
@@ -8,7 +13,9 @@ metadata:
 
 # HeroUI v3 React Development Guide
 
-HeroUI v3 is a component library built on **Tailwind CSS v4** and **React Aria Components**, providing accessible, customizable UI components for React applications.
+HeroUI v3 is a component library built on **Tailwind CSS v4** and **React Aria
+Components**, providing accessible, customizable UI components for React
+applications.
 
 ---
 
@@ -22,15 +29,16 @@ curl -fsSL https://heroui.com/install | bash -s heroui-react
 
 ## CRITICAL: v3 Only - Ignore v2 Knowledge
 
-**This guide is for HeroUI v3 ONLY.** Do NOT apply v2 patterns — the provider, styling, and component API all changed:
+**This guide is for HeroUI v3 ONLY.** Do NOT apply v2 patterns — the provider,
+styling, and component API all changed:
 
-| Feature       | v2 (DO NOT USE)                   | v3 (USE THIS)                               |
-| ------------- | --------------------------------- | ------------------------------------------- |
-| Provider      | `<HeroUIProvider>` required       | **No Provider needed**                      |
-| Animations    | `framer-motion` package           | CSS-based, no extra deps                    |
-| Component API | Flat props: `<Card title="x">`    | Compound: `<Card><Card.Header>`             |
-| Styling       | Tailwind v3 + `@heroui/theme`     | Tailwind v4 + `@heroui/styles`         	  |
-| Packages      | `@heroui/system`, `@heroui/theme` | `@heroui/react`, `@heroui/styles` 		  |
+| Feature       | v2 (DO NOT USE)                   | v3 (USE THIS)                     |
+| ------------- | --------------------------------- | --------------------------------- |
+| Provider      | `<HeroUIProvider>` required       | **No Provider needed**            |
+| Animations    | `framer-motion` package           | CSS-based, no extra deps          |
+| Component API | Flat props: `<Card title="x">`    | Compound: `<Card><Card.Header>`   |
+| Styling       | Tailwind v3 + `@heroui/theme`     | Tailwind v4 + `@heroui/styles`    |
+| Packages      | `@heroui/system`, `@heroui/theme` | `@heroui/react`, `@heroui/styles` |
 
 ```tsx
 // DO NOT DO THIS - v2 pattern
@@ -38,7 +46,7 @@ import { HeroUIProvider } from "@/heroui/react";
 import { motion } from "framer-motion";
 
 <HeroUIProvider>
-	<Card title="Product" description="A great product" />
+  <Card title="Product" description="A great product" />
 </HeroUIProvider>;
 ```
 
@@ -49,10 +57,10 @@ import { motion } from "framer-motion";
 import { Card } from "@/heroui/react";
 
 <Card>
-	<Card.Header>
-		<Card.Title>Product</Card.Title>
-		<Card.Description>A great product</Card.Description>
-	</Card.Header>
+  <Card.Header>
+    <Card.Title>Product</Card.Title>
+    <Card.Description>A great product</Card.Description>
+  </Card.Header>
 </Card>;
 ```
 
@@ -62,7 +70,8 @@ import { Card } from "@/heroui/react";
 
 ## Core Principles
 
-- Semantic variants (`primary`, `secondary`, `tertiary`) over visual descriptions
+- Semantic variants (`primary`, `secondary`, `tertiary`) over visual
+  descriptions
 - Composition over configuration (compound components)
 - CSS variable-based theming with `oklch` color space
 - BEM naming convention for predictable styling
@@ -71,7 +80,8 @@ import { Card } from "@/heroui/react";
 
 ## Accessing Documentation & Component Information
 
-**For component details, examples, props, and implementation patterns, always fetch documentation:**
+**For component details, examples, props, and implementation patterns, always
+fetch documentation:**
 
 ### Using Scripts
 
@@ -106,9 +116,11 @@ Examples:
 - Modal: `https://heroui.com/docs/react/components/modal.mdx`
 - Form: `https://heroui.com/docs/react/components/form.mdx`
 
-Getting started guides: `https://heroui.com/docs/react/getting-started/{topic}.mdx`
+Getting started guides:
+`https://heroui.com/docs/react/getting-started/{topic}.mdx`
 
-**Important:** Always fetch component docs before implementing. The MDX docs include complete examples, props, anatomy, and API references.
+**Important:** Always fetch component docs before implementing. The MDX docs
+include complete examples, props, anatomy, and API references.
 
 ---
 
@@ -144,18 +156,18 @@ npm i @heroui/styles @heroui/react tailwind-variants tailwindcss @tailwindcss/po
 import "./globals.css";
 
 export default function RootLayout({
-	children,
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<body>
-				{/* No Provider needed in HeroUI v3! */}
-				{children}
-			</body>
-		</html>
-	);
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        {/* No Provider needed in HeroUI v3! */}
+        {children}
+      </body>
+    </html>
+  );
 }
 ```
 
@@ -163,24 +175,30 @@ export default function RootLayout({
 
 ```js
 export default {
-	plugins: {
-		"@tailwindcss/postcss": {},
-	},
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
 };
 ```
 
 ### Critical Setup Requirements
 
-1. **Tailwind CSS v4 is MANDATORY** - HeroUI v3 will NOT work with Tailwind CSS v3
-2. **Use Compound Components** - Components use compound structure (e.g., `Card.Header`, `Card.Content`)
-3. **Use onPress, not onClick** - For better accessibility, use `onPress` event handlers
+1. **Tailwind CSS v4 is MANDATORY** - HeroUI v3 will NOT work with Tailwind CSS
+   v3
+2. **Use Compound Components** - Components use compound structure (e.g.,
+   `Card.Header`, `Card.Content`)
+3. **Use onPress, not onClick** - For better accessibility, use `onPress` event
+   handlers
 4. **Import Order Matters** - Always import Tailwind CSS before HeroUI styles
 
 ---
 
 ## Component Patterns
 
-All components use the **compound pattern** shown above (dot-notation subcomponents like `Card.Header`, `Card.Content`). Don't flatten to props — always compose with subcomponents. Fetch component docs for complete anatomy and examples.
+All components use the **compound pattern** shown above (dot-notation
+subcomponents like `Card.Header`, `Card.Content`). Don't flatten to props —
+always compose with subcomponents. Fetch component docs for complete anatomy and
+examples.
 
 ---
 
@@ -207,10 +225,10 @@ HeroUI v3 uses CSS variables with `oklch` color space:
 
 ```css
 :root {
-	--accent: oklch(0.6204 0.195 253.83);
-	--accent-foreground: var(--snow);
-	--background: oklch(0.9702 0 0);
-	--foreground: var(--eclipse);
+  --accent: oklch(0.6204 0.195 253.83);
+  --accent-foreground: var(--snow);
+  --background: oklch(0.9702 0 0);
+  --foreground: var(--eclipse);
 }
 ```
 
@@ -231,4 +249,5 @@ node scripts/get_theme.mjs
 <html class="dark" data-theme="dark"></html>
 ```
 
-For detailed theming, fetch: `https://heroui.com/docs/react/getting-started/theming.mdx`
+For detailed theming, fetch:
+`https://heroui.com/docs/react/getting-started/theming.mdx`

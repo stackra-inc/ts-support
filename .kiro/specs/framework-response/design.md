@@ -2,18 +2,35 @@
 
 ## Overview
 
-The Framework Response sub-package (`packages/framework/src/Response/`) provides a unified, fluent API response system for the Pixielity framework under namespace `Pixielity\Response`. It replaces the legacy standalone Response package (`.docs/Response/`) by integrating directly into the framework monorepo as a sub-package following the same pattern as `Routing`, `Container`, etc.
+The Framework Response sub-package (`packages/framework/src/Response/`) provides
+a unified, fluent API response system for the Pixielity framework under
+namespace `Pixielity\Response`. It replaces the legacy standalone Response
+package (`.docs/Response/`) by integrating directly into the framework monorepo
+as a sub-package following the same pattern as `Routing`, `Container`, etc.
 
 The system follows a layered architecture:
 
-1. **Builder Layer** — `Response` fluent builder collects response state (status, data, meta, links, headers, errors, ETag, preset, renderer, pipeline transformers).
-2. **Response Layer** — `ApiResponse` implements Laravel's `Responsable` contract, resolves lazy data, builds the payload structure, applies pipeline transformers, delegates to the renderer, and returns a Symfony HTTP response.
-3. **Rendering Layer** — `RendererResolver` performs content negotiation via Accept header parsing, resolving to a `Renderer` (JSON, XML, View, Stream) that produces a `RendererResult` value object.
-4. **Context Layer** — `ResponseContextManager` provides request-scoped infrastructure metadata (request ID, trace ID, timestamp, API version, debug flag) automatically merged into every response.
-5. **Preset Layer** — `ApiPreset`, `AdminPreset`, `MobilePreset` provide pre-configured defaults for different client types.
-6. **Integration Layer** — `InteractsWithResponse` trait on the base `Controller`, plus `#[UseData]` and `#[UseResource]` attribute integration for CRUD response transformation.
+1. **Builder Layer** — `Response` fluent builder collects response state
+   (status, data, meta, links, headers, errors, ETag, preset, renderer, pipeline
+   transformers).
+2. **Response Layer** — `ApiResponse` implements Laravel's `Responsable`
+   contract, resolves lazy data, builds the payload structure, applies pipeline
+   transformers, delegates to the renderer, and returns a Symfony HTTP response.
+3. **Rendering Layer** — `RendererResolver` performs content negotiation via
+   Accept header parsing, resolving to a `Renderer` (JSON, XML, View, Stream)
+   that produces a `RendererResult` value object.
+4. **Context Layer** — `ResponseContextManager` provides request-scoped
+   infrastructure metadata (request ID, trace ID, timestamp, API version, debug
+   flag) automatically merged into every response.
+5. **Preset Layer** — `ApiPreset`, `AdminPreset`, `MobilePreset` provide
+   pre-configured defaults for different client types.
+6. **Integration Layer** — `InteractsWithResponse` trait on the base
+   `Controller`, plus `#[UseData]` and `#[UseResource]` attribute integration
+   for CRUD response transformation.
 
-All request-scoped components use `#[Scoped]` for Octane safety. Stateless singletons use `#[Singleton]`. Renderers and presets are auto-discovered via `#[AsRenderer]` and `#[AsPreset]` attributes.
+All request-scoped components use `#[Scoped]` for Octane safety. Stateless
+singletons use `#[Singleton]`. Renderers and presets are auto-discovered via
+`#[AsRenderer]` and `#[AsPreset]` attributes.
 
 ## Architecture
 
@@ -293,11 +310,17 @@ sequenceDiagram
 
 ### Contracts
 
-All contracts reside in the shared contracts package at `Pixielity\Contracts\Framework\Response`. Each contract defines the public API that the Response sub-package's concrete classes implement. The `#[Bind]` attribute on each implementation points back to these contracts for automatic container resolution.
+All contracts reside in the shared contracts package at
+`Pixielity\Contracts\Framework\Response`. Each contract defines the public API
+that the Response sub-package's concrete classes implement. The `#[Bind]`
+attribute on each implementation points back to these contracts for automatic
+container resolution.
 
 #### ResponseBuilderInterface
 
-The fluent builder contract. Every chainable method returns `static` for fluent chaining. The builder implements `Responsable` so Laravel can auto-convert it to an HTTP response when returned from a controller.
+The fluent builder contract. Every chainable method returns `static` for fluent
+chaining. The builder implements `Responsable` so Laravel can auto-convert it to
+an HTTP response when returned from a controller.
 
 ```php
 <?php
@@ -604,7 +627,9 @@ interface ResponseBuilder extends Responsable
 
 #### ApiResponseInterface
 
-The Responsable output class contract. ApiResponse is the final step before HTTP output — it resolves lazy data, builds the payload, runs pipeline transformers, delegates to the renderer, and returns a Symfony HTTP response.
+The Responsable output class contract. ApiResponse is the final step before HTTP
+output — it resolves lazy data, builds the payload, runs pipeline transformers,
+delegates to the renderer, and returns a Symfony HTTP response.
 
 ```php
 <?php
@@ -789,7 +814,10 @@ interface ApiResponse extends Responsable
 
 #### RendererInterface
 
-Renderers are the pluggable content formatters. Each renderer knows how to convert a payload array into a specific output format (JSON, XML, HTML, stream). The `supports()` method enables content negotiation — the RendererResolver checks each renderer against the client's Accept header.
+Renderers are the pluggable content formatters. Each renderer knows how to
+convert a payload array into a specific output format (JSON, XML, HTML, stream).
+The `supports()` method enables content negotiation — the RendererResolver
+checks each renderer against the client's Accept header.
 
 ```php
 <?php
@@ -861,7 +889,9 @@ interface Renderer
 
 #### RendererResolverInterface
 
-The content negotiation engine. Resolves which renderer to use based on a strict priority chain: explicit override → preset default → Accept header → JSON fallback.
+The content negotiation engine. Resolves which renderer to use based on a strict
+priority chain: explicit override → preset default → Accept header → JSON
+fallback.
 
 ```php
 <?php
@@ -934,7 +964,10 @@ interface RendererResolver
 
 #### PresetInterface
 
-Presets encapsulate client-type-specific defaults. A preset tells the response system: "for this type of client, use this renderer, these headers, this meta, these JSON flags, and this debug setting." Presets are singletons because they hold no mutable request state.
+Presets encapsulate client-type-specific defaults. A preset tells the response
+system: "for this type of client, use this renderer, these headers, this meta,
+these JSON flags, and this debug setting." Presets are singletons because they
+hold no mutable request state.
 
 ```php
 <?php
@@ -1015,7 +1048,10 @@ interface Preset
 
 #### ResponseContextInterface
 
-Request-scoped infrastructure metadata. Created fresh per request (via `#[Scoped]`), captures request ID, trace ID, timestamp, and debug flag at construction. ApiResponse merges this context into every response payload automatically — controllers never need to touch it.
+Request-scoped infrastructure metadata. Created fresh per request (via
+`#[Scoped]`), captures request ID, trace ID, timestamp, and debug flag at
+construction. ApiResponse merges this context into every response payload
+automatically — controllers never need to touch it.
 
 ```php
 <?php
@@ -1149,7 +1185,9 @@ interface ResponseContext
 
 #### RendererResult
 
-Immutable value object produced by every Renderer. Contains the rendered body string, the content type for the Content-Type header, and any additional headers the renderer wants to add (e.g., charset, cache directives).
+Immutable value object produced by every Renderer. Contains the rendered body
+string, the content type for the Content-Type header, and any additional headers
+the renderer wants to add (e.g., charset, cache directives).
 
 ```php
 <?php
@@ -1192,11 +1230,16 @@ final readonly class RendererResult
 
 ### Attributes
 
-Discovery attributes that enable auto-registration of renderers and presets at boot time. The service provider uses `Discovery::attribute(AsRenderer::class)->get()` and `Discovery::attribute(AsPreset::class)->get()` to find all annotated classes.
+Discovery attributes that enable auto-registration of renderers and presets at
+boot time. The service provider uses
+`Discovery::attribute(AsRenderer::class)->get()` and
+`Discovery::attribute(AsPreset::class)->get()` to find all annotated classes.
 
 #### AsRenderer
 
-Placed on Renderer implementations to enable discovery-based registration with the RendererResolver. The optional `priority` parameter controls content negotiation ordering (higher = preferred).
+Placed on Renderer implementations to enable discovery-based registration with
+the RendererResolver. The optional `priority` parameter controls content
+negotiation ordering (higher = preferred).
 
 ```php
 <?php
@@ -1243,7 +1286,9 @@ final readonly class AsRenderer
 
 #### AsPreset
 
-Placed on Preset implementations to enable discovery-based registration. The optional `name` parameter provides a human-readable identifier; if omitted, the class name is used.
+Placed on Preset implementations to enable discovery-based registration. The
+optional `name` parameter provides a human-readable identifier; if omitted, the
+class name is used.
 
 ```php
 <?php
@@ -1288,7 +1333,10 @@ final readonly class AsPreset
 
 #### Response (Fluent Builder)
 
-The main entry point for constructing responses. Controllers call `$this->ok($data)` which flows through InteractsWithResponse → Response Facade → ResponseFactory → this builder. The builder collects all response state, then delegates to ApiResponse when Laravel calls `toResponse()`.
+The main entry point for constructing responses. Controllers call
+`$this->ok($data)` which flows through InteractsWithResponse → Response Facade →
+ResponseFactory → this builder. The builder collects all response state, then
+delegates to ApiResponse when Laravel calls `toResponse()`.
 
 ```php
 <?php
@@ -1404,7 +1452,10 @@ class Response implements ResponseBuilderContract
 
 #### ApiResponse
 
-The final step before HTTP output. Receives state from the Response builder, resolves lazy data, builds the canonical payload structure, runs pipeline transformers, delegates to the renderer for content formatting, and returns a Symfony HTTP response.
+The final step before HTTP output. Receives state from the Response builder,
+resolves lazy data, builds the canonical payload structure, runs pipeline
+transformers, delegates to the renderer for content formatting, and returns a
+Symfony HTTP response.
 
 ```php
 <?php
@@ -1991,125 +2042,178 @@ return [
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: Fluent Builder Returns Self
 
-_For any_ Response builder instance and _for any_ chainable method call (success, error, status, ok, created, data, message, meta, link, header, etag, preset, renderer, through, metrics), the return value SHALL be the same builder instance.
+_For any_ Response builder instance and _for any_ chainable method call
+(success, error, status, ok, created, data, message, meta, link, header, etag,
+preset, renderer, through, metrics), the return value SHALL be the same builder
+instance.
 
 **Validates: Requirements 1.1**
 
 ### Property 2: JSON Render Round-Trip
 
-_For any_ valid PHP array payload, rendering it via JsonRenderer and then JSON-decoding the resulting body SHALL produce a value equal to the original payload.
+_For any_ valid PHP array payload, rendering it via JsonRenderer and then
+JSON-decoding the resulting body SHALL produce a value equal to the original
+payload.
 
 **Validates: Requirements 3.2**
 
 ### Property 3: XML Render Well-Formedness
 
-_For any_ valid PHP array payload with string-coercible leaf values, rendering it via XmlRenderer SHALL produce a well-formed XML document that can be parsed by SimpleXMLElement without error.
+_For any_ valid PHP array payload with string-coercible leaf values, rendering
+it via XmlRenderer SHALL produce a well-formed XML document that can be parsed
+by SimpleXMLElement without error.
 
 **Validates: Requirements 3.3**
 
 ### Property 4: Renderer Resolution Priority
 
-_For any_ request with an optional explicit renderer, optional preset, and an Accept header, the RendererResolver SHALL resolve renderers in strict priority order: (1) explicit override if present, (2) preset default if present and no override, (3) Accept header match if no override and no preset, (4) JsonRenderer fallback otherwise.
+_For any_ request with an optional explicit renderer, optional preset, and an
+Accept header, the RendererResolver SHALL resolve renderers in strict priority
+order: (1) explicit override if present, (2) preset default if present and no
+override, (3) Accept header match if no override and no preset, (4) JsonRenderer
+fallback otherwise.
 
 **Validates: Requirements 4.1**
 
 ### Property 5: Accept Header Quality Factor Ordering
 
-_For any_ Accept header string containing multiple MIME types with quality factors, parsing the header SHALL produce a list of MIME types sorted in descending order of quality value.
+_For any_ Accept header string containing multiple MIME types with quality
+factors, parsing the header SHALL produce a list of MIME types sorted in
+descending order of quality value.
 
 **Validates: Requirements 4.2**
 
 ### Property 6: Renderer Registry Sorted by Priority
 
-_For any_ sequence of renderer registrations with varying priority values, the RendererResolver's `getRenderers()` SHALL always return renderers sorted in descending order of priority.
+_For any_ sequence of renderer registrations with varying priority values, the
+RendererResolver's `getRenderers()` SHALL always return renderers sorted in
+descending order of priority.
 
 **Validates: Requirements 4.3**
 
 ### Property 7: Request ID Resolution Priority
 
-_For any_ combination of request headers (X-Request-ID, X-Amzn-RequestId, X-Correlation-ID), the ResponseContextManager SHALL resolve the request ID by preferring X-Request-ID first, then X-Amzn-RequestId, then X-Correlation-ID, and falling back to a valid UUID v4 when none are present.
+_For any_ combination of request headers (X-Request-ID, X-Amzn-RequestId,
+X-Correlation-ID), the ResponseContextManager SHALL resolve the request ID by
+preferring X-Request-ID first, then X-Amzn-RequestId, then X-Correlation-ID, and
+falling back to a valid UUID v4 when none are present.
 
 **Validates: Requirements 6.1**
 
 ### Property 8: ResponseContext Set/Get Round-Trip
 
-_For any_ string key and _for any_ mixed value, calling `set(key, value)` on the ResponseContextManager and then `get(key)` SHALL return the original value.
+_For any_ string key and _for any_ mixed value, calling `set(key, value)` on the
+ResponseContextManager and then `get(key)` SHALL return the original value.
 
 **Validates: Requirements 6.4**
 
 ### Property 9: HasLinks Add/Get Round-Trip
 
-_For any_ link relation name, href string, and HTTP method, calling `addLink(rel, href, method)` and then `getLink(rel)` SHALL return an array with the same href and method values.
+_For any_ link relation name, href string, and HTTP method, calling
+`addLink(rel, href, method)` and then `getLink(rel)` SHALL return an array with
+the same href and method values.
 
 **Validates: Requirements 8.1**
 
 ### Property 10: HasMeta Add/Get Round-Trip
 
-_For any_ string key and _for any_ mixed value, calling `addMeta(key, value)` and then `getMetaValue(key)` SHALL return the original value.
+_For any_ string key and _for any_ mixed value, calling `addMeta(key, value)`
+and then `getMetaValue(key)` SHALL return the original value.
 
 **Validates: Requirements 8.3**
 
 ### Property 11: Pagination Meta Extraction
 
-_For any_ LengthAwarePaginator with arbitrary current*page, last_page, per_page, and total values, extracting pagination metadata SHALL produce an array containing current_page, last_page, per_page, total, from, and to fields matching the paginator's values. \_For any* CursorPaginator, the extracted metadata SHALL contain per_page, has_more, next_cursor, and prev_cursor fields matching the paginator's values.
+_For any_ LengthAwarePaginator with arbitrary current*page, last_page, per_page,
+and total values, extracting pagination metadata SHALL produce an array
+containing current_page, last_page, per_page, total, from, and to fields
+matching the paginator's values. \_For any* CursorPaginator, the extracted
+metadata SHALL contain per_page, has_more, next_cursor, and prev_cursor fields
+matching the paginator's values.
 
 **Validates: Requirements 8.5, 8.6**
 
 ### Property 12: Pagination Links Match Paginator State
 
-_For any_ LengthAwarePaginator, the extracted navigation links SHALL include a 'next' link if and only if the paginator has more pages, and a 'prev' link if and only if the current page is greater than 1. The 'first' and 'last' links SHALL always be present.
+_For any_ LengthAwarePaginator, the extracted navigation links SHALL include a
+'next' link if and only if the paginator has more pages, and a 'prev' link if
+and only if the current page is greater than 1. The 'first' and 'last' links
+SHALL always be present.
 
 **Validates: Requirements 8.7**
 
 ### Property 13: Closure Resolution Round-Trip
 
-_For any_ value wrapped in a Closure, calling `resolveLazyData` SHALL invoke the closure and return the original value.
+_For any_ value wrapped in a Closure, calling `resolveLazyData` SHALL invoke the
+closure and return the original value.
 
 **Validates: Requirements 8.8**
 
 ### Property 14: Recursive Nested Lazy Data Resolution
 
-_For any_ nested array structure where some leaf values are Closures wrapping concrete values, calling `resolveNestedData` SHALL produce an equivalent structure with all Closures replaced by their return values.
+_For any_ nested array structure where some leaf values are Closures wrapping
+concrete values, calling `resolveNestedData` SHALL produce an equivalent
+structure with all Closures replaced by their return values.
 
 **Validates: Requirements 8.10**
 
 ### Property 15: UseResource Method List Membership
 
-_For any_ set of single, collection, and paginated method name lists provided to the UseResource attribute, `isSingleMethod(m)` SHALL return true if and only if `m` is in the single methods list, and analogously for `isCollectionMethod` and `isPaginatedMethod`.
+_For any_ set of single, collection, and paginated method name lists provided to
+the UseResource attribute, `isSingleMethod(m)` SHALL return true if and only if
+`m` is in the single methods list, and analogously for `isCollectionMethod` and
+`isPaginatedMethod`.
 
 **Validates: Requirements 12.5**
 
 ### Property 16: Payload Required Fields Invariant
 
-_For any_ ApiResponse configuration (varying success/error, status codes, data, meta, links, errors), the built payload SHALL always contain the keys `success` (bool), `message` (string), `timestamp` (string), and `request_id` (string). The `data` key SHALL be present if and only if data was set. The `errors` key SHALL be present if and only if errors were set.
+_For any_ ApiResponse configuration (varying success/error, status codes, data,
+meta, links, errors), the built payload SHALL always contain the keys `success`
+(bool), `message` (string), `timestamp` (string), and `request_id` (string). The
+`data` key SHALL be present if and only if data was set. The `errors` key SHALL
+be present if and only if errors were set.
 
 **Validates: Requirements 2.3**
 
 ### Property 17: Debug Section Presence
 
-_For any_ ApiResponse, the payload SHALL contain a `debug` key if and only if the response context has debug mode enabled OR `withMetrics(true)` was called.
+_For any_ ApiResponse, the payload SHALL contain a `debug` key if and only if
+the response context has debug mode enabled OR `withMetrics(true)` was called.
 
 **Validates: Requirements 2.4**
 
 ### Property 18: Context Data Merged Into Payload
 
-_For any_ ResponseContextManager with arbitrary metadata keys and _for any_ builder with arbitrary metadata keys, the final payload's `meta` section SHALL contain all keys from both sources. Similarly, the `links` section SHALL contain all link relations from both the context and the builder.
+_For any_ ResponseContextManager with arbitrary metadata keys and _for any_
+builder with arbitrary metadata keys, the final payload's `meta` section SHALL
+contain all keys from both sources. Similarly, the `links` section SHALL contain
+all link relations from both the context and the builder.
 
 **Validates: Requirements 2.5, 2.6**
 
 ### Property 19: ETag Correctness
 
-_For any_ ApiResponse with data, if no explicit ETag is set, the ETag value SHALL equal `md5(json_encode(data))`. If an explicit ETag is set, the ETag value SHALL equal the provided string. In both cases, the ETag SHALL appear as a payload field and as an HTTP `ETag` header with the value wrapped in double quotes.
+_For any_ ApiResponse with data, if no explicit ETag is set, the ETag value
+SHALL equal `md5(json_encode(data))`. If an explicit ETag is set, the ETag value
+SHALL equal the provided string. In both cases, the ETag SHALL appear as a
+payload field and as an HTTP `ETag` header with the value wrapped in double
+quotes.
 
 **Validates: Requirements 16.1, 16.2, 16.3**
 
 ### Property 20: strict_types Declaration
 
-_For any_ PHP file in the Response sub-package source directory, the file SHALL contain `declare(strict_types=1)` as its first statement after the opening `<?php` tag.
+_For any_ PHP file in the Response sub-package source directory, the file SHALL
+contain `declare(strict_types=1)` as its first statement after the opening
+`<?php` tag.
 
 **Validates: Requirements 14.6**
 
@@ -2118,7 +2222,10 @@ _For any_ PHP file in the Response sub-package source directory, the file SHALL 
 ### Testing Framework
 
 - **Unit Tests**: PHPUnit 11.x
-- **Property-Based Tests**: [PhpQuickCheck](https://github.com/steffenfriedrich/php-quickcheck) or a custom generator approach using PHPUnit's data providers with Faker for randomized input generation
+- **Property-Based Tests**:
+  [PhpQuickCheck](https://github.com/steffenfriedrich/php-quickcheck) or a
+  custom generator approach using PHPUnit's data providers with Faker for
+  randomized input generation
 - **Integration Tests**: Orchestra Testbench for Laravel container integration
 - **Mocking**: Mockery 1.6+
 
@@ -2141,7 +2248,8 @@ Unit tests cover specific examples, edge cases, and integration points:
 
 ### Property-Based Tests
 
-Each property test runs a minimum of 100 iterations with randomized inputs. Each test is tagged with a comment referencing the design property.
+Each property test runs a minimum of 100 iterations with randomized inputs. Each
+test is tagged with a comment referencing the design property.
 
 ```
 // Feature: framework-response, Property 1: Fluent Builder Returns Self
@@ -2150,15 +2258,19 @@ Each property test runs a minimum of 100 iterations with randomized inputs. Each
 // ... etc.
 ```
 
-Properties 1–19 from the Correctness Properties section above are implemented as property-based tests. Property 20 (strict_types) is implemented as a file-scanning test.
+Properties 1–19 from the Correctness Properties section above are implemented as
+property-based tests. Property 20 (strict_types) is implemented as a
+file-scanning test.
 
 **Generator Strategy:**
 
 - Random array payloads: nested arrays with string/int/float/bool/null leaves
 - Random Accept headers: comma-separated MIME types with optional `q=` values
-- Random link data: alphanumeric relation names, URL-like hrefs, HTTP method enums
+- Random link data: alphanumeric relation names, URL-like hrefs, HTTP method
+  enums
 - Random meta data: string keys with mixed values
-- Random paginator states: mocked LengthAwarePaginator/CursorPaginator with random page/total/perPage values
+- Random paginator states: mocked LengthAwarePaginator/CursorPaginator with
+  random page/total/perPage values
 - Random ETag strings: alphanumeric strings
 - Random method name lists: arrays of random string identifiers
 
@@ -2169,7 +2281,8 @@ Integration tests verify component wiring with the Laravel container:
 - Service provider registers bindings correctly (13.3, 13.4)
 - `#[AsRenderer]` discovery registers renderers with resolver (13.3)
 - `#[AsPreset]` discovery makes presets available (13.4)
-- Full request lifecycle: Controller → Response Builder → ApiResponse → Renderer → HTTP Response (2.2)
+- Full request lifecycle: Controller → Response Builder → ApiResponse → Renderer
+  → HTTP Response (2.2)
 - Pipeline transformers execute in order (9.1)
 - `#[UseData]` attribute resolves and transforms DTOs (11.1, 11.2, 11.3)
 - `#[UseResource]` attribute wraps results in resources (12.1, 12.2, 12.3, 12.4)
@@ -2179,9 +2292,12 @@ Integration tests verify component wiring with the Laravel container:
 
 Smoke tests verify one-time configuration and attribute presence:
 
-- `#[Scoped]` attribute on ApiResponse, ResponseContextManager, RendererResolver, Response Builder (1.7, 1.8, 2.7, 2.8, 4.4, 4.5, 6.6, 6.7, 15.1–15.4)
+- `#[Scoped]` attribute on ApiResponse, ResponseContextManager,
+  RendererResolver, Response Builder (1.7, 1.8, 2.7, 2.8, 4.4, 4.5, 6.6, 6.7,
+  15.1–15.4)
 - `#[Singleton]` attribute on ResponseFactory, Presets (7.3, 15.5, 15.6)
 - `#[Bind]` attribute on all contract-bound classes
 - `#[AsRenderer]` and `#[AsPreset]` attribute definitions (13.1, 13.2)
-- Package structure: composer.json, module.json, config/response.php exist (14.1–14.5)
+- Package structure: composer.json, module.json, config/response.php exist
+  (14.1–14.5)
 - Controller composes InteractsWithResponse trait (10.4)

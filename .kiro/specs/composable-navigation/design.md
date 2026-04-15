@@ -2,18 +2,42 @@
 
 ## Overview
 
-The composable navigation system is a headless, framework-agnostic navigation engine split into five packages (`@nav/core`, `@nav/react`, `@nav/ui`, `@nav/plugins`, `@nav/refine`) following the established `@cart/*` architecture. The core engine manages immutable navigation trees, active state resolution, breadcrumb generation, role-based visibility filtering, collapse state management, keyboard navigation, context-based configuration, plugin extensibility, and serialization. The React layer provides context providers and hooks. The UI layer provides compound components built on HeroUI v3. The plugins layer provides optional extensions (badges, search, analytics, spotlight). The Refine adapter (`@nav/refine`) bridges `@refinedev/core` resources, menu items, breadcrumbs, auth identity, and routing into the `@nav/core` NavTree — making the system 100% Refine-compatible while remaining fully usable without Refine.
+The composable navigation system is a headless, framework-agnostic navigation
+engine split into five packages (`@nav/core`, `@nav/react`, `@nav/ui`,
+`@nav/plugins`, `@nav/refine`) following the established `@cart/*` architecture.
+The core engine manages immutable navigation trees, active state resolution,
+breadcrumb generation, role-based visibility filtering, collapse state
+management, keyboard navigation, context-based configuration, plugin
+extensibility, and serialization. The React layer provides context providers and
+hooks. The UI layer provides compound components built on HeroUI v3. The plugins
+layer provides optional extensions (badges, search, analytics, spotlight). The
+Refine adapter (`@nav/refine`) bridges `@refinedev/core` resources, menu items,
+breadcrumbs, auth identity, and routing into the `@nav/core` NavTree — making
+the system 100% Refine-compatible while remaining fully usable without Refine.
 
-The system powers all navigation surfaces across the MNGO platform: POS terminal header/sidebar/spotlight, dashboard sidebar/breadcrumbs, landing page sticky headers/footers, admin settings panels, and ecommerce storefronts.
+The system powers all navigation surfaces across the MNGO platform: POS terminal
+header/sidebar/spotlight, dashboard sidebar/breadcrumbs, landing page sticky
+headers/footers, admin settings panels, and ecommerce storefronts.
 
 ### Key Design Decisions
 
-1. **Immutable state** — All NavTree mutations return new instances, enabling predictable state management and easy undo/redo integration.
-2. **Functional engine** — The core engine is a collection of pure functions (no classes), matching the `@cart/core` pattern. This makes testing trivial and tree-shaking effective.
-3. **Context presets** — Each navigation context (POS, dashboard, landing, etc.) has a default configuration preset that can be overridden, reducing boilerplate.
-4. **Compound components** — The UI layer uses the `Nav.*` compound component pattern (like `Cart.*`), giving consumers full control over composition.
-5. **Plugin isolation** — Plugins can inject nodes, badges, shortcuts, and hooks without modifying core code. Plugin errors are caught and logged, never interrupting navigation.
-6. **Refine adapter** — `@nav/refine` is an optional package that auto-populates NavTrees from Refine's `useMenu()`, `useBreadcrumb()`, `useGetIdentity()`, and resource definitions. The nav system works standalone without Refine; the adapter is a drop-in bridge.
+1. **Immutable state** — All NavTree mutations return new instances, enabling
+   predictable state management and easy undo/redo integration.
+2. **Functional engine** — The core engine is a collection of pure functions (no
+   classes), matching the `@cart/core` pattern. This makes testing trivial and
+   tree-shaking effective.
+3. **Context presets** — Each navigation context (POS, dashboard, landing, etc.)
+   has a default configuration preset that can be overridden, reducing
+   boilerplate.
+4. **Compound components** — The UI layer uses the `Nav.*` compound component
+   pattern (like `Cart.*`), giving consumers full control over composition.
+5. **Plugin isolation** — Plugins can inject nodes, badges, shortcuts, and hooks
+   without modifying core code. Plugin errors are caught and logged, never
+   interrupting navigation.
+6. **Refine adapter** — `@nav/refine` is an optional package that auto-populates
+   NavTrees from Refine's `useMenu()`, `useBreadcrumb()`, `useGetIdentity()`,
+   and resource definitions. The nav system works standalone without Refine; the
+   adapter is a drop-in bridge.
 
 ## Architecture
 
@@ -125,35 +149,80 @@ sequenceDiagram
 
 ```typescript
 // ─── Tree Construction ─────────────────────────────────────────
-function createNavTree(context: NavContext, config?: Partial<NavConfig>): NavTree;
+function createNavTree(
+  context: NavContext,
+  config?: Partial<NavConfig>,
+): NavTree;
 function addSection(tree: NavTree, section: NavSectionDef): NavTree;
-function addNode(tree: NavTree, sectionId: string, node: NavNodeDef, parentId?: string): NavTree;
+function addNode(
+  tree: NavTree,
+  sectionId: string,
+  node: NavNodeDef,
+  parentId?: string,
+): NavTree;
 function removeNode(tree: NavTree, nodeId: string): NavTree;
-function moveNode(tree: NavTree, nodeId: string, newParentId: string | null, newSectionId?: string): NavTree;
+function moveNode(
+  tree: NavTree,
+  nodeId: string,
+  newParentId: string | null,
+  newSectionId?: string,
+): NavTree;
 
 // ─── Active State Resolution ───────────────────────────────────
-function resolve(tree: NavTree, path: string, strategy?: MatchStrategy): ResolveResult;
+function resolve(
+  tree: NavTree,
+  path: string,
+  strategy?: MatchStrategy,
+): ResolveResult;
 
 // ─── Breadcrumb Generation ─────────────────────────────────────
-function generateBreadcrumbs(tree: NavTree, nodeId: string | null): BreadcrumbTrail;
+function generateBreadcrumbs(
+  tree: NavTree,
+  nodeId: string | null,
+): BreadcrumbTrail;
 
 // ─── Visibility Filtering ──────────────────────────────────────
-function filterByRole(tree: NavTree, roles: ReadonlySet<string>, userContext?: unknown): NavTree;
+function filterByRole(
+  tree: NavTree,
+  roles: ReadonlySet<string>,
+  userContext?: unknown,
+): NavTree;
 
 // ─── Collapse State ────────────────────────────────────────────
-function createCollapseState(tree: NavTree, defaultCollapsed: boolean): CollapseState;
+function createCollapseState(
+  tree: NavTree,
+  defaultCollapsed: boolean,
+): CollapseState;
 function toggleCollapse(state: CollapseState, nodeId: string): CollapseState;
-function setCollapsed(state: CollapseState, nodeId: string, collapsed: boolean): CollapseState;
+function setCollapsed(
+  state: CollapseState,
+  nodeId: string,
+  collapsed: boolean,
+): CollapseState;
 function collapseAll(state: CollapseState): CollapseState;
-function expandToNode(state: CollapseState, tree: NavTree, nodeId: string): CollapseState;
+function expandToNode(
+  state: CollapseState,
+  tree: NavTree,
+  nodeId: string,
+): CollapseState;
 
 // ─── Keyboard Navigation ──────────────────────────────────────
 function createKeyboardBindings(config: NavConfig): KeyboardBindings;
-function registerShortcut(bindings: KeyboardBindings, shortcut: string, target: string | NavAction): KeyboardBindings;
-function resolveKeyEvent(bindings: KeyboardBindings, event: KeyDescriptor): string | NavAction | null;
+function registerShortcut(
+  bindings: KeyboardBindings,
+  shortcut: string,
+  target: string | NavAction,
+): KeyboardBindings;
+function resolveKeyEvent(
+  bindings: KeyboardBindings,
+  event: KeyDescriptor,
+): string | NavAction | null;
 
 // ─── Configuration ─────────────────────────────────────────────
-function resolveNavConfig(context: NavContext, overrides?: Partial<NavConfig>): NavConfig;
+function resolveNavConfig(
+  context: NavContext,
+  overrides?: Partial<NavConfig>,
+): NavConfig;
 const NAV_CONTEXT_PRESETS: Record<NavContext, NavConfig>;
 
 // ─── Serialization ─────────────────────────────────────────────
@@ -162,10 +231,17 @@ function deserialize(json: string): NavTree;
 
 // ─── Plugin System ─────────────────────────────────────────────
 function createPluginRegistry(): NavPluginRegistry;
-function registerPlugin(registry: NavPluginRegistry, plugin: NavPlugin): NavPluginRegistry;
+function registerPlugin(
+  registry: NavPluginRegistry,
+  plugin: NavPlugin,
+): NavPluginRegistry;
 function applyPluginNodes(registry: NavPluginRegistry, tree: NavTree): NavTree;
 function applyPluginBadges(registry: NavPluginRegistry, tree: NavTree): NavTree;
-function invokePluginHook(registry: NavPluginRegistry, hook: keyof NavPluginHooks, ...args: unknown[]): void;
+function invokePluginHook(
+  registry: NavPluginRegistry,
+  hook: keyof NavPluginHooks,
+  ...args: unknown[]
+): void;
 ```
 
 ### @nav/react — Hooks & Provider
@@ -186,36 +262,36 @@ function useNavBadge(nodeId: string): BadgeConfig | null;
 
 ```typescript
 // ─── Generic Components ────────────────────────────────────────
-Nav.Sidebar        // Vertical nav panel (collapsed/expanded)
-Nav.Header         // Horizontal top bar (left/center/right slots)
-Nav.Menu           // Nested menu list from a NavSection
-Nav.Item           // Single nav item with sub-composables:
-  Nav.Item.Icon
-  Nav.Item.Label
-  Nav.Item.Badge
-  Nav.Item.Shortcut
-  Nav.Item.Children
-Nav.Breadcrumbs    // Horizontal breadcrumb trail
-Nav.Footer         // Footer with grouped link columns
-Nav.UserMenu       // User avatar dropdown
-Nav.Search         // Search input filtering NavNodes
+Nav.Sidebar; // Vertical nav panel (collapsed/expanded)
+Nav.Header; // Horizontal top bar (left/center/right slots)
+Nav.Menu; // Nested menu list from a NavSection
+Nav.Item; // Single nav item with sub-composables:
+Nav.Item.Icon;
+Nav.Item.Label;
+Nav.Item.Badge;
+Nav.Item.Shortcut;
+Nav.Item.Children;
+Nav.Breadcrumbs; // Horizontal breadcrumb trail
+Nav.Footer; // Footer with grouped link columns
+Nav.UserMenu; // User avatar dropdown
+Nav.Search; // Search input filtering NavNodes
 
 // ─── POS-Specific ──────────────────────────────────────────────
-Nav.POS.Header     // POS header layout with all slots
-Nav.POS.Sidebar    // POS category sidebar
-Nav.POS.Spotlight  // Full-screen command palette
-Nav.POS.UserMenu   // User profile drawer with stack nav
+Nav.POS.Header; // POS header layout with all slots
+Nav.POS.Sidebar; // POS category sidebar
+Nav.POS.Spotlight; // Full-screen command palette
+Nav.POS.UserMenu; // User profile drawer with stack nav
 
 // ─── Dashboard-Specific ────────────────────────────────────────
-Nav.Dashboard.Layout       // Dashboard shell (sidebar + header + content)
-Nav.Dashboard.Sidebar      // Multi-section sidebar with collapse
-Nav.Dashboard.Breadcrumbs  // Dashboard breadcrumbs
-Nav.Dashboard.SettingsNav  // Settings panel navigation
+Nav.Dashboard.Layout; // Dashboard shell (sidebar + header + content)
+Nav.Dashboard.Sidebar; // Multi-section sidebar with collapse
+Nav.Dashboard.Breadcrumbs; // Dashboard breadcrumbs
+Nav.Dashboard.SettingsNav; // Settings panel navigation
 
 // ─── Landing-Specific ──────────────────────────────────────────
-Nav.Landing.Header       // Sticky header with responsive hamburger
-Nav.Landing.MobileDrawer // Mobile slide-in menu
-Nav.Landing.Footer       // Footer with link columns + legal bar
+Nav.Landing.Header; // Sticky header with responsive hamburger
+Nav.Landing.MobileDrawer; // Mobile slide-in menu
+Nav.Landing.Footer; // Footer with link columns + legal bar
 ```
 
 ### @nav/plugins — Plugin Factories
@@ -229,7 +305,10 @@ function createSpotlightPlugin(config: SpotlightPluginConfig): NavPlugin;
 
 ### @nav/refine — Refine.dev Adapter (`packages/nav/refine/`)
 
-The Refine adapter bridges `@refinedev/core` into the `@nav/core` NavTree system. It reads Refine's resource definitions, menu items, breadcrumbs, auth identity, and routing to auto-populate and sync NavTrees. The nav system works fully without this package — it's an optional drop-in for Refine-based apps.
+The Refine adapter bridges `@refinedev/core` into the `@nav/core` NavTree
+system. It reads Refine's resource definitions, menu items, breadcrumbs, auth
+identity, and routing to auto-populate and sync NavTrees. The nav system works
+fully without this package — it's an optional drop-in for Refine-based apps.
 
 ```typescript
 // ─── NavTree Builder from Refine Resources ─────────────────────
@@ -373,7 +452,13 @@ type BadgeVariant = "default" | "success" | "warning" | "danger";
 type VisibilityRuleType = "roles" | "permissions" | "custom" | "public";
 
 /** Navigation actions for keyboard bindings */
-type NavAction = "navigate" | "toggle" | "expand" | "collapse" | "search" | "spotlight";
+type NavAction =
+  | "navigate"
+  | "toggle"
+  | "expand"
+  | "collapse"
+  | "search"
+  | "spotlight";
 
 // ─── Badge Configuration ───────────────────────────────────────
 
@@ -624,170 +709,220 @@ interface NavActions {
 }
 ```
 
-
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: NavTree node id uniqueness
 
-*For any* NavTree produced by any sequence of `addNode` operations, all NavNode ids within the tree shall be unique — no two nodes share the same id.
+_For any_ NavTree produced by any sequence of `addNode` operations, all NavNode
+ids within the tree shall be unique — no two nodes share the same id.
 
 **Validates: Requirements 1.5**
 
 ### Property 2: NavSection ordering
 
-*For any* NavSection within a NavTree, the nodes shall be ordered by their `order` field in ascending sequence.
+_For any_ NavSection within a NavTree, the nodes shall be ordered by their
+`order` field in ascending sequence.
 
 **Validates: Requirements 1.6**
 
 ### Property 3: addNode placement
 
-*For any* NavTree, section id, NavNodeDef, and optional parent id: if a parent id is provided, the new node shall appear as a child of that parent; if no parent id is provided, the new node shall appear at the root level of the specified section.
+_For any_ NavTree, section id, NavNodeDef, and optional parent id: if a parent
+id is provided, the new node shall appear as a child of that parent; if no
+parent id is provided, the new node shall appear at the root level of the
+specified section.
 
 **Validates: Requirements 2.2, 2.3**
 
 ### Property 4: addSection inclusion
 
-*For any* NavTree and NavSectionDef, calling `addSection` shall produce a new NavTree that contains the added section.
+_For any_ NavTree and NavSectionDef, calling `addSection` shall produce a new
+NavTree that contains the added section.
 
 **Validates: Requirements 2.4**
 
 ### Property 5: removeNode cascading deletion
 
-*For any* NavTree and any node id present in the tree, calling `removeNode` shall produce a new NavTree where neither the target node nor any of its descendants are present.
+_For any_ NavTree and any node id present in the tree, calling `removeNode`
+shall produce a new NavTree where neither the target node nor any of its
+descendants are present.
 
 **Validates: Requirements 2.5**
 
 ### Property 6: moveNode relocation
 
-*For any* NavTree, node id, and valid new parent id, calling `moveNode` shall produce a new NavTree where the node (with its entire subtree intact) appears as a child of the new parent and no longer appears at its original location.
+_For any_ NavTree, node id, and valid new parent id, calling `moveNode` shall
+produce a new NavTree where the node (with its entire subtree intact) appears as
+a child of the new parent and no longer appears at its original location.
 
 **Validates: Requirements 2.6**
 
 ### Property 7: Immutability of all operations
 
-*For any* NavTree and any mutation operation (addNode, removeNode, moveNode, addSection, filterByRole), the original NavTree instance shall remain unchanged after the operation returns.
+_For any_ NavTree and any mutation operation (addNode, removeNode, moveNode,
+addSection, filterByRole), the original NavTree instance shall remain unchanged
+after the operation returns.
 
 **Validates: Requirements 2.9, 5.6**
 
 ### Property 8: Active resolution uniqueness and longest match
 
-*For any* NavTree and any route path, the `resolve` function shall return at most one active NavNode, and that node shall be the one whose path is the longest prefix match (with exact matches preferred over prefix matches).
+_For any_ NavTree and any route path, the `resolve` function shall return at
+most one active NavNode, and that node shall be the one whose path is the
+longest prefix match (with exact matches preferred over prefix matches).
 
 **Validates: Requirements 3.1, 3.3, 3.6**
 
 ### Property 9: Strategy-aware resolution
 
-*For any* NavNode with a custom `matchStrategy` override, the `resolve` function shall use the specified strategy for that node instead of the default strategy.
+_For any_ NavNode with a custom `matchStrategy` override, the `resolve` function
+shall use the specified strategy for that node instead of the default strategy.
 
 **Validates: Requirements 3.4, 3.5**
 
 ### Property 10: Ancestor chain completeness
 
-*For any* resolved active NavNode, the `resolve` function shall return the full ancestor chain from the root to the active node, enabling auto-expansion of collapsed parents.
+_For any_ resolved active NavNode, the `resolve` function shall return the full
+ancestor chain from the root to the active node, enabling auto-expansion of
+collapsed parents.
 
 **Validates: Requirements 3.7**
 
 ### Property 11: Breadcrumb depth invariant
 
-*For any* active NavNode at depth D in the NavTree, `generateBreadcrumbs` shall return a BreadcrumbTrail containing exactly D+1 entries, each with a label and path, ordered from root to the active node.
+_For any_ active NavNode at depth D in the NavTree, `generateBreadcrumbs` shall
+return a BreadcrumbTrail containing exactly D+1 entries, each with a label and
+path, ordered from root to the active node.
 
 **Validates: Requirements 4.1, 4.4, 4.5**
 
 ### Property 12: Role-based filtering correctness
 
-*For any* NavTree and set of user roles, `filterByRole` shall return a new NavTree containing only NavNodes whose VisibilityRule is satisfied by the provided roles, with filtered-out parents cascading removal to all descendants.
+_For any_ NavTree and set of user roles, `filterByRole` shall return a new
+NavTree containing only NavNodes whose VisibilityRule is satisfied by the
+provided roles, with filtered-out parents cascading removal to all descendants.
 
 **Validates: Requirements 5.1, 5.2**
 
 ### Property 13: Visible parent with no visible children
 
-*For any* NavTree where a parent NavNode is visible but all its children are filtered out, `filterByRole` shall retain the parent with an empty children array.
+_For any_ NavTree where a parent NavNode is visible but all its children are
+filtered out, `filterByRole` shall retain the parent with an empty children
+array.
 
 **Validates: Requirements 5.3**
 
 ### Property 14: Empty roles yields only public nodes
 
-*For any* NavTree, calling `filterByRole` with an empty roles set shall return a tree containing only NavNodes with "public" visibility or no VisibilityRule (null).
+_For any_ NavTree, calling `filterByRole` with an empty roles set shall return a
+tree containing only NavNodes with "public" visibility or no VisibilityRule
+(null).
 
 **Validates: Requirements 5.7**
 
 ### Property 15: Toggle collapse round-trip
 
-*For any* CollapseState and any NavNode id, applying `toggleCollapse` twice to the same node shall restore the original collapsed state for that node.
+_For any_ CollapseState and any NavNode id, applying `toggleCollapse` twice to
+the same node shall restore the original collapsed state for that node.
 
 **Validates: Requirements 6.2, 6.7**
 
 ### Property 16: collapseAll sets all to collapsed
 
-*For any* CollapseState, calling `collapseAll` shall set every entry to collapsed (true).
+_For any_ CollapseState, calling `collapseAll` shall set every entry to
+collapsed (true).
 
 **Validates: Requirements 6.4**
 
 ### Property 17: expandToNode expands ancestor chain
 
-*For any* NavTree, CollapseState, and target NavNode id, calling `expandToNode` shall set all ancestor nodes of the target to expanded (false) so the target becomes visible.
+_For any_ NavTree, CollapseState, and target NavNode id, calling `expandToNode`
+shall set all ancestor nodes of the target to expanded (false) so the target
+becomes visible.
 
 **Validates: Requirements 6.5**
 
 ### Property 18: Keyboard shortcut registration round-trip
 
-*For any* KeyboardBindings, shortcut string, and target (NavNode id or NavAction), registering the shortcut and then resolving a matching key event shall return the registered target.
+_For any_ KeyboardBindings, shortcut string, and target (NavNode id or
+NavAction), registering the shortcut and then resolving a matching key event
+shall return the registered target.
 
 **Validates: Requirements 7.2, 7.3**
 
 ### Property 19: List navigation focus ordering
 
-*For any* ordered list of visible NavNodes, ArrowDown from position i shall move focus to position i+1 (clamped), ArrowUp from position i shall move to i-1 (clamped), Home shall move to position 0, and End shall move to the last position.
+_For any_ ordered list of visible NavNodes, ArrowDown from position i shall move
+focus to position i+1 (clamped), ArrowUp from position i shall move to i-1
+(clamped), Home shall move to position 0, and End shall move to the last
+position.
 
 **Validates: Requirements 7.4, 7.7, 7.8**
 
 ### Property 20: Typeahead search
 
-*For any* list of visible NavNodes and any prefix string, typeahead shall return the first NavNode whose label starts with the typed characters (case-insensitive).
+_For any_ list of visible NavNodes and any prefix string, typeahead shall return
+the first NavNode whose label starts with the typed characters
+(case-insensitive).
 
 **Validates: Requirements 7.9**
 
 ### Property 21: Context config preset application
 
-*For any* NavContext, creating a NavTree shall apply the corresponding default NavConfig preset. When explicit overrides are provided, the resulting config shall be the preset merged with the overrides (overrides win).
+_For any_ NavContext, creating a NavTree shall apply the corresponding default
+NavConfig preset. When explicit overrides are provided, the resulting config
+shall be the preset merged with the overrides (overrides win).
 
 **Validates: Requirements 8.3, 8.4**
 
 ### Property 22: Plugin node extension
 
-*For any* NavPluginRegistry containing plugins with `extendNodes`, calling `applyPluginNodes` shall invoke each plugin's `extendNodes` function and the resulting tree shall contain the nodes injected by the plugins.
+_For any_ NavPluginRegistry containing plugins with `extendNodes`, calling
+`applyPluginNodes` shall invoke each plugin's `extendNodes` function and the
+resulting tree shall contain the nodes injected by the plugins.
 
 **Validates: Requirements 9.3**
 
 ### Property 23: Plugin badge application
 
-*For any* NavPluginRegistry containing plugins with `badges`, calling `applyPluginBadges` shall update the BadgeConfig on matching NavNodes according to the plugin's badge function output.
+_For any_ NavPluginRegistry containing plugins with `badges`, calling
+`applyPluginBadges` shall update the BadgeConfig on matching NavNodes according
+to the plugin's badge function output.
 
 **Validates: Requirements 9.4**
 
 ### Property 24: Plugin shortcut merging (existing wins)
 
-*For any* NavPluginRegistry and existing KeyboardBindings, merging plugin shortcuts shall add new bindings but preserve existing bindings when conflicts occur.
+_For any_ NavPluginRegistry and existing KeyboardBindings, merging plugin
+shortcuts shall add new bindings but preserve existing bindings when conflicts
+occur.
 
 **Validates: Requirements 9.6, 9.8**
 
 ### Property 25: Serialization round-trip
 
-*For any* valid NavTree (with no "custom" VisibilityRules), `deserialize(serialize(tree))` shall produce a NavTree equivalent to the original.
+_For any_ valid NavTree (with no "custom" VisibilityRules),
+`deserialize(serialize(tree))` shall produce a NavTree equivalent to the
+original.
 
 **Validates: Requirements 10.3**
 
 ### Property 26: Custom visibility rules excluded from serialization
 
-*For any* NavTree containing NavNodes with "custom" VisibilityRules, serializing and then deserializing shall convert those rules to "public" VisibilityRules.
+_For any_ NavTree containing NavNodes with "custom" VisibilityRules, serializing
+and then deserializing shall convert those rules to "public" VisibilityRules.
 
 **Validates: Requirements 10.6**
 
 ### Property 27: createNavTree returns empty tree for context
 
-*For any* NavContext value, `createNavTree` shall return a new NavTree with that context, an empty sections array, and the correct version number.
+_For any_ NavContext value, `createNavTree` shall return a new NavTree with that
+context, an empty sections array, and the correct version number.
 
 **Validates: Requirements 2.1**
 
@@ -795,64 +930,75 @@ interface NavActions {
 
 ### @nav/core Errors
 
-| Error Class | Trigger | Behavior |
-|---|---|---|
-| `DuplicateNodeError` | `addNode` called with an id that already exists in the tree | Returns error with the duplicate node id |
-| `NavDeserializationError` | `deserialize` called with invalid JSON | Wraps the native parse error with a descriptive message |
+| Error Class                | Trigger                                                               | Behavior                                                   |
+| -------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `DuplicateNodeError`       | `addNode` called with an id that already exists in the tree           | Returns error with the duplicate node id                   |
+| `NavDeserializationError`  | `deserialize` called with invalid JSON                                | Wraps the native parse error with a descriptive message    |
 | `NavSchemaValidationError` | `deserialize` called with JSON that doesn't conform to NavTree schema | Collects all violations and reports them in a single error |
 
 ### @nav/core Edge Cases
 
-| Scenario | Behavior |
-|---|---|
-| `removeNode` with non-existent id | Returns the NavTree unchanged (no error) |
-| `resolve` with no matching path | Returns `{ node: null, ancestors: [] }` |
-| `generateBreadcrumbs` with null | Returns empty `BreadcrumbTrail` |
-| `filterByRole` with empty roles | Returns tree with only public/null-visibility nodes |
-| CollapseState lookup for missing node id | Falls back to `NavConfig.defaultCollapsed` |
-| Plugin hook throws an error | Caught, logged as warning, navigation continues |
-| Plugin shortcut conflicts with existing binding | Existing binding preserved, warning logged |
-| `serialize` with custom VisibilityRules | Custom predicates excluded, restored as "public" on deserialize |
+| Scenario                                        | Behavior                                                        |
+| ----------------------------------------------- | --------------------------------------------------------------- |
+| `removeNode` with non-existent id               | Returns the NavTree unchanged (no error)                        |
+| `resolve` with no matching path                 | Returns `{ node: null, ancestors: [] }`                         |
+| `generateBreadcrumbs` with null                 | Returns empty `BreadcrumbTrail`                                 |
+| `filterByRole` with empty roles                 | Returns tree with only public/null-visibility nodes             |
+| CollapseState lookup for missing node id        | Falls back to `NavConfig.defaultCollapsed`                      |
+| Plugin hook throws an error                     | Caught, logged as warning, navigation continues                 |
+| Plugin shortcut conflicts with existing binding | Existing binding preserved, warning logged                      |
+| `serialize` with custom VisibilityRules         | Custom predicates excluded, restored as "public" on deserialize |
 
 ### @nav/react Errors
 
-| Error | Trigger | Behavior |
-|---|---|---|
+| Error                     | Trigger                                         | Behavior                                                             |
+| ------------------------- | ----------------------------------------------- | -------------------------------------------------------------------- |
 | `NavProviderMissingError` | Any `useNav*` hook called outside `NavProvider` | Throws descriptive error: "useNav must be used within a NavProvider" |
 
 ## Testing Strategy
 
 ### Dual Testing Approach
 
-The navigation system uses both unit tests and property-based tests for comprehensive coverage:
+The navigation system uses both unit tests and property-based tests for
+comprehensive coverage:
 
-- **Unit tests** — Verify specific examples, edge cases, error conditions, and React component behavior
-- **Property tests** — Verify universal properties across randomly generated inputs using `fast-check`
+- **Unit tests** — Verify specific examples, edge cases, error conditions, and
+  React component behavior
+- **Property tests** — Verify universal properties across randomly generated
+  inputs using `fast-check`
 
 ### Property-Based Testing Configuration
 
 - **Library**: `fast-check` (already used in `@cart/core` and `@cart/plugins`)
 - **Minimum iterations**: 100 per property test
-- **Tag format**: `Feature: composable-navigation, Property {number}: {property_text}`
+- **Tag format**:
+  `Feature: composable-navigation, Property {number}: {property_text}`
 - **Each correctness property is implemented by a single property-based test**
 
 ### Test Distribution by Package
 
 **@nav/core** (property tests + unit tests)
+
 - Property tests for all 27 correctness properties above
-- Unit tests for error conditions (DuplicateNodeError, deserialization errors, schema validation)
-- Unit tests for edge cases (removeNode with non-existent id, resolve with no match, null breadcrumbs)
-- Unit tests for context preset values (POS, dashboard, landing specific defaults)
+- Unit tests for error conditions (DuplicateNodeError, deserialization errors,
+  schema validation)
+- Unit tests for edge cases (removeNode with non-existent id, resolve with no
+  match, null breadcrumbs)
+- Unit tests for context preset values (POS, dashboard, landing specific
+  defaults)
 - Environment: Node.js (vitest, `environment: "node"`)
 
 **@nav/react** (unit tests + integration tests)
-- Unit tests for hook behavior (useNav, useNavActions, useBreadcrumbs, useNavSection, useNavBadge)
+
+- Unit tests for hook behavior (useNav, useNavActions, useBreadcrumbs,
+  useNavSection, useNavBadge)
 - Unit tests for provider initialization and plugin registration
 - Unit tests for error throwing when hooks used outside provider
 - Integration tests for route change → active node re-resolution
 - Environment: jsdom (vitest + @testing-library/react)
 
 **@nav/ui** (unit tests + integration tests)
+
 - Unit tests for component rendering (Nav.Sidebar, Nav.Header, Nav.Menu, etc.)
 - Integration tests for ARIA attributes (role, aria-current, aria-expanded)
 - Integration tests for compound component composition
@@ -860,18 +1006,23 @@ The navigation system uses both unit tests and property-based tests for comprehe
 - Environment: jsdom (vitest + @testing-library/react)
 
 **@nav/plugins** (property tests + unit tests)
+
 - Property tests for plugin node extension and badge application
 - Unit tests for plugin factory functions
 - Unit tests for error isolation (plugin hook throws)
 - Environment: Node.js (vitest, `environment: "node"`)
 
 **@nav/refine** (unit tests + integration tests)
+
 - Unit tests for `buildNavTreeFromResources` (resource → NavNode mapping)
 - Unit tests for `syncWithRefineMenu` (menu item merging)
 - Unit tests for `refineBreadcrumbsToTrail` (breadcrumb conversion)
-- Integration tests for `RefineNavProvider` (auto-population from Refine context)
-- Integration tests for `useRefineNav`, `useRefineBreadcrumbs`, `useRefineUserIdentity`
-- Environment: jsdom (vitest + @testing-library/react, mocked @refinedev/core hooks)
+- Integration tests for `RefineNavProvider` (auto-population from Refine
+  context)
+- Integration tests for `useRefineNav`, `useRefineBreadcrumbs`,
+  `useRefineUserIdentity`
+- Environment: jsdom (vitest + @testing-library/react, mocked @refinedev/core
+  hooks)
 
 ### Custom Generators (fast-check)
 
@@ -879,10 +1030,12 @@ The following custom `fast-check` arbitraries will be needed for property tests:
 
 - `arbNavContext` — generates random NavContext values
 - `arbBadgeConfig` — generates random BadgeConfig objects
-- `arbVisibilityRule` — generates random VisibilityRule (excluding "custom" for serialization tests)
+- `arbVisibilityRule` — generates random VisibilityRule (excluding "custom" for
+  serialization tests)
 - `arbNavNodeDef` — generates random NavNodeDef with configurable max depth
 - `arbNavSectionDef` — generates random NavSectionDef with random nodes
-- `arbNavTree` — generates random NavTree with sections and nodes (configurable depth/breadth)
+- `arbNavTree` — generates random NavTree with sections and nodes (configurable
+  depth/breadth)
 - `arbCollapseState` — generates random CollapseState records
 - `arbKeyboardBindings` — generates random KeyboardBindings maps
 - `arbNavConfig` — generates random NavConfig with valid feature flags

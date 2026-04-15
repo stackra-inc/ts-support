@@ -2,21 +2,51 @@
 
 ## Overview
 
-The `pixielity/laravel-search` package is the Elasticsearch implementation layer for the Pixielity monorepo. It implements the three framework Indexer contracts (`IndexerInterface`, `IndexManagerInterface`, `RecordBuilderInterface`) using `pdphilip/elasticsearch` v5 as the ES Eloquent driver, and provides the full search orchestration layer: unified cross-entity search, entity-specific search, autocomplete, faceted search, geo-search, SQL LIKE fallback, observer chains, tenant lifecycle management, Artisan commands, health checks, and search analytics.
+The `pixielity/laravel-search` package is the Elasticsearch implementation layer
+for the Pixielity monorepo. It implements the three framework Indexer contracts
+(`IndexerInterface`, `IndexManagerInterface`, `RecordBuilderInterface`) using
+`pdphilip/elasticsearch` v5 as the ES Eloquent driver, and provides the full
+search orchestration layer: unified cross-entity search, entity-specific search,
+autocomplete, faceted search, geo-search, SQL LIKE fallback, observer chains,
+tenant lifecycle management, Artisan commands, health checks, and search
+analytics.
 
 ### Key Design Decisions
 
-1. **Framework Contract Implementation** — `SearchIndexer`, `SearchIndexManager`, and `SearchRecordBuilder` implement the framework's `IndexerInterface`, `IndexManagerInterface`, and `RecordBuilderInterface` respectively. The `#[Bind]` annotations on the framework interfaces point to these classes. This package never redefines framework-owned types.
+1. **Framework Contract Implementation** — `SearchIndexer`,
+   `SearchIndexManager`, and `SearchRecordBuilder` implement the framework's
+   `IndexerInterface`, `IndexManagerInterface`, and `RecordBuilderInterface`
+   respectively. The `#[Bind]` annotations on the framework interfaces point to
+   these classes. This package never redefines framework-owned types.
 
-2. **pdphilip/elasticsearch as ES Driver** — All ES operations go through `PDPhilip\Elasticsearch\Connection` which extends Laravel's `BaseConnection`. This gives us Eloquent-compatible query builders, schema management via `Schema\Builder`, bulk operations, and `setIndexPrefix()` for tenant isolation. No raw `elasticsearch/elasticsearch` client, no Scout, no Meilisearch.
+2. **pdphilip/elasticsearch as ES Driver** — All ES operations go through
+   `PDPhilip\Elasticsearch\Connection` which extends Laravel's `BaseConnection`.
+   This gives us Eloquent-compatible query builders, schema management via
+   `Schema\Builder`, bulk operations, and `setIndexPrefix()` for tenant
+   isolation. No raw `elasticsearch/elasticsearch` client, no Scout, no
+   Meilisearch.
 
-3. **ElasticLens Patterns Adapted** — `ObserverRegistry` registers observers for base + embedded models. `BaseModelObserver` dispatches `IndexBuildJob` on save/delete. `EmbeddedModelTrigger` traverses relationship chains to rebuild parent documents. `SearchRecordBuilder` builds ES documents from model + embeds. All adapted to use Pixielity attributes and Discovery instead of config-based field maps.
+3. **ElasticLens Patterns Adapted** — `ObserverRegistry` registers observers for
+   base + embedded models. `BaseModelObserver` dispatches `IndexBuildJob` on
+   save/delete. `EmbeddedModelTrigger` traverses relationship chains to rebuild
+   parent documents. `SearchRecordBuilder` builds ES documents from model +
+   embeds. All adapted to use Pixielity attributes and Discovery instead of
+   config-based field maps.
 
-4. **Index-Per-Tenant via setIndexPrefix()** — `SearchBootstrapper` calls `Connection::setIndexPrefix('tenant_{key}_')` on tenant init. All ES operations automatically use tenant-prefixed index names. Reverts on tenant teardown. Global indexes (non-`BelongsToTenant` models) are unaffected.
+4. **Index-Per-Tenant via setIndexPrefix()** — `SearchBootstrapper` calls
+   `Connection::setIndexPrefix('tenant_{key}_')` on tenant init. All ES
+   operations automatically use tenant-prefixed index names. Reverts on tenant
+   teardown. Global indexes (non-`BelongsToTenant` models) are unaffected.
 
-5. **SQL LIKE Fallback** — When ES is unreachable and fallback is enabled, `SearchManager` delegates to `RequestSearchCriteria` from the CRUD package for flat-field search. Embedded relationship search is unavailable in fallback mode. A `SearchFallbackActivated` event is dispatched.
+5. **SQL LIKE Fallback** — When ES is unreachable and fallback is enabled,
+   `SearchManager` delegates to `RequestSearchCriteria` from the CRUD package
+   for flat-field search. Embedded relationship search is unavailable in
+   fallback mode. A `SearchFallbackActivated` event is dispatched.
 
-6. **Analytics in PostgreSQL** — Search analytics (query tracking, click-through, zero-result tracking) are stored in PostgreSQL tables, not ES. This keeps analytics independent of ES availability and leverages existing relational query patterns.
+6. **Analytics in PostgreSQL** — Search analytics (query tracking,
+   click-through, zero-result tracking) are stored in PostgreSQL tables, not ES.
+   This keeps analytics independent of ES availability and leverages existing
+   relational query patterns.
 
 ## Architecture
 
@@ -224,7 +254,8 @@ sequenceDiagram
 
 #### `SearchIndexer` — implements `IndexerInterface`
 
-Resides at `packages/search/src/Services/SearchIndexer.php` under `Pixielity\Search\Services`.
+Resides at `packages/search/src/Services/SearchIndexer.php` under
+`Pixielity\Search\Services`.
 
 ```php
 #[Scoped]
@@ -281,7 +312,8 @@ class SearchIndexer implements IndexerInterface
 
 #### `SearchIndexManager` — implements `IndexManagerInterface`
 
-Resides at `packages/search/src/Services/SearchIndexManager.php` under `Pixielity\Search\Services`.
+Resides at `packages/search/src/Services/SearchIndexManager.php` under
+`Pixielity\Search\Services`.
 
 ```php
 #[Scoped]
@@ -365,9 +397,11 @@ class SearchIndexManager implements IndexManagerInterface
 
 #### `SearchRecordBuilder` — implements `RecordBuilderInterface`
 
-Resides at `packages/search/src/Services/SearchRecordBuilder.php` under `Pixielity\Search\Services`.
+Resides at `packages/search/src/Services/SearchRecordBuilder.php` under
+`Pixielity\Search\Services`.
 
-Adapted from ElasticLens `RecordBuilder`/`RecordMapper` pattern. Uses `IndexerRegistry` for config instead of `IndexConfig`.
+Adapted from ElasticLens `RecordBuilder`/`RecordMapper` pattern. Uses
+`IndexerRegistry` for config instead of `IndexConfig`.
 
 ```php
 #[Scoped]
@@ -417,7 +451,8 @@ class SearchRecordBuilder implements RecordBuilderInterface
 
 ### SearchManager Service
 
-Resides at `packages/search/src/Services/SearchManager.php` under `Pixielity\Search\Services`.
+Resides at `packages/search/src/Services/SearchManager.php` under
+`Pixielity\Search\Services`.
 
 ```php
 #[Bind(SearchManagerInterface::class)]
@@ -480,16 +515,23 @@ class SearchManager implements SearchManagerInterface
 
 The `SearchManager` builds ES query DSL as follows:
 
-- Full-text search: `bool.must` with `multi_match` across searchable fields, `fuzziness: 'AUTO'` when `typoTolerance` is true
-- Filters: `bool.filter` with `term`/`terms`/`range` clauses from filterable fields
+- Full-text search: `bool.must` with `multi_match` across searchable fields,
+  `fuzziness: 'AUTO'` when `typoTolerance` is true
+- Filters: `bool.filter` with `term`/`terms`/`range` clauses from filterable
+  fields
 - Sorting: `sort` array from sortable fields
 - Geo-filter: `bool.filter` with `geo_distance` when lat/lng/radius provided
 - Geo-sort: `sort` with `_geo_distance` for distance calculation
-- Highlights: `highlight.fields` for all searchable fields with configurable pre/post tags
+- Highlights: `highlight.fields` for all searchable fields with configurable
+  pre/post tags
 - Aggregations: `aggs` with `terms` on filterable fields for facet distributions
-- Suggestions: `match_phrase_prefix` with reduced `_source` (displayedAttributes only)
+- Suggestions: `match_phrase_prefix` with reduced `_source` (displayedAttributes
+  only)
 
-When ES is unavailable and `search.fallback.enabled` is true, the `SearchManager` falls back to `RequestSearchCriteria` from the CRUD package for flat-field SQL LIKE search. Embedded relationship search is not available in fallback mode.
+When ES is unavailable and `search.fallback.enabled` is true, the
+`SearchManager` falls back to `RequestSearchCriteria` from the CRUD package for
+flat-field SQL LIKE search. Embedded relationship search is not available in
+fallback mode.
 
 ### Contracts (Package-Owned)
 
@@ -525,7 +567,8 @@ interface SearchAnalyticsRepositoryInterface
 
 #### `ObserverRegistry`
 
-Resides at `packages/search/src/Observers/ObserverRegistry.php`. Adapted from ElasticLens `ObserverRegistry`.
+Resides at `packages/search/src/Observers/ObserverRegistry.php`. Adapted from
+ElasticLens `ObserverRegistry`.
 
 ```php
 class ObserverRegistry
@@ -550,7 +593,8 @@ class ObserverRegistry
 
 #### `BaseModelObserver`
 
-Resides at `packages/search/src/Observers/BaseModelObserver.php`. Adapted from ElasticLens `BaseModelObserver`.
+Resides at `packages/search/src/Observers/BaseModelObserver.php`. Adapted from
+ElasticLens `BaseModelObserver`.
 
 ```php
 class BaseModelObserver
@@ -591,7 +635,8 @@ class BaseModelObserver
 
 #### `EmbeddedModelTrigger`
 
-Resides at `packages/search/src/Observers/EmbeddedModelTrigger.php`. Adapted from ElasticLens `EmbeddedModelTrigger`.
+Resides at `packages/search/src/Observers/EmbeddedModelTrigger.php`. Adapted
+from ElasticLens `EmbeddedModelTrigger`.
 
 ```php
 class EmbeddedModelTrigger
@@ -770,7 +815,8 @@ class SearchController extends Controller
 
 ### Artisan Commands
 
-All commands use Laravel Prompts for output. No `$this->info()` or `$this->error()`.
+All commands use Laravel Prompts for output. No `$this->info()` or
+`$this->error()`.
 
 | Command          | Signature                                | Description                                          |
 | ---------------- | ---------------------------------------- | ---------------------------------------------------- |
@@ -825,7 +871,8 @@ class DeleteTenantIndexes
 
 ### Events
 
-All events are `final readonly` DTOs with `#[AsEvent]`, carrying scalar values only.
+All events are `final readonly` DTOs with `#[AsEvent]`, carrying scalar values
+only.
 
 | Event                     | Properties                                           | Dispatched By                        |
 | ------------------------- | ---------------------------------------------------- | ------------------------------------ |
@@ -991,7 +1038,9 @@ class SearchAnalytic extends Model
 }
 ```
 
-Columns: `id`, `query`, `entities` (json), `total_results`, `result_counts` (json), `is_zero_result`, `user_id` (nullable), `tenant_id` (nullable), `response_time_ms`, `created_at`.
+Columns: `id`, `query`, `entities` (json), `total_results`, `result_counts`
+(json), `is_zero_result`, `user_id` (nullable), `tenant_id` (nullable),
+`response_time_ms`, `created_at`.
 
 #### `SearchClick`
 
@@ -1009,7 +1058,8 @@ class SearchClick extends Model
 }
 ```
 
-Columns: `id`, `query`, `entity`, `record_id`, `position`, `user_id` (nullable), `tenant_id` (nullable), `created_at`.
+Columns: `id`, `query`, `entity`, `record_id`, `position`, `user_id` (nullable),
+`tenant_id` (nullable), `created_at`.
 
 ### Migrations
 
@@ -1158,113 +1208,158 @@ packages/search/
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: DTO construction round-trip
 
-_For any_ valid set of property values, constructing `SearchResult`, `EntityResult`, `SearchSuggestion`, or `IndexStatusDTO` and reading back all properties should return the original values unchanged. This includes all scalar types, enum values, arrays, and nullable fields.
+_For any_ valid set of property values, constructing `SearchResult`,
+`EntityResult`, `SearchSuggestion`, or `IndexStatusDTO` and reading back all
+properties should return the original values unchanged. This includes all scalar
+types, enum values, arrays, and nullable fields.
 
 **Validates: Requirements 8.3, 8.4, 9.6, 10.3**
 
 ### Property 2: Rebuild chunking covers all record IDs
 
-_For any_ total record count N and chunk size C, when `Indexer::rebuild()` dispatches `BulkIndexJob`s, the union of all chunk ID arrays should equal the full set of record IDs, and each chunk should contain at most C IDs.
+_For any_ total record count N and chunk size C, when `Indexer::rebuild()`
+dispatches `BulkIndexJob`s, the union of all chunk ID arrays should equal the
+full set of record IDs, and each chunk should contain at most C IDs.
 
 **Validates: Requirements 2.6**
 
 ### Property 3: Index name resolution follows tenant/global pattern
 
-_For any_ entity class with `isTenantScoped` flag and optional tenant key, `IndexManager::resolveIndexName()` should return `tenant_{tenantKey}_{indexName}` when tenant-scoped with a tenant key, and the bare `indexName` when not tenant-scoped or no tenant key is provided.
+_For any_ entity class with `isTenantScoped` flag and optional tenant key,
+`IndexManager::resolveIndexName()` should return
+`tenant_{tenantKey}_{indexName}` when tenant-scoped with a tenant key, and the
+bare `indexName` when not tenant-scoped or no tenant key is provided.
 
 **Validates: Requirements 2.7, 14.7**
 
 ### Property 4: Document building includes all searchable fields and embed field names
 
-_For any_ `IndexConfigurationDTO` with a set of searchable fields and `EmbedOne`/`EmbedMany` declarations, the document array produced by `RecordBuilder::map()` should contain keys for every searchable field and every declared embed field name.
+_For any_ `IndexConfigurationDTO` with a set of searchable fields and
+`EmbedOne`/`EmbedMany` declarations, the document array produced by
+`RecordBuilder::map()` should contain keys for every searchable field and every
+declared embed field name.
 
 **Validates: Requirements 4.3, 4.4**
 
 ### Property 5: EmbedMany respects limit constraint
 
-_For any_ `EmbedMany` configuration with a non-null `limit` of N, the embedded array in the document output should contain at most N items, regardless of how many related records exist.
+_For any_ `EmbedMany` configuration with a non-null `limit` of N, the embedded
+array in the document output should contain at most N items, regardless of how
+many related records exist.
 
 **Validates: Requirements 4.5**
 
 ### Property 6: excludeIndex returns null from map
 
-_For any_ model where `excludeIndex()` returns `true`, calling `RecordBuilder::map()` should return `null`.
+_For any_ model where `excludeIndex()` returns `true`, calling
+`RecordBuilder::map()` should return `null`.
 
 **Validates: Requirements 4.6**
 
 ### Property 7: Bootstrapper prefix round-trip
 
-_For any_ original index prefix string and any tenant key, calling `SearchBootstrapper::bootstrap()` then `SearchBootstrapper::revert()` should restore the ES connection's index prefix to the original value.
+_For any_ original index prefix string and any tenant key, calling
+`SearchBootstrapper::bootstrap()` then `SearchBootstrapper::revert()` should
+restore the ES connection's index prefix to the original value.
 
 **Validates: Requirements 6.2, 6.3, 6.4**
 
 ### Property 8: Search query DSL includes searchable fields with conditional fuzziness
 
-_For any_ entity configuration with a set of searchable fields and a `typoTolerance` flag, the generated ES bool query should contain a `multi_match` clause covering all searchable fields, and should include `fuzziness: 'AUTO'` if and only if `typoTolerance` is `true`.
+_For any_ entity configuration with a set of searchable fields and a
+`typoTolerance` flag, the generated ES bool query should contain a `multi_match`
+clause covering all searchable fields, and should include `fuzziness: 'AUTO'` if
+and only if `typoTolerance` is `true`.
 
 **Validates: Requirements 7.3, 7.4**
 
 ### Property 9: Filter and sort validation rejects undeclared fields
 
-_For any_ field name that is not present in an entity's declared filterable fields, applying it as a filter should produce a validation error. Similarly, _for any_ field name not in the entity's declared sortable fields, applying it as a sort should produce a validation error.
+_For any_ field name that is not present in an entity's declared filterable
+fields, applying it as a filter should produce a validation error. Similarly,
+_for any_ field name not in the entity's declared sortable fields, applying it
+as a sort should produce a validation error.
 
 **Validates: Requirements 9.4, 9.5**
 
 ### Property 10: Filter clauses generated from filterable fields
 
-_For any_ filter key that exists in the entity's declared filterable fields and a corresponding filter value, the generated ES query should contain a `bool.filter` clause for that field.
+_For any_ filter key that exists in the entity's declared filterable fields and
+a corresponding filter value, the generated ES query should contain a
+`bool.filter` clause for that field.
 
 **Validates: Requirements 9.2**
 
 ### Property 11: Sort clauses generated from sortable fields
 
-_For any_ sort field that exists in the entity's declared sortable fields and a direction (asc/desc), the generated ES query should contain a `sort` entry for that field with the specified direction.
+_For any_ sort field that exists in the entity's declared sortable fields and a
+direction (asc/desc), the generated ES query should contain a `sort` entry for
+that field with the specified direction.
 
 **Validates: Requirements 9.3**
 
 ### Property 12: Aggregation query contains terms for filterable fields
 
-_For any_ entity with a set of declared filterable fields, the facet query generated by `SearchManager::facets()` should contain a `terms` aggregation for each filterable field.
+_For any_ entity with a set of declared filterable fields, the facet query
+generated by `SearchManager::facets()` should contain a `terms` aggregation for
+each filterable field.
 
 **Validates: Requirements 11.2**
 
 ### Property 13: Highlight configuration uses configured tags
 
-_For any_ non-empty `pre_tag` and `post_tag` configuration strings, the generated ES highlight configuration should use those exact strings as the highlight markers.
+_For any_ non-empty `pre_tag` and `post_tag` configuration strings, the
+generated ES highlight configuration should use those exact strings as the
+highlight markers.
 
 **Validates: Requirements 12.1**
 
 ### Property 14: Geo field transformation produces valid ES geo_point
 
-_For any_ valid latitude (-90 to 90) and longitude (-180 to 180), the geo field transformation should produce a valid ES `geo_point` object with `lat` and `lon` keys matching the input values.
+_For any_ valid latitude (-90 to 90) and longitude (-180 to 180), the geo field
+transformation should produce a valid ES `geo_point` object with `lat` and `lon`
+keys matching the input values.
 
 **Validates: Requirements 13.2**
 
 ### Property 15: Geo distance filter generation
 
-_For any_ valid latitude, longitude, and positive radius in meters, the generated ES query should contain a `geo_distance` filter with the specified distance and location.
+_For any_ valid latitude, longitude, and positive radius in meters, the
+generated ES query should contain a `geo_distance` filter with the specified
+distance and location.
 
 **Validates: Requirements 13.4**
 
 ### Property 16: Unrecognized entity validation
 
-_For any_ entity identifier string that is not registered in the `IndexerRegistry`, the `SearchManager` should reject it with a validation error listing the allowed entity identifiers.
+_For any_ entity identifier string that is not registered in the
+`IndexerRegistry`, the `SearchManager` should reject it with a validation error
+listing the allowed entity identifiers.
 
 **Validates: Requirements 8.6**
 
 ### Property 17: Zero-result analytics flag
 
-_For any_ search result where `totalResults` equals 0, the persisted analytics record should have `is_zero_result` set to `true`. _For any_ search result where `totalResults` is greater than 0, `is_zero_result` should be `false`.
+_For any_ search result where `totalResults` equals 0, the persisted analytics
+record should have `is_zero_result` set to `true`. _For any_ search result where
+`totalResults` is greater than 0, `is_zero_result` should be `false`.
 
 **Validates: Requirements 20.2**
 
 ### Property 18: Package events are final readonly DTOs with scalar properties
 
-_For any_ event class in the `Pixielity\Search\Events` namespace (`IndexCreated`, `IndexRebuilt`, `IndexFlushed`, `IndexDeleted`, `SearchPerformed`, `SearchFallbackActivated`), the class should be `final readonly` and all constructor parameters should be scalar types, enum types, or nullable scalar types.
+_For any_ event class in the `Pixielity\Search\Events` namespace
+(`IndexCreated`, `IndexRebuilt`, `IndexFlushed`, `IndexDeleted`,
+`SearchPerformed`, `SearchFallbackActivated`), the class should be
+`final readonly` and all constructor parameters should be scalar types, enum
+types, or nullable scalar types.
 
 **Validates: Requirements 19.4**
 
@@ -1295,38 +1390,71 @@ _For any_ event class in the `Pixielity\Search\Events` namespace (`IndexCreated`
 
 Unit tests cover structural constraints, specific examples, and edge cases:
 
-- **Service provider structure**: Verify `SearchServiceProvider` has `#[Module(name: 'Search', priority: 55)]`, `#[LoadsResources(...)]`, implements `HasBindings`, registers correct bindings (Requirement 1)
-- **Interface implementations**: Verify `SearchIndexer` implements `IndexerInterface`, `SearchIndexManager` implements `IndexManagerInterface`, `SearchRecordBuilder` implements `RecordBuilderInterface` (Requirements 2.1, 3.1, 4.1)
-- **Job structure**: Verify `IndexBuildJob`, `IndexDeleteJob`, `BulkIndexJob` implement `ShouldQueue`, use correct queue from config (Requirements 14.1–14.4)
-- **Event structure**: Verify all events have `#[AsEvent]`, are `final readonly`, carry correct properties (Requirement 19)
-- **Enum structure**: Verify `SearchScope` has correct cases, backing values, `#[Label]`/`#[Description]` (Requirement 21.1)
-- **Bootstrapper structure**: Verify `SearchBootstrapper` has `#[AsBootstrapper(priority: 110)]`, implements `TenancyBootstrapperInterface` (Requirement 6.1)
-- **Health check structure**: Verify `SearchHealthCheck` has `#[AsHealthCheck]` (Requirement 18.1)
-- **Config structure**: Verify all config keys exist with correct defaults (Requirement 22)
-- **Composer dependencies**: Verify required packages present, forbidden packages absent (Requirements 1.4, 1.5)
-- **Observer dispatch**: Verify `BaseModelObserver::saved()` dispatches `IndexBuildJob`, `deleting()` dispatches `IndexDeleteJob` (Requirement 5.2)
-- **Fallback flag**: Verify `SearchResult` includes `fallback: true` when in fallback mode (Requirement 17.4)
-- **Analytics disabled**: Verify no analytics calls when `search.analytics.enabled` is false (Requirement 20.6)
+- **Service provider structure**: Verify `SearchServiceProvider` has
+  `#[Module(name: 'Search', priority: 55)]`, `#[LoadsResources(...)]`,
+  implements `HasBindings`, registers correct bindings (Requirement 1)
+- **Interface implementations**: Verify `SearchIndexer` implements
+  `IndexerInterface`, `SearchIndexManager` implements `IndexManagerInterface`,
+  `SearchRecordBuilder` implements `RecordBuilderInterface` (Requirements 2.1,
+  3.1, 4.1)
+- **Job structure**: Verify `IndexBuildJob`, `IndexDeleteJob`, `BulkIndexJob`
+  implement `ShouldQueue`, use correct queue from config (Requirements
+  14.1–14.4)
+- **Event structure**: Verify all events have `#[AsEvent]`, are
+  `final readonly`, carry correct properties (Requirement 19)
+- **Enum structure**: Verify `SearchScope` has correct cases, backing values,
+  `#[Label]`/`#[Description]` (Requirement 21.1)
+- **Bootstrapper structure**: Verify `SearchBootstrapper` has
+  `#[AsBootstrapper(priority: 110)]`, implements `TenancyBootstrapperInterface`
+  (Requirement 6.1)
+- **Health check structure**: Verify `SearchHealthCheck` has `#[AsHealthCheck]`
+  (Requirement 18.1)
+- **Config structure**: Verify all config keys exist with correct defaults
+  (Requirement 22)
+- **Composer dependencies**: Verify required packages present, forbidden
+  packages absent (Requirements 1.4, 1.5)
+- **Observer dispatch**: Verify `BaseModelObserver::saved()` dispatches
+  `IndexBuildJob`, `deleting()` dispatches `IndexDeleteJob` (Requirement 5.2)
+- **Fallback flag**: Verify `SearchResult` includes `fallback: true` when in
+  fallback mode (Requirement 17.4)
+- **Analytics disabled**: Verify no analytics calls when
+  `search.analytics.enabled` is false (Requirement 20.6)
 
 ### Integration Tests
 
 Integration tests cover component interactions with mocked dependencies:
 
-- **Indexer operations**: Mock ES Connection, verify `index()` calls build + persist, `remove()` calls delete, `flush()` calls delete-by-query (Requirements 2.3–2.5)
-- **IndexManager lifecycle**: Mock Schema Builder and Connection, verify `createIndex()` creates with correct mappings/analyzers, `deleteIndex()` drops, `rebuildIndex()` sequences correctly, events dispatched (Requirements 3.3–3.7)
-- **RecordBuilder pipeline**: Mock DB and registry, verify `build()` loads model + embeds, `dryRun()` skips ES write (Requirements 4.3, 4.7)
-- **Observer chain registration**: Mock model classes, verify `ObserverRegistry::register()` attaches observers to base and embedded models (Requirement 5.1)
-- **EmbeddedModelTrigger traversal**: Mock DB with multi-level relationships, verify upstream traversal and chunked job dispatch (Requirements 5.3–5.5)
-- **Tenant lifecycle listeners**: Dispatch `TenantCreated`/`TenantDeleted`, verify `IndexManager` called for each tenant-scoped entity (Requirement 16)
-- **SQL LIKE fallback**: Mock ES as unavailable, verify `RequestSearchCriteria` used, event dispatched, log written (Requirement 17)
-- **Health check**: Mock ES connection and registry, verify cluster check, index existence, sync status (Requirement 18)
-- **Artisan commands**: Mock `IndexManager`, verify correct methods called with correct arguments, output formatted with Laravel Prompts (Requirement 15)
-- **Search analytics persistence**: Call `recordSearch()` and `recordClick()`, verify DB records created (Requirement 20)
-- **API endpoints**: HTTP tests for all controller endpoints with mocked `SearchManager` (Requirements 8, 9, 10, 11)
+- **Indexer operations**: Mock ES Connection, verify `index()` calls build +
+  persist, `remove()` calls delete, `flush()` calls delete-by-query
+  (Requirements 2.3–2.5)
+- **IndexManager lifecycle**: Mock Schema Builder and Connection, verify
+  `createIndex()` creates with correct mappings/analyzers, `deleteIndex()`
+  drops, `rebuildIndex()` sequences correctly, events dispatched (Requirements
+  3.3–3.7)
+- **RecordBuilder pipeline**: Mock DB and registry, verify `build()` loads
+  model + embeds, `dryRun()` skips ES write (Requirements 4.3, 4.7)
+- **Observer chain registration**: Mock model classes, verify
+  `ObserverRegistry::register()` attaches observers to base and embedded models
+  (Requirement 5.1)
+- **EmbeddedModelTrigger traversal**: Mock DB with multi-level relationships,
+  verify upstream traversal and chunked job dispatch (Requirements 5.3–5.5)
+- **Tenant lifecycle listeners**: Dispatch `TenantCreated`/`TenantDeleted`,
+  verify `IndexManager` called for each tenant-scoped entity (Requirement 16)
+- **SQL LIKE fallback**: Mock ES as unavailable, verify `RequestSearchCriteria`
+  used, event dispatched, log written (Requirement 17)
+- **Health check**: Mock ES connection and registry, verify cluster check, index
+  existence, sync status (Requirement 18)
+- **Artisan commands**: Mock `IndexManager`, verify correct methods called with
+  correct arguments, output formatted with Laravel Prompts (Requirement 15)
+- **Search analytics persistence**: Call `recordSearch()` and `recordClick()`,
+  verify DB records created (Requirement 20)
+- **API endpoints**: HTTP tests for all controller endpoints with mocked
+  `SearchManager` (Requirements 8, 9, 10, 11)
 
 ### Property-Based Tests
 
-Property-based tests use `innmind/black-box` (PHP PBT library) with minimum 100 iterations per property. Each test references its design document property.
+Property-based tests use `innmind/black-box` (PHP PBT library) with minimum 100
+iterations per property. Each test references its design document property.
 
 | Property    | Test Description                                                                                           | Tag                                                                                                           |
 | ----------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |

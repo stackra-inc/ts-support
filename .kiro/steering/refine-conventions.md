@@ -11,8 +11,10 @@ inclusion: auto
 
 **ALL file and folder names MUST use lowercase kebab-case**
 
-- ✅ `use-tenant.hook.ts`, `create-button.component.tsx`, `tenant-config.interface.ts`
-- ❌ `useTenant.hook.ts`, `CreateButton.component.tsx`, `use_tenant.hook.ts`, `TenantConfig.interface.ts`
+- ✅ `use-tenant.hook.ts`, `create-button.component.tsx`,
+  `tenant-config.interface.ts`
+- ❌ `useTenant.hook.ts`, `CreateButton.component.tsx`, `use_tenant.hook.ts`,
+  `TenantConfig.interface.ts`
 
 ### 2. Export Interfaces
 
@@ -116,7 +118,8 @@ inclusion: auto
 - Index file: `with-tenant/index.tsx` (re-exports the component)
 - Test file: `with-tenant/with-tenant.component.test.tsx`
 - Types file: `with-tenant/with-tenant.types.ts` (component-specific types)
-- **Note:** Folder/file names are kebab-case, but exported component is PascalCase
+- **Note:** Folder/file names are kebab-case, but exported component is
+  PascalCase
   - Folder: `auto-save-indicator/`
   - File: `auto-save-indicator.component.tsx`
   - Export: `export const AutoSaveIndicator = () => { ... }`
@@ -152,7 +155,8 @@ inclusion: auto
 - Example: `providers/notification-provider.provider.tsx`
 - Test file: `providers/notification-provider.provider.test.tsx`
 - Component exports use PascalCase: `NotificationProvider`
-- Function/const exports use camelCase: `notificationProvider`, `useNotificationProvider`
+- Function/const exports use camelCase: `notificationProvider`,
+  `useNotificationProvider`
 
 #### Constants
 
@@ -294,7 +298,8 @@ export type { TenantConfig } from "./tenant-config.interface";
 ### Providers
 
 - Component providers use PascalCase: `ThemeProvider`, `NotificationProvider`
-- Function/const providers use camelCase: `themeProvider`, `notificationProvider`
+- Function/const providers use camelCase: `themeProvider`,
+  `notificationProvider`
 - When passing to Refine, use camelCase:
   ```tsx
   <Refine
@@ -411,7 +416,8 @@ export {
 
 ### Resolver Pattern
 
-Inspired by nestjs-i18n, each resolver is responsible for resolving tenant from a specific source:
+Inspired by nestjs-i18n, each resolver is responsible for resolving tenant from
+a specific source:
 
 ```typescript
 // resolvers/subdomain.resolver.ts

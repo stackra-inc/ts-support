@@ -6,7 +6,10 @@ inclusion: auto
 
 ## Overview
 
-The drawer stack system is a comprehensive, production-ready panel management library at `packages/ui/src/components/drawer-stack/`. It provides stacked side panels (desktop) and Vaul-style bottom sheets (mobile) with full accessibility, drag-to-dismiss, focus trapping, and a composite component API.
+The drawer stack system is a comprehensive, production-ready panel management
+library at `packages/ui/src/components/drawer-stack/`. It provides stacked side
+panels (desktop) and Vaul-style bottom sheets (mobile) with full accessibility,
+drag-to-dismiss, focus trapping, and a composite component API.
 
 ## Architecture
 
@@ -100,17 +103,21 @@ operations.bringToTop(id); // Move existing to top
 
 ## Slot System
 
-All components render `ScopedSlot` which checks both global and drawer-ID-scoped slots:
+All components render `ScopedSlot` which checks both global and drawer-ID-scoped
+slots:
 
 - Global: `drawer.header.before` — renders in ALL drawers
-- Scoped: `drawer.checkout.header.before` — renders only in drawer with `id="checkout"`
+- Scoped: `drawer.checkout.header.before` — renders only in drawer with
+  `id="checkout"`
 
-Available positions: `DRAWER_SLOTS.HEADER`, `.SUB_HEADER`, `.CONTENT`, `.FOOTER`, `.STEPPER`, `.ALERT`, `.SECTION`, `.DIVIDER`, `.CONTAINER`
+Available positions: `DRAWER_SLOTS.HEADER`, `.SUB_HEADER`, `.CONTENT`,
+`.FOOTER`, `.STEPPER`, `.ALERT`, `.SECTION`, `.DIVIDER`, `.CONTAINER`
 
 ## Mobile Bottom Sheet
 
 - Vaul-style full-height sheet with elastic drag
-- Background scales down when open (`data-drawer-wrapper` attribute required on app wrapper)
+- Background scales down when open (`data-drawer-wrapper` attribute required on
+  app wrapper)
 - Nested displacement for stacked sheets
 - Snap points support for half-sheet drawers
 - DragHandle visible on touch devices only
@@ -128,13 +135,15 @@ When `enableKeyboardNavigation` is set:
 - `Ctrl+Tab` — cycle to next drawer
 - `Ctrl+Shift+Tab` — cycle to previous
 - `Ctrl+1..9` — jump to drawer by position
-- `Escape` — close top drawer (respects `closeOnEscape` and `event.defaultPrevented`)
+- `Escape` — close top drawer (respects `closeOnEscape` and
+  `event.defaultPrevented`)
 
 ## Coding Conventions
 
 - Use `@drawer/*` path aliases for all internal imports
 - Use `ScopedSlot` (not raw `Slot`) in all drawer components
-- All new components need: interface file, component file, index.ts barrel, update parent barrels
+- All new components need: interface file, component file, index.ts barrel,
+  update parent barrels
 - Follow the folder structure: `components/<name>/<name>.component.tsx`
 - Add slot positions to `DRAWER_SLOTS` constant for any new component
 - Use `useDrawerId()` to access the current drawer's config.id

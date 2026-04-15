@@ -2,14 +2,8 @@
   "mcpServers": {
     "tailwindcss-docs": {
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://gitmcp.io/tailwindlabs/tailwindcss"
-      ],
-      "autoApprove": [
-        "search_tailwindcss_documentation"
-      ]
+      "args": ["-y", "mcp-remote", "https://gitmcp.io/tailwindlabs/tailwindcss"],
+      "autoApprove": ["search_tailwindcss_documentation"]
     },
     "next-devtools": {
       "command": "npx",
@@ -39,11 +33,7 @@
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://gitmcp.io/tailwindlabs/tailwindcss"],
       "disabled": false,
-      "autoApprove": [
-        "search_docs",
-        "get_class_reference",
-        "get_config_reference"
-      ]
+      "autoApprove": ["search_docs", "get_class_reference", "get_config_reference"]
     },
     "github": {
       "command": "npx",

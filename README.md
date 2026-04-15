@@ -11,10 +11,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**A production-ready Next.js monorepo template powered by [Turborepo](https://turborepo.dev).**
-Batteries included: HeroUI, Tailwind 4, shared ESLint/tsconfig, CI/CD, git hooks, and MCP.
+**A production-ready Next.js monorepo template powered by
+[Turborepo](https://turborepo.dev).** Batteries included: HeroUI, Tailwind 4,
+shared ESLint/tsconfig, CI/CD, git hooks, and MCP.
 
-[Quick Start](#quick-start) · [Structure](#structure) · [Commands](#commands) · [Packages](#packages) · [CI/CD](#cicd) · [Contributing](CONTRIBUTING.md)
+[Quick Start](#quick-start) · [Structure](#structure) · [Commands](#commands) ·
+[Packages](#packages) · [CI/CD](#cicd) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -71,20 +73,20 @@ npm run dev
 
 ### Root
 
-| Command | Description |
-|---|---|
-| `npm run build` | Build all workspaces in dependency order |
-| `npm run dev` | Start all apps in watch/dev mode |
-| `npm run start` | Start all apps in production mode |
-| `npm run lint` | ESLint across all workspaces |
-| `npm run lint:fix` | ESLint auto-fix across all workspaces |
-| `npm run check-types` | TypeScript type-check across all workspaces |
-| `npm run test` | Run all test suites |
-| `npm run format` | Prettier format all files |
-| `npm run format:check` | Prettier check (no write) |
-| `npm run clean` | Remove build artefacts |
-| `npm run clean:all` | Remove build artefacts + node_modules |
-| `npm run upgrade` | `ncu -u && npm install` |
+| Command                | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `npm run build`        | Build all workspaces in dependency order    |
+| `npm run dev`          | Start all apps in watch/dev mode            |
+| `npm run start`        | Start all apps in production mode           |
+| `npm run lint`         | ESLint across all workspaces                |
+| `npm run lint:fix`     | ESLint auto-fix across all workspaces       |
+| `npm run check-types`  | TypeScript type-check across all workspaces |
+| `npm run test`         | Run all test suites                         |
+| `npm run format`       | Prettier format all files                   |
+| `npm run format:check` | Prettier check (no write)                   |
+| `npm run clean`        | Remove build artefacts                      |
+| `npm run clean:all`    | Remove build artefacts + node_modules       |
+| `npm run upgrade`      | `ncu -u && npm install`                     |
 
 Filter to a single workspace:
 
@@ -164,20 +166,20 @@ git tag my-package-v1.0.0 && git push --tags
 
 ## CI/CD
 
-| Workflow | Trigger | What it does |
-|---|---|---|
-| `ci.yml` | PR + push to `main/develop` | Node 18/20/22 matrix · lint · type-check · build |
-| `release.yml` | Tag `v*` or `<pkg>-v*` | GitHub Release + npm publish |
-| `security.yml` | Weekly + push to `main` | npm audit · CodeQL (JS/TS) |
+| Workflow       | Trigger                     | What it does                                     |
+| -------------- | --------------------------- | ------------------------------------------------ |
+| `ci.yml`       | PR + push to `main/develop` | Node 18/20/22 matrix · lint · type-check · build |
+| `release.yml`  | Tag `v*` or `<pkg>-v*`      | GitHub Release + npm publish                     |
+| `security.yml` | Weekly + push to `main`     | npm audit · CodeQL (JS/TS)                       |
 
 ### Required secrets
 
-| Secret | Workflow | Description |
-|---|---|---|
-| `CODECOV_TOKEN` | ci.yml | [codecov.io](https://codecov.io) token |
-| `NPM_TOKEN` | release.yml | npm publish token |
-| `TURBO_TOKEN` | ci.yml | Turborepo remote cache token (optional) |
-| `TURBO_TEAM` | ci.yml | Turborepo team slug (optional) |
+| Secret          | Workflow    | Description                             |
+| --------------- | ----------- | --------------------------------------- |
+| `CODECOV_TOKEN` | ci.yml      | [codecov.io](https://codecov.io) token  |
+| `NPM_TOKEN`     | release.yml | npm publish token                       |
+| `TURBO_TOKEN`   | ci.yml      | Turborepo remote cache token (optional) |
+| `TURBO_TEAM`    | ci.yml      | Turborepo team slug (optional)          |
 
 ---
 
@@ -185,13 +187,13 @@ git tag my-package-v1.0.0 && git push --tags
 
 Configured in `.kiro/settings/mcp.json`:
 
-| Server | Package | Purpose |
-|---|---|---|
-| `next-devtools` | `next-devtools-mcp` | Live build errors, routes, Server Actions |
-| `heroui-react` | `@heroui/react-mcp` | HeroUI v3 component docs |
-| `tailwindcss` | `mcp-remote` → gitmcp.io | Live Tailwind CSS docs |
-| `github` | `@modelcontextprotocol/server-github` | Repo operations |
-| `playwright` | `@playwright/mcp` | Browser testing |
+| Server          | Package                               | Purpose                                   |
+| --------------- | ------------------------------------- | ----------------------------------------- |
+| `next-devtools` | `next-devtools-mcp`                   | Live build errors, routes, Server Actions |
+| `heroui-react`  | `@heroui/react-mcp`                   | HeroUI v3 component docs                  |
+| `tailwindcss`   | `mcp-remote` → gitmcp.io              | Live Tailwind CSS docs                    |
+| `github`        | `@modelcontextprotocol/server-github` | Repo operations                           |
+| `playwright`    | `@playwright/mcp`                     | Browser testing                           |
 
 ---
 

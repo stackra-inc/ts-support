@@ -2,7 +2,13 @@
 
 ## Overview
 
-This design covers four enhancement features for the drawer stack system at `packages/ui/src/components/drawer-stack/`: lifecycle hooks (`onBeforeOpen`, `onAfterOpen`, `onAfterClose`), optional stack persistence via `localStorage`, keyboard navigation between stacked drawers, and a `ResizeObserver` integration for mobile bottom sheets with dynamic content. All features are opt-in extensions to existing interfaces (`DrawerConfig`, `DrawerStackProvider`) and do not break current consumers.
+This design covers four enhancement features for the drawer stack system at
+`packages/ui/src/components/drawer-stack/`: lifecycle hooks (`onBeforeOpen`,
+`onAfterOpen`, `onAfterClose`), optional stack persistence via `localStorage`,
+keyboard navigation between stacked drawers, and a `ResizeObserver` integration
+for mobile bottom sheets with dynamic content. All features are opt-in
+extensions to existing interfaces (`DrawerConfig`, `DrawerStackProvider`) and do
+not break current consumers.
 
 ### Files Affected
 
@@ -17,7 +23,8 @@ This design covers four enhancement features for the drawer stack system at `pac
 
 ## Architecture
 
-The enhancements integrate into the existing layered architecture without changing the core reducer or context shape:
+The enhancements integrate into the existing layered architecture without
+changing the core reducer or context shape:
 
 ```mermaid
 graph TD
@@ -41,11 +48,17 @@ graph TD
 
 Key design decisions:
 
-- **onBeforeOpen** lives in the provider's `push` method (pre-dispatch guard), mirroring the existing `onBeforeClose` pattern in `pop`.
-- **onAfterOpen/onAfterClose** live in `DrawerContainer` because they depend on animation completion, which is managed by the visual entry lifecycle.
-- **Persistence** lives in the provider via a `useEffect` that serializes on stack changes, keeping the reducer pure.
-- **Keyboard navigation** is a `useEffect` in `DrawerContainer` that listens for key combos and calls `operations.bringToTop`. The `enableKeyboardNavigation` flag is threaded through context.
-- **ResizeObserver** is scoped to `MobilePanel` only, attached via a `useEffect` when `observeResize` is true.
+- **onBeforeOpen** lives in the provider's `push` method (pre-dispatch guard),
+  mirroring the existing `onBeforeClose` pattern in `pop`.
+- **onAfterOpen/onAfterClose** live in `DrawerContainer` because they depend on
+  animation completion, which is managed by the visual entry lifecycle.
+- **Persistence** lives in the provider via a `useEffect` that serializes on
+  stack changes, keeping the reducer pure.
+- **Keyboard navigation** is a `useEffect` in `DrawerContainer` that listens for
+  key combos and calls `operations.bringToTop`. The `enableKeyboardNavigation`
+  flag is threaded through context.
+- **ResizeObserver** is scoped to `MobilePanel` only, attached via a `useEffect`
+  when `observeResize` is true.
 
 ## Components and Interfaces
 
@@ -94,7 +107,8 @@ const push = useCallback(async (config: DrawerConfig, component: ReactNode) => {
 }, []);
 ```
 
-The `StackOperations.push` signature changes to return `void | Promise<void>` (backward-compatible since callers that don't await still work).
+The `StackOperations.push` signature changes to return `void | Promise<void>`
+(backward-compatible since callers that don't await still work).
 
 ### Feature 2: onAfterOpen Lifecycle Hook
 
@@ -115,7 +129,9 @@ export interface DrawerConfig<TId extends string = string> {
 
 **Container change** in `drawer-container.component.tsx`:
 
-In both `DesktopPanel` and `MobilePanel`, after the enter animation completes (when `entered` becomes `true`), invoke the callback. Use a ref to track whether it has already been called for this instance:
+In both `DesktopPanel` and `MobilePanel`, after the enter animation completes
+(when `entered` becomes `true`), invoke the callback. Use a ref to track whether
+it has already been called for this instance:
 
 ```typescript
 // Inside DesktopPanel / MobilePanel
@@ -129,7 +145,10 @@ useEffect(() => {
 }, [entered, isLeaving, entry.config]);
 ```
 
-The `afterOpenCalledRef` ensures the callback fires exactly once, even if `entered` toggles due to re-renders. For singleton re-activation (where the existing entry is moved to top without creating a new component instance), the ref remains `true` from the first push, so the callback is not re-invoked.
+The `afterOpenCalledRef` ensures the callback fires exactly once, even if
+`entered` toggles due to re-renders. For singleton re-activation (where the
+existing entry is moved to top without creating a new component instance), the
+ref remains `true` from the first push, so the callback is not re-invoked.
 
 ### Feature 3: onAfterClose Lifecycle Hook
 
@@ -150,7 +169,9 @@ export interface DrawerConfig<TId extends string = string> {
 
 **Container change** in `drawer-container.component.tsx`:
 
-The existing exit timer in the `useEffect` that syncs visual entries already fires when a drawer leaves the stack. We invoke `onAfterClose` inside that timer callback, right before purging the visual entry:
+The existing exit timer in the `useEffect` that syncs visual entries already
+fires when a drawer leaves the stack. We invoke `onAfterClose` inside that timer
+callback, right before purging the visual entry:
 
 ```typescript
 // In the visual sync useEffect, where exit timers are created:
@@ -171,7 +192,9 @@ if (!stillInStack && !ve.isLeaving) {
 }
 ```
 
-When `clear` is called, all drawers transition to `isLeaving: true` simultaneously, and each gets its own exit timer. Each timer invokes its respective `onAfterClose` independently.
+When `clear` is called, all drawers transition to `isLeaving: true`
+simultaneously, and each gets its own exit timer. Each timer invokes its
+respective `onAfterClose` independently.
 
 ### Feature 4: Stack Persistence via Browser Storage
 
@@ -250,11 +273,14 @@ useEffect(() => {
 }, []);
 ```
 
-When `onRestore` is not provided, the persisted data is read but discarded (no drawers are pushed). The consumer is responsible for calling `operations.push()` inside `onRestore` to rebuild the stack.
+When `onRestore` is not provided, the persisted data is read but discarded (no
+drawers are pushed). The consumer is responsible for calling `operations.push()`
+inside `onRestore` to rebuild the stack.
 
 ### Feature 5: Keyboard Navigation Between Stacked Drawers
 
-**Context change:** The `enableKeyboardNavigation` flag needs to reach `DrawerContainer`. We extend the context value:
+**Context change:** The `enableKeyboardNavigation` flag needs to reach
+`DrawerContainer`. We extend the context value:
 
 ```typescript
 export interface DrawerStackContextValue<TId extends string = string> {
@@ -342,7 +368,11 @@ useEffect(() => {
 }, [enableKeyboardNavigation, isOpen, stack, operations]);
 ```
 
-The cycling logic: `Ctrl+Tab` brings the drawer one position below the current top to the top. Since `bringToTop` moves the target to the end of the array, this effectively rotates the stack. `Ctrl+Shift+Tab` reverses the direction. When the bottom-most drawer is active (after cycling), `Ctrl+Shift+Tab` wraps to the original top.
+The cycling logic: `Ctrl+Tab` brings the drawer one position below the current
+top to the top. Since `bringToTop` moves the target to the end of the array,
+this effectively rotates the stack. `Ctrl+Shift+Tab` reverses the direction.
+When the bottom-most drawer is active (after cycling), `Ctrl+Shift+Tab` wraps to
+the original top.
 
 ### Feature 6: Drawer Content Resize Observer for Mobile Bottom Sheets
 
@@ -392,7 +422,9 @@ The content container div gets the ref:
 </div>
 ```
 
-On desktop panels, the `observeResize` flag is ignored — `DesktopPanel` does not attach any `ResizeObserver` regardless of the config value, since desktop panels are already full-height with scrollable content areas.
+On desktop panels, the `observeResize` flag is ignored — `DesktopPanel` does not
+attach any `ResizeObserver` regardless of the config value, since desktop panels
+are already full-height with scrollable content areas.
 
 ## Data Models
 
@@ -452,51 +484,76 @@ interface PersistedDrawerState {
 }
 ```
 
-All changes are additive — existing consumers that don't use the new fields continue to work without modification.
+All changes are additive — existing consumers that don't use the new fields
+continue to work without modification.
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: onBeforeOpen guard controls push outcome
 
-_For any_ `DrawerConfig` with an `onBeforeOpen` callback (sync or async), the drawer SHALL be added to the stack if and only if the callback returns `true`. If the callback returns `false`, throws, or the returned Promise rejects, the stack SHALL remain unchanged.
+_For any_ `DrawerConfig` with an `onBeforeOpen` callback (sync or async), the
+drawer SHALL be added to the stack if and only if the callback returns `true`.
+If the callback returns `false`, throws, or the returned Promise rejects, the
+stack SHALL remain unchanged.
 
 **Validates: Requirements 1.2, 1.3, 1.4, 1.5, 1.6**
 
 ### Property 2: onAfterOpen fires exactly once after enter animation
 
-_For any_ drawer with an `onAfterOpen` callback, the callback SHALL be invoked exactly once after the drawer's enter animation completes. For any subsequent singleton re-activation of the same drawer, the callback SHALL NOT be invoked again.
+_For any_ drawer with an `onAfterOpen` callback, the callback SHALL be invoked
+exactly once after the drawer's enter animation completes. For any subsequent
+singleton re-activation of the same drawer, the callback SHALL NOT be invoked
+again.
 
 **Validates: Requirements 2.2, 2.4, 2.5**
 
 ### Property 3: onAfterClose fires exactly once per removal
 
-_For any_ set of N drawers in the stack where each has an `onAfterClose` callback, removing K drawers (via `pop`, `popTo`, or `clear`) SHALL result in exactly K invocations of `onAfterClose`, one per removed drawer, after each drawer's exit animation completes.
+_For any_ set of N drawers in the stack where each has an `onAfterClose`
+callback, removing K drawers (via `pop`, `popTo`, or `clear`) SHALL result in
+exactly K invocations of `onAfterClose`, one per removed drawer, after each
+drawer's exit animation completes.
 
 **Validates: Requirements 3.2, 3.4, 3.5**
 
 ### Property 4: Persistence round-trip preserves drawer IDs
 
-_For any_ sequence of stack operations (push, pop, replace, clear) performed while `persistKey` is set, the value stored in `localStorage[persistKey]` SHALL contain exactly the IDs of the current stack entries. When the provider remounts with the same `persistKey` and an `onRestore` callback, the callback SHALL receive the same array of IDs that were persisted.
+_For any_ sequence of stack operations (push, pop, replace, clear) performed
+while `persistKey` is set, the value stored in `localStorage[persistKey]` SHALL
+contain exactly the IDs of the current stack entries. When the provider remounts
+with the same `persistKey` and an `onRestore` callback, the callback SHALL
+receive the same array of IDs that were persisted.
 
 **Validates: Requirements 4.2, 4.5**
 
 ### Property 5: Keyboard cycling is bidirectional and wraps
 
-_For any_ stack of N drawers (N ≥ 2) with `enableKeyboardNavigation` enabled, pressing `Ctrl+Tab` K times followed by `Ctrl+Shift+Tab` K times SHALL return the same drawer to the top position. Additionally, pressing `Ctrl+Tab` N times SHALL cycle through all drawers and return to the original top drawer.
+_For any_ stack of N drawers (N ≥ 2) with `enableKeyboardNavigation` enabled,
+pressing `Ctrl+Tab` K times followed by `Ctrl+Shift+Tab` K times SHALL return
+the same drawer to the top position. Additionally, pressing `Ctrl+Tab` N times
+SHALL cycle through all drawers and return to the original top drawer.
 
 **Validates: Requirements 5.3, 5.4**
 
 ### Property 6: Ctrl+number direct access
 
-_For any_ stack of N drawers with `enableKeyboardNavigation` enabled and any integer K where 1 ≤ K ≤ 9, pressing `Ctrl+K` SHALL bring the drawer at 1-based position K to the top if K ≤ N, and SHALL be a no-op if K > N.
+_For any_ stack of N drawers with `enableKeyboardNavigation` enabled and any
+integer K where 1 ≤ K ≤ 9, pressing `Ctrl+K` SHALL bring the drawer at 1-based
+position K to the top if K ≤ N, and SHALL be a no-op if K > N.
 
 **Validates: Requirements 5.5**
 
 ### Property 7: Mobile overflow-y reflects content height
 
-_For any_ mobile bottom sheet drawer with `observeResize` enabled, the content container's `overflow-y` SHALL be `"auto"` when the content's scroll height exceeds the container's client height, and SHALL be `"hidden"` when the content fits within the container.
+_For any_ mobile bottom sheet drawer with `observeResize` enabled, the content
+container's `overflow-y` SHALL be `"auto"` when the content's scroll height
+exceeds the container's client height, and SHALL be `"hidden"` when the content
+fits within the container.
 
 **Validates: Requirements 6.3, 6.4**
 
@@ -547,9 +604,11 @@ _For any_ mobile bottom sheet drawer with `observeResize` enabled, the content c
 
 ### Property-Based Tests
 
-Property-based testing library: **fast-check** (standard for TypeScript/React projects).
+Property-based testing library: **fast-check** (standard for TypeScript/React
+projects).
 
-Each property test runs a minimum of 100 iterations and is tagged with the corresponding design property.
+Each property test runs a minimum of 100 iterations and is tagged with the
+corresponding design property.
 
 | Property Test                                  | Tag                                            | Min Iterations |
 | ---------------------------------------------- | ---------------------------------------------- | -------------- |
@@ -563,7 +622,8 @@ Each property test runs a minimum of 100 iterations and is tagged with the corre
 
 ### Test Environment
 
-- **JSDOM** for DOM simulation (focus, element queries, event dispatch, localStorage)
+- **JSDOM** for DOM simulation (focus, element queries, event dispatch,
+  localStorage)
 - **React Testing Library** for component rendering
 - **fast-check** for property-based test generation
 - Mock `requestAnimationFrame` with synchronous execution for animation tests

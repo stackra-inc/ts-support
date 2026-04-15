@@ -2,23 +2,51 @@
 
 ## Overview
 
-The `framework/src/Indexer/` sub-package provides the pure PHP foundation layer for all indexing operations in the Pixielity monorepo. It lives at `packages/framework/src/Indexer/` under the namespace `Pixielity\Indexer`, following the same structural pattern as `Aop/`, `Compiler/`, `Event/`, and other framework sub-packages.
+The `framework/src/Indexer/` sub-package provides the pure PHP foundation layer
+for all indexing operations in the Pixielity monorepo. It lives at
+`packages/framework/src/Indexer/` under the namespace `Pixielity\Indexer`,
+following the same structural pattern as `Aop/`, `Compiler/`, `Event/`, and
+other framework sub-packages.
 
-This sub-package owns the attribute definitions, contracts, traits, enums, events, DTOs, and compile-time registry that the `search` package and `reporting` package build on top of. It has **zero Elasticsearch dependency** — all ES-specific implementations live in the search package (`pixielity/laravel-search`).
+This sub-package owns the attribute definitions, contracts, traits, enums,
+events, DTOs, and compile-time registry that the `search` package and
+`reporting` package build on top of. It has **zero Elasticsearch dependency** —
+all ES-specific implementations live in the search package
+(`pixielity/laravel-search`).
 
 ### Key Design Decisions
 
-1. **Pure PHP Foundation** — No ES client, no Scout, no external search dependencies. This package defines _what_ indexing means (contracts, attributes, DTOs) while the search package defines _how_ it's done (ES client, query DSL, document persistence).
+1. **Pure PHP Foundation** — No ES client, no Scout, no external search
+   dependencies. This package defines _what_ indexing means (contracts,
+   attributes, DTOs) while the search package defines _how_ it's done (ES
+   client, query DSL, document persistence).
 
-2. **Zero Field Duplication** — `#[Searchable]`, `#[Filterable]`, `#[Sortable]` stay in the CRUD package. The `IndexerRegistry` reads them via Discovery at compile time and merges them into `IndexConfigurationDTO`. The `#[Indexed]` attribute only carries ES-specific config (analyzer, synonyms, typo tolerance, geo field, etc.).
+2. **Zero Field Duplication** — `#[Searchable]`, `#[Filterable]`, `#[Sortable]`
+   stay in the CRUD package. The `IndexerRegistry` reads them via Discovery at
+   compile time and merges them into `IndexConfigurationDTO`. The `#[Indexed]`
+   attribute only carries ES-specific config (analyzer, synonyms, typo
+   tolerance, geo field, etc.).
 
-3. **Compile-Time Registry** — `IndexerRegistryCompiler` (`#[AsCompiler(priority: 25)]`) discovers all `#[Indexed]` models, merges with CRUD attributes, detects tenant scoping from `BelongsToTenant` trait, and caches into `IndexerRegistry`. Zero runtime Discovery calls per request.
+3. **Compile-Time Registry** — `IndexerRegistryCompiler`
+   (`#[AsCompiler(priority: 25)]`) discovers all `#[Indexed]` models, merges
+   with CRUD attributes, detects tenant scoping from `BelongsToTenant` trait,
+   and caches into `IndexerRegistry`. Zero runtime Discovery calls per request.
 
-4. **Tenant Auto-Detection** — Tenant scoping is detected at compile time by checking `class_uses_recursive()` for `BelongsToTenant`. No `tenantScoped` parameter on `#[Indexed]`. The search package's bootstrapper uses this flag for index-per-tenant strategy.
+4. **Tenant Auto-Detection** — Tenant scoping is detected at compile time by
+   checking `class_uses_recursive()` for `BelongsToTenant`. No `tenantScoped`
+   parameter on `#[Indexed]`. The search package's bootstrapper uses this flag
+   for index-per-tenant strategy.
 
-5. **ElasticLens Patterns Adapted** — `Indexable` trait (model concern), `RoutesToIndex` trait (repository concern), observer chain registration, `excludeIndex()` override, `toIndexableArray()` document building — all adapted from ElasticLens to use Pixielity attributes and Discovery instead of config-based field maps.
+5. **ElasticLens Patterns Adapted** — `Indexable` trait (model concern),
+   `RoutesToIndex` trait (repository concern), observer chain registration,
+   `excludeIndex()` override, `toIndexableArray()` document building — all
+   adapted from ElasticLens to use Pixielity attributes and Discovery instead of
+   config-based field maps.
 
-6. **Interface-First** — `IndexerInterface`, `IndexManagerInterface`, `RecordBuilderInterface` define the API. `#[Bind]` on each interface points to the search package's implementation. The framework sub-package never imports ES classes.
+6. **Interface-First** — `IndexerInterface`, `IndexManagerInterface`,
+   `RecordBuilderInterface` define the API. `#[Bind]` on each interface points
+   to the search package's implementation. The framework sub-package never
+   imports ES classes.
 
 ## Architecture
 
@@ -188,7 +216,9 @@ final readonly class Indexed
 }
 ```
 
-Does NOT accept `searchableFields`, `filterableAttributes`, `sortableAttributes`, or `tenantScoped`. Those are read from existing CRUD attributes and `BelongsToTenant` trait detection.
+Does NOT accept `searchableFields`, `filterableAttributes`,
+`sortableAttributes`, or `tenantScoped`. Those are read from existing CRUD
+attributes and `BelongsToTenant` trait detection.
 
 #### `#[EmbedOne]` — Single Embedded Relationship
 
@@ -263,7 +293,8 @@ final readonly class UseIndex
 
 ### Contracts
 
-All interfaces use `#[Bind]` on the interface pointing to the search package's implementation.
+All interfaces use `#[Bind]` on the interface pointing to the search package's
+implementation.
 
 #### `IndexerInterface`
 
@@ -456,7 +487,8 @@ enum BuildState: string
 
 #### `Indexable` — Model Concern
 
-Applied to models that are opted into ES indexing. Provides document building, index management delegation, and automatic observer registration.
+Applied to models that are opted into ES indexing. Provides document building,
+index management delegation, and automatic observer registration.
 
 ```php
 trait Indexable
@@ -496,7 +528,8 @@ trait Indexable
 
 #### `RoutesToIndex` — Repository Concern
 
-Applied to repositories that should transparently route reads to ES when available.
+Applied to repositories that should transparently route reads to ES when
+available.
 
 ```php
 trait RoutesToIndex
@@ -550,7 +583,8 @@ class IndexUnavailableException extends \RuntimeException
 
 #### `IndexerRegistry`
 
-Bound as `#[Scoped]` for Octane-safe per-request isolation. Loaded from cache at boot, populated by `IndexerRegistryCompiler` at compile time.
+Bound as `#[Scoped]` for Octane-safe per-request isolation. Loaded from cache at
+boot, populated by `IndexerRegistryCompiler` at compile time.
 
 ```php
 #[Scoped]
@@ -696,65 +730,91 @@ packages/framework/src/Indexer/
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: Attribute construction round-trip
 
-_For any_ valid parameter combination passed to any Indexer attribute (`Indexed`, `EmbedOne`, `EmbedMany`, `Aggregatable`, `UseIndex`), constructing the attribute and reading back all public properties should return values identical to the input parameters. When constructed with no arguments (where defaults exist), all properties should match their documented defaults.
+_For any_ valid parameter combination passed to any Indexer attribute
+(`Indexed`, `EmbedOne`, `EmbedMany`, `Aggregatable`, `UseIndex`), constructing
+the attribute and reading back all public properties should return values
+identical to the input parameters. When constructed with no arguments (where
+defaults exist), all properties should match their documented defaults.
 
 **Validates: Requirements 1.1, 2.1, 2.2, 3.1, 3.4, 3.5, 4.1**
 
 ### Property 2: DTO and Event construction round-trip
 
-_For any_ valid set of property values, constructing `IndexConfigurationDTO` or `DocumentIndexed` and reading back all properties should return the original values unchanged. This includes all scalar types, enum values, arrays, and nullable fields.
+_For any_ valid set of property values, constructing `IndexConfigurationDTO` or
+`DocumentIndexed` and reading back all properties should return the original
+values unchanged. This includes all scalar types, enum values, arrays, and
+nullable fields.
 
 **Validates: Requirements 11.2, 16.1**
 
 ### Property 3: All Indexer enum cases have Label and Description metadata
 
-_For any_ case of `AggregationType`, `IndexStatus`, or `BuildState`, the case should have both a `#[Label]` and a `#[Description]` attribute with non-empty string values.
+_For any_ case of `AggregationType`, `IndexStatus`, or `BuildState`, the case
+should have both a `#[Label]` and a `#[Description]` attribute with non-empty
+string values.
 
 **Validates: Requirements 5.3, 6.3, 7.3**
 
 ### Property 4: AggregationType.isNumeric() correctly classifies cases
 
-_For any_ `AggregationType` case, `isNumeric()` should return `true` if and only if the case is one of `SUM`, `AVG`, `MIN`, `MAX`, or `PERCENTILES`.
+_For any_ `AggregationType` case, `isNumeric()` should return `true` if and only
+if the case is one of `SUM`, `AVG`, `MIN`, `MAX`, or `PERCENTILES`.
 
 **Validates: Requirements 5.4**
 
 ### Property 5: IndexStatus health categorization is mutually exclusive and exhaustive
 
-_For any_ `IndexStatus` case, exactly one of `isHealthy()`, `isDegraded()`, or `isUnhealthy()` should return `true`. The mapping should be: `GREEN` → healthy, `YELLOW` → degraded, `RED`/`UNKNOWN` → unhealthy.
+_For any_ `IndexStatus` case, exactly one of `isHealthy()`, `isDegraded()`, or
+`isUnhealthy()` should return `true`. The mapping should be: `GREEN` → healthy,
+`YELLOW` → degraded, `RED`/`UNKNOWN` → unhealthy.
 
 **Validates: Requirements 6.4**
 
 ### Property 6: BuildState terminal/active categorization is mutually exclusive and exhaustive
 
-_For any_ `BuildState` case, exactly one of `isTerminal()` or `isActive()` should return `true`. The mapping should be: `COMPLETED`/`FAILED`/`SKIPPED` → terminal, `PENDING`/`BUILDING` → active.
+_For any_ `BuildState` case, exactly one of `isTerminal()` or `isActive()`
+should return `true`. The mapping should be: `COMPLETED`/`FAILED`/`SKIPPED` →
+terminal, `PENDING`/`BUILDING` → active.
 
 **Validates: Requirements 7.4**
 
 ### Property 7: toIndexableArray() includes all searchable fields and resolved embeds
 
-_For any_ model with `#[Searchable]` fields and `#[EmbedOne]`/`#[EmbedMany]` declarations, calling `toIndexableArray()` should return an array that contains keys for every searchable field and every declared embed field name.
+_For any_ model with `#[Searchable]` fields and `#[EmbedOne]`/`#[EmbedMany]`
+declarations, calling `toIndexableArray()` should return an array that contains
+keys for every searchable field and every declared embed field name.
 
 **Validates: Requirements 12.1, 12.2**
 
 ### Property 8: EmbedMany respects limit constraint
 
-_For any_ `#[EmbedMany]` declaration with a non-null `limit` of N, the embedded array in the `toIndexableArray()` output should contain at most N items, regardless of how many related records exist.
+_For any_ `#[EmbedMany]` declaration with a non-null `limit` of N, the embedded
+array in the `toIndexableArray()` output should contain at most N items,
+regardless of how many related records exist.
 
 **Validates: Requirements 12.3**
 
 ### Property 9: IndexUnavailableException message contains entity class
 
-_For any_ non-empty string used as the entity class name, constructing `IndexUnavailableException` should produce a message that contains that string.
+_For any_ non-empty string used as the entity class name, constructing
+`IndexUnavailableException` should produce a message that contains that string.
 
 **Validates: Requirements 13.5, 17.2**
 
 ### Property 10: IndexerRegistry CRUD consistency
 
-_For any_ set of `IndexConfigurationDTO` instances registered into `IndexerRegistry`, `has()` should return `true` for every registered model class and `false` for unregistered classes, `get()` should return the exact DTO that was registered, `all()` should return all registered DTOs, and `tenantScoped()` should return only DTOs where `isTenantScoped` is `true`.
+_For any_ set of `IndexConfigurationDTO` instances registered into
+`IndexerRegistry`, `has()` should return `true` for every registered model class
+and `false` for unregistered classes, `get()` should return the exact DTO that
+was registered, `all()` should return all registered DTOs, and `tenantScoped()`
+should return only DTOs where `isTenantScoped` is `true`.
 
 **Validates: Requirements 14.6**
 
@@ -777,27 +837,51 @@ _For any_ set of `IndexConfigurationDTO` instances registered into `IndexerRegis
 
 Unit tests cover structural constraints, specific examples, and edge cases:
 
-- **Attribute structure**: Verify `#[Indexed]`, `#[EmbedOne]`, `#[EmbedMany]`, `#[Aggregatable]`, `#[UseIndex]` have correct `Attribute::TARGET_CLASS` targets, `final readonly` modifiers, `IS_REPEATABLE` flags, and `ATTR_*` constants (Requirements 1.2–1.5, 2.3–2.5, 3.2–3.3, 3.6, 4.2–4.4)
-- **Interface structure**: Verify `IndexerInterface`, `IndexManagerInterface`, `RecordBuilderInterface` define correct method signatures and have `#[Bind]` annotations (Requirements 8.1–8.4, 9.1–9.3, 10.1–10.3)
-- **Enum cases**: Verify `AggregationType`, `IndexStatus`, `BuildState` have correct backing values and use `Enum` trait (Requirements 5.1–5.2, 6.1–6.2, 7.1–7.2)
-- **Event structure**: Verify `DocumentIndexed` is `final readonly` with `#[AsEvent]` and carries only scalar/enum properties (Requirements 11.1, 11.3–11.4)
-- **Compiler annotation**: Verify `IndexerRegistryCompiler` has `#[AsCompiler(priority: 25, phase: CompilerPhase::REGISTRY)]` and implements `CompilerInterface` (Requirements 15.1–15.2)
-- **Compiler skip**: Verify `CompilerResult::skipped()` returned when no indexed models found (Requirement 15.5)
-- **Exception hierarchy**: Verify `IndexUnavailableException` extends `\RuntimeException` (Requirement 17.1)
+- **Attribute structure**: Verify `#[Indexed]`, `#[EmbedOne]`, `#[EmbedMany]`,
+  `#[Aggregatable]`, `#[UseIndex]` have correct `Attribute::TARGET_CLASS`
+  targets, `final readonly` modifiers, `IS_REPEATABLE` flags, and `ATTR_*`
+  constants (Requirements 1.2–1.5, 2.3–2.5, 3.2–3.3, 3.6, 4.2–4.4)
+- **Interface structure**: Verify `IndexerInterface`, `IndexManagerInterface`,
+  `RecordBuilderInterface` define correct method signatures and have `#[Bind]`
+  annotations (Requirements 8.1–8.4, 9.1–9.3, 10.1–10.3)
+- **Enum cases**: Verify `AggregationType`, `IndexStatus`, `BuildState` have
+  correct backing values and use `Enum` trait (Requirements 5.1–5.2, 6.1–6.2,
+  7.1–7.2)
+- **Event structure**: Verify `DocumentIndexed` is `final readonly` with
+  `#[AsEvent]` and carries only scalar/enum properties (Requirements 11.1,
+  11.3–11.4)
+- **Compiler annotation**: Verify `IndexerRegistryCompiler` has
+  `#[AsCompiler(priority: 25, phase: CompilerPhase::REGISTRY)]` and implements
+  `CompilerInterface` (Requirements 15.1–15.2)
+- **Compiler skip**: Verify `CompilerResult::skipped()` returned when no indexed
+  models found (Requirement 15.5)
+- **Exception hierarchy**: Verify `IndexUnavailableException` extends
+  `\RuntimeException` (Requirement 17.1)
 
 ### Integration Tests
 
 Integration tests cover component interactions with mocked dependencies:
 
-- **Indexable trait observer registration**: Verify `bootIndexable()` registers `saved`/`deleted` model events (Requirement 12.5)
-- **Indexable trait delegation**: Verify `buildIndex()` delegates to `RecordBuilderInterface::build()`, `removeIndex()` delegates to `IndexerInterface::remove()` (Requirement 12.4)
-- **RoutesToIndex routing**: Mock `IndexerRegistry` and `IndexerInterface`, verify ES builder returned when available, PG builder on fallback, exception when fallback disabled (Requirements 13.1–13.5)
-- **IndexerRegistryCompiler compilation**: Mock Discovery and RepositoryConfigRegistry, verify cache file written with correct merged configs (Requirements 15.3–15.4)
-- **IndexerRegistry Discovery integration**: Mock Discovery facade, verify `#[Searchable]`, `#[Filterable]`, `#[Sortable]`, `#[EmbedOne]`, `#[EmbedMany]`, `#[Aggregatable]` are read correctly (Requirements 14.1–14.4)
+- **Indexable trait observer registration**: Verify `bootIndexable()` registers
+  `saved`/`deleted` model events (Requirement 12.5)
+- **Indexable trait delegation**: Verify `buildIndex()` delegates to
+  `RecordBuilderInterface::build()`, `removeIndex()` delegates to
+  `IndexerInterface::remove()` (Requirement 12.4)
+- **RoutesToIndex routing**: Mock `IndexerRegistry` and `IndexerInterface`,
+  verify ES builder returned when available, PG builder on fallback, exception
+  when fallback disabled (Requirements 13.1–13.5)
+- **IndexerRegistryCompiler compilation**: Mock Discovery and
+  RepositoryConfigRegistry, verify cache file written with correct merged
+  configs (Requirements 15.3–15.4)
+- **IndexerRegistry Discovery integration**: Mock Discovery facade, verify
+  `#[Searchable]`, `#[Filterable]`, `#[Sortable]`, `#[EmbedOne]`,
+  `#[EmbedMany]`, `#[Aggregatable]` are read correctly (Requirements 14.1–14.4)
 
 ### Property-Based Tests
 
-Property-based tests use a PBT library (e.g., `eris/eris` or `innmind/black-box` for PHP) with minimum 100 iterations per property. Each test references its design document property.
+Property-based tests use a PBT library (e.g., `eris/eris` or `innmind/black-box`
+for PHP) with minimum 100 iterations per property. Each test references its
+design document property.
 
 | Property    | Test Description                                                                                       | Tag                                                                                                                      |
 | ----------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |

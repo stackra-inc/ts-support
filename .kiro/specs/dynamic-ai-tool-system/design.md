@@ -2,15 +2,23 @@
 
 ## Overview
 
-The Dynamic AI Tool System replaces the current multi-file, hardcoded tool registration pattern with a declarative, metadata-driven architecture. Today, adding a frontend-executable tool requires changes in at least 4 places:
+The Dynamic AI Tool System replaces the current multi-file, hardcoded tool
+registration pattern with a declarative, metadata-driven architecture. Today,
+adding a frontend-executable tool requires changes in at least 4 places:
 
 1. The PHP tool class (`App\Ai\Tools\*`)
 2. The agent's `tools()` array (e.g., `CashierAgent::tools()`)
 3. The frontend `FRONTEND_TOOL_NAMES` set in `frontend-tools.ts`
-4. The `executeFrontendToolAction` switch statement in `frontend-tool-executor.ts`
+4. The `executeFrontendToolAction` switch statement in
+   `frontend-tool-executor.ts`
 5. The `TrustGate` static arrays for trust levels and frontend-executable flags
 
-The new system introduces a `ToolMetadata` interface on PHP tool classes that self-declares execution context, trust level, and an `ActionDescriptor` for frontend tools. A `ToolRegistry` service auto-discovers these classes, resolves per-role and per-tenant tool sets, and exposes a Tool Manifest API. The frontend consumes this manifest to dynamically dispatch tool actions without hardcoded switch statements.
+The new system introduces a `ToolMetadata` interface on PHP tool classes that
+self-declares execution context, trust level, and an `ActionDescriptor` for
+frontend tools. A `ToolRegistry` service auto-discovers these classes, resolves
+per-role and per-tenant tool sets, and exposes a Tool Manifest API. The frontend
+consumes this manifest to dynamically dispatch tool actions without hardcoded
+switch statements.
 
 ### Design Goals
 
@@ -18,7 +26,8 @@ The new system introduces a `ToolMetadata` interface on PHP tool classes that se
 - Zero-registration discovery: new tools are available immediately
 - Per-tenant configurability: enable/disable tools without code changes
 - Backward compatibility: existing tools work during incremental migration
-- Type-safe contracts: shared schemas between backend manifest and frontend dispatcher
+- Type-safe contracts: shared schemas between backend manifest and frontend
+  dispatcher
 
 ## Architecture
 
@@ -82,15 +91,27 @@ sequenceDiagram
 
 ### Key Design Decisions
 
-1. **Interface-based metadata over annotations/attributes**: PHP 8 attributes could work, but an interface with methods is more testable, IDE-friendly, and consistent with Laravel AI SDK's existing `Tool` interface pattern.
+1. **Interface-based metadata over annotations/attributes**: PHP 8 attributes
+   could work, but an interface with methods is more testable, IDE-friendly, and
+   consistent with Laravel AI SDK's existing `Tool` interface pattern.
 
-2. **Manifest served via dedicated endpoint (not inlined in SSE)**: The manifest is relatively static per session. Serving it once via REST avoids bloating every SSE stream and allows frontend caching.
+2. **Manifest served via dedicated endpoint (not inlined in SSE)**: The manifest
+   is relatively static per session. Serving it once via REST avoids bloating
+   every SSE stream and allows frontend caching.
 
-3. **Three action types (custom-event, react-callback, context-update)**: These cover the three existing frontend tool patterns observed in the codebase. `custom-event` maps to `window.dispatchEvent` (used by NavigateUI, ToggleDarkMode). `react-callback` maps to registered callbacks (used by StartWalkthrough, HighlightElement). `context-update` enables future tools that set React state directly.
+3. **Three action types (custom-event, react-callback, context-update)**: These
+   cover the three existing frontend tool patterns observed in the codebase.
+   `custom-event` maps to `window.dispatchEvent` (used by NavigateUI,
+   ToggleDarkMode). `react-callback` maps to registered callbacks (used by
+   StartWalkthrough, HighlightElement). `context-update` enables future tools
+   that set React state directly.
 
-4. **Database-backed tenant config over config files**: Tenant tool configuration needs to be updatable at runtime without deployments, so a database table is the right choice.
+4. **Database-backed tenant config over config files**: Tenant tool
+   configuration needs to be updatable at runtime without deployments, so a
+   database table is the right choice.
 
-5. **10-second timeout for frontend tool results**: Balances responsiveness with allowing time for UI animations (walkthroughs, navigation transitions).
+5. **10-second timeout for frontend tool results**: Balances responsiveness with
+   allowing time for UI animations (walkthroughs, navigation transitions).
 
 ## Components and Interfaces
 
@@ -204,7 +225,6 @@ class ToolResultController extends Controller
 }
 ```
 
-
 ### Frontend Components
 
 #### 5. `ToolManifestProvider` (React Context)
@@ -297,14 +317,14 @@ class CallbackRegistryImpl implements CallbackRegistry {
 
 #### `tenant_tool_configs` Table
 
-| Column       | Type         | Description                                      |
-|-------------|-------------|--------------------------------------------------|
-| id          | bigint (PK) | Auto-increment primary key                       |
-| tenant_id   | string       | Tenant identifier (indexed)                      |
-| tool_name   | string       | Tool class name (e.g., "NavigateUI")             |
-| enabled     | boolean      | Whether the tool is enabled for this tenant      |
-| created_at  | timestamp    | Record creation time                             |
-| updated_at  | timestamp    | Last modification time                           |
+| Column     | Type        | Description                                 |
+| ---------- | ----------- | ------------------------------------------- |
+| id         | bigint (PK) | Auto-increment primary key                  |
+| tenant_id  | string      | Tenant identifier (indexed)                 |
+| tool_name  | string      | Tool class name (e.g., "NavigateUI")        |
+| enabled    | boolean     | Whether the tool is enabled for this tenant |
+| created_at | timestamp   | Record creation time                        |
+| updated_at | timestamp   | Last modification time                      |
 
 Unique constraint on `(tenant_id, tool_name)`.
 
@@ -417,7 +437,8 @@ class TenantToolConfig extends Model
 
 ### Role-to-Tool Mapping
 
-The `ToolRegistry` uses a role map configuration to determine which tools are available per role. This replaces the manual `tools()` arrays in agent classes.
+The `ToolRegistry` uses a role map configuration to determine which tools are
+available per role. This replaces the manual `tools()` arrays in agent classes.
 
 ```php
 // config/tools.php
@@ -441,68 +462,102 @@ return [
 ];
 ```
 
-
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: Metadata Validation and Defaults
 
-*For any* tool class, if it implements `HasToolMetadata` and declares `executionContext` as `"frontend"`, then `actionDescriptor()` must return a non-null value with valid `type`, `target`, and optional `argMapping`. Conversely, *for any* tool class that does not implement `HasToolMetadata`, the registry must return default metadata with `executionContext = "server"` and `trustLevel = "low"`.
+_For any_ tool class, if it implements `HasToolMetadata` and declares
+`executionContext` as `"frontend"`, then `actionDescriptor()` must return a
+non-null value with valid `type`, `target`, and optional `argMapping`.
+Conversely, _for any_ tool class that does not implement `HasToolMetadata`, the
+registry must return default metadata with `executionContext = "server"` and
+`trustLevel = "low"`.
 
 **Validates: Requirements 1.1, 1.3, 1.4**
 
 ### Property 2: Tool Resolution Filtering
 
-*For any* role, tenant ID, and tenant tool configuration, the set of tools returned by `resolveForAgent(role, tenantId)` must equal the intersection of the role's allowed tools and the tenant's enabled tools. When no `TenantToolConfig` exists for the tenant, all role-allowed tools must be returned.
+_For any_ role, tenant ID, and tenant tool configuration, the set of tools
+returned by `resolveForAgent(role, tenantId)` must equal the intersection of the
+role's allowed tools and the tenant's enabled tools. When no `TenantToolConfig`
+exists for the tenant, all role-allowed tools must be returned.
 
 **Validates: Requirements 2.2, 3.2, 5.2, 5.3**
 
 ### Property 3: Manifest Structure Integrity
 
-*For any* set of resolved tools, the generated Tool Manifest must be a valid JSON object containing a `tools` array where each entry includes `name` (string), `executionContext` ("server" | "frontend"), `trustLevel` ("low" | "medium" | "high"), and `schema` (object). Frontend tools must additionally include a valid `actionDescriptor`.
+_For any_ set of resolved tools, the generated Tool Manifest must be a valid
+JSON object containing a `tools` array where each entry includes `name`
+(string), `executionContext` ("server" | "frontend"), `trustLevel` ("low" |
+"medium" | "high"), and `schema` (object). Frontend tools must additionally
+include a valid `actionDescriptor`.
 
 **Validates: Requirements 3.1, 7.1**
 
 ### Property 4: Dispatcher Action Routing
 
-*For any* valid `ActionDescriptor` with type `"custom-event"`, the dispatcher must call `window.dispatchEvent` with a `CustomEvent` whose `type` equals the descriptor's `target` and whose `detail` contains the mapped arguments. *For any* descriptor with type `"react-callback"`, the dispatcher must invoke the callback registered under the `target` key with the mapped arguments. *For any* descriptor with type `"context-update"`, the dispatcher must call the context updater with the `target` key and mapped arguments.
+_For any_ valid `ActionDescriptor` with type `"custom-event"`, the dispatcher
+must call `window.dispatchEvent` with a `CustomEvent` whose `type` equals the
+descriptor's `target` and whose `detail` contains the mapped arguments. _For
+any_ descriptor with type `"react-callback"`, the dispatcher must invoke the
+callback registered under the `target` key with the mapped arguments. _For any_
+descriptor with type `"context-update"`, the dispatcher must call the context
+updater with the `target` key and mapped arguments.
 
 **Validates: Requirements 4.1, 4.2, 7.2, 7.3, 7.4**
 
 ### Property 5: Unknown Tool Passthrough
 
-*For any* tool call event where the tool name is not present in the loaded Tool Manifest, the Frontend Tool Dispatcher must not execute any frontend action and must treat the tool as server-only.
+_For any_ tool call event where the tool name is not present in the loaded Tool
+Manifest, the Frontend Tool Dispatcher must not execute any frontend action and
+must treat the tool as server-only.
 
 **Validates: Requirements 4.3**
 
 ### Property 6: Dispatcher Error Structure
 
-*For any* frontend tool execution that fails (unregistered callback, missing target element, invalid action type), the dispatcher must return a result object with `success = false` and a non-empty `message` string describing the failure.
+_For any_ frontend tool execution that fails (unregistered callback, missing
+target element, invalid action type), the dispatcher must return a result object
+with `success = false` and a non-empty `message` string describing the failure.
 
 **Validates: Requirements 4.4, 7.5**
 
 ### Property 7: Tool Result Payload Structure
 
-*For any* tool execution result sent back to the backend, the payload must include `toolCallId` (string), `success` (boolean), and `message` (string). The optional `data` field, when present, must be a valid JSON-serializable object.
+_For any_ tool execution result sent back to the backend, the payload must
+include `toolCallId` (string), `success` (boolean), and `message` (string). The
+optional `data` field, when present, must be a valid JSON-serializable object.
 
 **Validates: Requirements 6.1, 6.2**
 
 ### Property 8: Tenant Config Round-Trip
 
-*For any* tenant ID and tool name, writing an enabled/disabled configuration and then reading it back must return the same enabled state. Disabling a tool and then resolving tools for that tenant must exclude the disabled tool.
+_For any_ tenant ID and tool name, writing an enabled/disabled configuration and
+then reading it back must return the same enabled state. Disabling a tool and
+then resolving tools for that tenant must exclude the disabled tool.
 
 **Validates: Requirements 5.1, 5.2**
 
 ### Property 9: Metadata Resolution Precedence
 
-*For any* tool that implements both `HasToolMetadata` and is listed in a legacy agent `tools()` array, the `ToolRegistry` must use the metadata-declared values (execution context, trust level, action descriptor) over the legacy hardcoded values. *For any* tool without `HasToolMetadata`, the registry must fall back to the legacy registration.
+_For any_ tool that implements both `HasToolMetadata` and is listed in a legacy
+agent `tools()` array, the `ToolRegistry` must use the metadata-declared values
+(execution context, trust level, action descriptor) over the legacy hardcoded
+values. _For any_ tool without `HasToolMetadata`, the registry must fall back to
+the legacy registration.
 
 **Validates: Requirements 8.1, 8.2**
 
 ### Property 10: Dual-Name Dispatch Compatibility
 
-*For any* frontend tool, the dispatcher must correctly handle both the PascalCase name (e.g., `"NavigateUI"`) and the camelCase name (e.g., `"navigateUI"`) during the migration period, executing the same action for both.
+_For any_ frontend tool, the dispatcher must correctly handle both the
+PascalCase name (e.g., `"NavigateUI"`) and the camelCase name (e.g.,
+`"navigateUI"`) during the migration period, executing the same action for both.
 
 **Validates: Requirements 8.3**
 
@@ -510,69 +565,83 @@ return [
 
 ### Backend Error Handling
 
-| Scenario | Handling | HTTP Status |
-|----------|----------|-------------|
-| Tool class has invalid metadata (e.g., frontend without ActionDescriptor) | Log warning, skip tool during discovery | N/A (startup) |
-| Manifest requested for unknown role | Return empty tools array | 200 |
-| Manifest requested without authentication | Reject request | 401 |
-| Tool result received for unknown toolCallId | Log warning, return error | 404 |
-| Tool result received after timeout (>10s) | Log warning, accept but mark as late | 200 |
-| TenantToolConfig DB query fails | Fall back to default (all tools enabled) | N/A (graceful degradation) |
-| Tool discovery finds duplicate tool names | Log warning, last-discovered wins | N/A (startup) |
+| Scenario                                                                  | Handling                                 | HTTP Status                |
+| ------------------------------------------------------------------------- | ---------------------------------------- | -------------------------- |
+| Tool class has invalid metadata (e.g., frontend without ActionDescriptor) | Log warning, skip tool during discovery  | N/A (startup)              |
+| Manifest requested for unknown role                                       | Return empty tools array                 | 200                        |
+| Manifest requested without authentication                                 | Reject request                           | 401                        |
+| Tool result received for unknown toolCallId                               | Log warning, return error                | 404                        |
+| Tool result received after timeout (>10s)                                 | Log warning, accept but mark as late     | 200                        |
+| TenantToolConfig DB query fails                                           | Fall back to default (all tools enabled) | N/A (graceful degradation) |
+| Tool discovery finds duplicate tool names                                 | Log warning, last-discovered wins        | N/A (startup)              |
 
 ### Frontend Error Handling
 
-| Scenario | Handling |
-|----------|----------|
-| Manifest fetch fails (network error) | Retry with exponential backoff (3 attempts), fall back to legacy `FRONTEND_TOOL_NAMES` |
+| Scenario                                          | Handling                                                                                          |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Manifest fetch fails (network error)              | Retry with exponential backoff (3 attempts), fall back to legacy `FRONTEND_TOOL_NAMES`            |
 | ActionDescriptor references unregistered callback | Return `{ success: false, message: "Callback 'X' not registered" }`, send error result to backend |
-| ActionDescriptor has unknown action type | Return `{ success: false, message: "Unknown action type 'X'" }`, send error result to backend |
-| CustomEvent dispatch target element not found | Return success (event dispatched regardless; listener absence is not an error) |
-| Context update key not found | Return `{ success: false, message: "Context key 'X' not found" }` |
-| Tool result POST to backend fails | Retry once, then log error locally; backend timeout will handle it |
-| Manifest response has invalid JSON | Fall back to legacy tool set, log error |
+| ActionDescriptor has unknown action type          | Return `{ success: false, message: "Unknown action type 'X'" }`, send error result to backend     |
+| CustomEvent dispatch target element not found     | Return success (event dispatched regardless; listener absence is not an error)                    |
+| Context update key not found                      | Return `{ success: false, message: "Context key 'X' not found" }`                                 |
+| Tool result POST to backend fails                 | Retry once, then log error locally; backend timeout will handle it                                |
+| Manifest response has invalid JSON                | Fall back to legacy tool set, log error                                                           |
 
 ### Timeout Handling
 
 The backend tracks pending frontend tool calls with a 10-second timeout:
 
 1. When a tool call is sent to the frontend via SSE, the backend starts a timer.
-2. If the frontend sends a result via `POST /api/tools/result` within 10 seconds, the result is injected into the LLM conversation.
-3. If no result arrives within 10 seconds, the backend injects a timeout error: `{ success: false, message: "Frontend tool execution timed out after 10 seconds" }`.
-4. Late results (arriving after timeout) are logged but not injected into the conversation.
+2. If the frontend sends a result via `POST /api/tools/result` within 10
+   seconds, the result is injected into the LLM conversation.
+3. If no result arrives within 10 seconds, the backend injects a timeout error:
+   `{ success: false, message: "Frontend tool execution timed out after 10 seconds" }`.
+4. Late results (arriving after timeout) are logged but not injected into the
+   conversation.
 
 ## Testing Strategy
 
 ### Unit Tests (Example-Based)
 
-- **Manifest endpoint**: Verify the `/api/tools/manifest` endpoint returns 200 with valid JSON for authenticated requests (Req 3.3)
-- **Auto-discovery integration**: Verify `ToolRegistry::discover()` finds all tool classes in the namespace (Req 2.1, 2.4)
-- **Timeout behavior**: Simulate a tool call without result, verify timeout error after 10 seconds (Req 6.4)
-- **Manifest freshness**: Change a tenant config, request manifest, verify it reflects the change (Req 3.4, 5.4)
-- **Tool result injection**: Send a tool result via POST, verify it's injected into conversation context (Req 6.3)
+- **Manifest endpoint**: Verify the `/api/tools/manifest` endpoint returns 200
+  with valid JSON for authenticated requests (Req 3.3)
+- **Auto-discovery integration**: Verify `ToolRegistry::discover()` finds all
+  tool classes in the namespace (Req 2.1, 2.4)
+- **Timeout behavior**: Simulate a tool call without result, verify timeout
+  error after 10 seconds (Req 6.4)
+- **Manifest freshness**: Change a tenant config, request manifest, verify it
+  reflects the change (Req 3.4, 5.4)
+- **Tool result injection**: Send a tool result via POST, verify it's injected
+  into conversation context (Req 6.3)
 
 ### Property-Based Tests
 
-Property-based tests will use **fast-check** (TypeScript, frontend) and **PHPUnit with data providers** (PHP, backend) to validate universal properties across generated inputs. Each property test runs a minimum of 100 iterations.
+Property-based tests will use **fast-check** (TypeScript, frontend) and
+**PHPUnit with data providers** (PHP, backend) to validate universal properties
+across generated inputs. Each property test runs a minimum of 100 iterations.
 
-| Property | Test Location | Library | What's Generated |
-|----------|--------------|---------|-----------------|
-| Property 1: Metadata Validation | `tests/Unit/ToolMetadataTest.php` | PHPUnit data providers | Random tool metadata with varying executionContext, trustLevel, actionDescriptor combinations |
-| Property 2: Tool Resolution Filtering | `tests/Unit/ToolRegistryTest.php` | PHPUnit data providers | Random role-tool maps, tenant configs, verify intersection logic |
-| Property 3: Manifest Structure | `tests/Unit/ToolManifestTest.php` | PHPUnit data providers | Random tool sets, verify manifest JSON structure |
-| Property 4: Dispatcher Action Routing | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check | Random ActionDescriptors with all three types, random args, verify correct dispatch |
-| Property 5: Unknown Tool Passthrough | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check | Random tool names not in manifest, verify no execution |
-| Property 6: Dispatcher Error Structure | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check | Random failure scenarios, verify error result shape |
-| Property 7: Tool Result Payload | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check | Random tool results, verify payload structure |
-| Property 8: Tenant Config Round-Trip | `tests/Unit/TenantToolConfigTest.php` | PHPUnit data providers | Random tenant/tool/enabled combinations |
-| Property 9: Metadata Precedence | `tests/Unit/ToolRegistryTest.php` | PHPUnit data providers | Tools with and without metadata, verify precedence |
-| Property 10: Dual-Name Compatibility | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check | Random tool names in PascalCase and camelCase, verify same behavior |
+| Property                               | Test Location                                | Library                | What's Generated                                                                              |
+| -------------------------------------- | -------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------- |
+| Property 1: Metadata Validation        | `tests/Unit/ToolMetadataTest.php`            | PHPUnit data providers | Random tool metadata with varying executionContext, trustLevel, actionDescriptor combinations |
+| Property 2: Tool Resolution Filtering  | `tests/Unit/ToolRegistryTest.php`            | PHPUnit data providers | Random role-tool maps, tenant configs, verify intersection logic                              |
+| Property 3: Manifest Structure         | `tests/Unit/ToolManifestTest.php`            | PHPUnit data providers | Random tool sets, verify manifest JSON structure                                              |
+| Property 4: Dispatcher Action Routing  | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check             | Random ActionDescriptors with all three types, random args, verify correct dispatch           |
+| Property 5: Unknown Tool Passthrough   | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check             | Random tool names not in manifest, verify no execution                                        |
+| Property 6: Dispatcher Error Structure | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check             | Random failure scenarios, verify error result shape                                           |
+| Property 7: Tool Result Payload        | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check             | Random tool results, verify payload structure                                                 |
+| Property 8: Tenant Config Round-Trip   | `tests/Unit/TenantToolConfigTest.php`        | PHPUnit data providers | Random tenant/tool/enabled combinations                                                       |
+| Property 9: Metadata Precedence        | `tests/Unit/ToolRegistryTest.php`            | PHPUnit data providers | Tools with and without metadata, verify precedence                                            |
+| Property 10: Dual-Name Compatibility   | `__tests__/frontend-tool-dispatcher.test.ts` | fast-check             | Random tool names in PascalCase and camelCase, verify same behavior                           |
 
 ### Integration Tests
 
-- **End-to-end tool flow**: Send a chat message that triggers a frontend tool, verify SSE event contains `frontendExecutable: true` and correct ActionDescriptor, send result back, verify conversation continues.
-- **Tenant config propagation**: Create tenant config, request manifest, verify filtering. Update config, request again, verify change.
-- **Backward compatibility**: Mix of migrated and legacy tools, verify all resolve correctly through both paths.
+- **End-to-end tool flow**: Send a chat message that triggers a frontend tool,
+  verify SSE event contains `frontendExecutable: true` and correct
+  ActionDescriptor, send result back, verify conversation continues.
+- **Tenant config propagation**: Create tenant config, request manifest, verify
+  filtering. Update config, request again, verify change.
+- **Backward compatibility**: Mix of migrated and legacy tools, verify all
+  resolve correctly through both paths.
 
 ### Test Tagging Convention
 

@@ -2,9 +2,22 @@
 
 ## Overview
 
-This design covers 22 requirements for the MNGO POS v2 checkout experience overhaul. The changes span the full checkout lifecycle: pre-checkout flow fixes (date/time ordering, seat state reflection, drawer behavior, grid layout, dismiss consistency, collapsible details), payment enhancements (split payment calculator, foreign currency, customer wallet, gift voucher), cart operations (split cart), post-payment UX (success page refactor, printing, RFID linking), a new experience builder wizard, promotions and cart intelligence (dynamic offers, cart messages), B2B account loading, ticket tagging, and pool/capacity management (inventory pools on calendar, pool performance, pool transfer).
+This design covers 22 requirements for the MNGO POS v2 checkout experience
+overhaul. The changes span the full checkout lifecycle: pre-checkout flow fixes
+(date/time ordering, seat state reflection, drawer behavior, grid layout,
+dismiss consistency, collapsible details), payment enhancements (split payment
+calculator, foreign currency, customer wallet, gift voucher), cart operations
+(split cart), post-payment UX (success page refactor, printing, RFID linking), a
+new experience builder wizard, promotions and cart intelligence (dynamic offers,
+cart messages), B2B account loading, ticket tagging, and pool/capacity
+management (inventory pools on calendar, pool performance, pool transfer).
 
-All new UI surfaces are implemented as drawer stack entries via `DrawerStackProvider` using `push`/`pop`/`replace`/`update`/`clear` operations. The existing split-panel layout (catalog left, cart right) and `SmartDock` context-aware action bar are extended, not replaced. The `@cart/react` package manages cart state; new payment and metadata features extend the cart item metadata and checkout drawer state.
+All new UI surfaces are implemented as drawer stack entries via
+`DrawerStackProvider` using `push`/`pop`/`replace`/`update`/`clear` operations.
+The existing split-panel layout (catalog left, cart right) and `SmartDock`
+context-aware action bar are extended, not replaced. The `@cart/react` package
+manages cart state; new payment and metadata features extend the cart item
+metadata and checkout drawer state.
 
 ## Architecture
 
@@ -126,9 +139,16 @@ graph LR
 
 **Changes to `EventDetailDrawer`:**
 
-The current implementation already renders Date & Time CTA and Seat Map CTA, but the ordering in the scrollable body needs adjustment. The Date/Time section must render above the Seat Map section for timed seated events. The seat selection button is already disabled when `needsTimeSlot && !activeTimeSlot`.
+The current implementation already renders Date & Time CTA and Seat Map CTA, but
+the ordering in the scrollable body needs adjustment. The Date/Time section must
+render above the Seat Map section for timed seated events. The seat selection
+button is already disabled when `needsTimeSlot && !activeTimeSlot`.
 
-The `update` operation on the drawer stack is already used by `handleOpenDateTimePicker` and `handleOpenSeatMap` in `pos-home.tsx` to update the underlying `EventDetailDrawer` props after a sub-drawer confirms. This pattern is correct and requires no architectural change — only ensuring the render order is Date/Time → Seats → Tickets in the scrollable body.
+The `update` operation on the drawer stack is already used by
+`handleOpenDateTimePicker` and `handleOpenSeatMap` in `pos-home.tsx` to update
+the underlying `EventDetailDrawer` props after a sub-drawer confirms. This
+pattern is correct and requires no architectural change — only ensuring the
+render order is Date/Time → Seats → Tickets in the scrollable body.
 
 ```typescript
 // EventDetailDrawer body order (timed seated events):
@@ -159,7 +179,11 @@ interface EventDetailDrawerProps {
 }
 ```
 
-The seat selection button already reflects confirmed seats via `selectedSeatsExternal` and `selectedSeatTotalExternal` props. The `update` call in `pos-home.tsx` already passes these after `SeatMapDrawer.onConfirmSeats`. The 100ms requirement (Req 2.2) is met by the synchronous `update` dispatch + React reconciliation.
+The seat selection button already reflects confirmed seats via
+`selectedSeatsExternal` and `selectedSeatTotalExternal` props. The `update` call
+in `pos-home.tsx` already passes these after `SeatMapDrawer.onConfirmSeats`. The
+100ms requirement (Req 2.2) is met by the synchronous `update` dispatch + React
+reconciliation.
 
 ### Requirement 4: Product Grid Layout
 
@@ -175,7 +199,10 @@ Replace the current grid with CSS `auto-fill` responsive grid:
 }
 ```
 
-The `ProductGrid` component currently uses Tailwind grid classes. Change to inline style or a CSS variable approach so the `minmax(180px, 1fr)` constraint is enforced. The `ResizeObserver` on the catalog panel (already in `pos-home.tsx` for the cart panel) ensures reflow on resize.
+The `ProductGrid` component currently uses Tailwind grid classes. Change to
+inline style or a CSS variable approach so the `minmax(180px, 1fr)` constraint
+is enforced. The `ResizeObserver` on the catalog panel (already in
+`pos-home.tsx` for the cart panel) ensures reflow on resize.
 
 ### Requirement 5: Drawer Dismiss Button Consistency
 
@@ -197,25 +224,26 @@ interface DrawerConfig<TId extends string = string> {
 
 **`DrawerHeader` changes:**
 
-- Read `showCloseButton` from the drawer config via `useDrawerPosition()` context.
+- Read `showCloseButton` from the drawer config via `useDrawerPosition()`
+  context.
 - If `showCloseButton === false`, hide the X button but keep ESC handling.
 
-**Dismiss rules:**
-| Drawer | X Button | ESC |
-|--------|----------|-----|
-| ProfileDrawer | ❌ | ✅ |
-| NotificationPanel | ❌ | ✅ |
-| ShiftPanel | ❌ | ✅ |
-| EventDetailDrawer | ✅ | ✅ |
-| CheckoutDrawer | ✅ | ✅ |
-| SeatMapDrawer | ✅ | ✅ |
-| DateTimePickerDrawer | ✅ | ✅ |
+**Dismiss rules:** | Drawer | X Button | ESC | |--------|----------|-----| |
+ProfileDrawer | ❌ | ✅ | | NotificationPanel | ❌ | ✅ | | ShiftPanel | ❌ | ✅
+| | EventDetailDrawer | ✅ | ✅ | | CheckoutDrawer | ✅ | ✅ | | SeatMapDrawer |
+✅ | ✅ | | DateTimePickerDrawer | ✅ | ✅ |
 
 ### Requirement 6: Collapsible Details Section
 
-The `EventDetailDrawer` already has a collapsible "Details, Includes & Rules" section with `detailsOpen` state defaulting to `false`. The current implementation groups description, includes, and restrictions. It needs to also include location, hours, languages, group size, accessibility, and what-to-bring inside the collapsible section instead of rendering them above it.
+The `EventDetailDrawer` already has a collapsible "Details, Includes & Rules"
+section with `detailsOpen` state defaulting to `false`. The current
+implementation groups description, includes, and restrictions. It needs to also
+include location, hours, languages, group size, accessibility, and what-to-bring
+inside the collapsible section instead of rendering them above it.
 
-**Change:** Move the quick info grid (location, hours, languages, group size, accessibility, what-to-bring) inside the collapsible `detailsOpen` block, after the description and before includes/restrictions.
+**Change:** Move the quick info grid (location, hours, languages, group size,
+accessibility, what-to-bring) inside the collapsible `detailsOpen` block, after
+the description and before includes/restrictions.
 
 ### Requirement 7: Split Payment Calculator
 
@@ -241,7 +269,8 @@ The existing implementation satisfies most of Req 7. Verify:
 - ✅ 7.6: Remove split recalculates remaining
 - ✅ 7.7: Splits displayed with icon, label, amount, remove button
 
-**Minor enhancement:** Include tip in the remaining balance initialization (already done: `finalTotal = total + tip`).
+**Minor enhancement:** Include tip in the remaining balance initialization
+(already done: `finalTotal = total + tip`).
 
 ### Requirement 8: Foreign Currency Payment
 
@@ -269,10 +298,13 @@ interface PaymentSplit {
 **Flow:**
 
 1. Cashier selects payment method → keypad opens
-2. Above the keypad amount display, a currency selector dropdown shows available currencies
-3. When a foreign currency is selected, the remaining balance display converts: `remaining * currency.rate`
+2. Above the keypad amount display, a currency selector dropdown shows available
+   currencies
+3. When a foreign currency is selected, the remaining balance display converts:
+   `remaining * currency.rate`
 4. Cashier enters amount in foreign currency
-5. On "Apply", the amount is converted back: `foreignAmount / currency.rate` → stored as base currency split
+5. On "Apply", the amount is converted back: `foreignAmount / currency.rate` →
+   stored as base currency split
 6. The split record shows both: "USD $50.00 (AED 183.62)"
 
 ### Requirement 9: Customer Wallet Payment
@@ -314,7 +346,8 @@ interface GiftVoucherState {
 1. Cashier selects "Gift Voucher" from payment grid
 2. Input field appears for serial number (supports barcode scanner input)
 3. On submit, validate voucher (async call)
-4. If valid: show remaining value, auto-apply `Math.min(voucherValue, remaining)` as split
+4. If valid: show remaining value, auto-apply
+   `Math.min(voucherValue, remaining)` as split
 5. If invalid/redeemed: show error, prevent split
 
 ### Requirement 11: Split Cart
@@ -333,7 +366,8 @@ interface SplitCartDrawerProps {
 **Integration in `pos-home.tsx`:**
 
 - SmartDock shows "Split" action when `cartItems.length >= 2`
-- On confirm: `createCart()` → move selected items to new cart → set new cart as active
+- On confirm: `createCart()` → move selected items to new cart → set new cart as
+  active
 - Prevent splitting all items (would leave original empty)
 - Prevent splitting zero items
 
@@ -345,7 +379,8 @@ Extend the existing overlay with:
 
 - Payment method summary (list of splits with method + amount)
 - Timestamp display
-- "Print Receipt", "Send E-Ticket", "New Order" action buttons (replacing current PRINT/EMAIL/SAVE)
+- "Print Receipt", "Send E-Ticket", "New Order" action buttons (replacing
+  current PRINT/EMAIL/SAVE)
 - Auto-dismiss timer increased from 15s to 30s
 - "New Order" creates a fresh cart via `createCart()`
 
@@ -381,9 +416,12 @@ interface PrintService {
 
 **Integration:**
 
-- Terminal settings (`TerminalSettings`) extended with `printMode: "silent" | "preview"`
-- On payment complete with receipt option "print": call `printService.printReceipt()`
-- Silent mode uses `window.print()` with a hidden iframe containing print-optimized CSS
+- Terminal settings (`TerminalSettings`) extended with
+  `printMode: "silent" | "preview"`
+- On payment complete with receipt option "print": call
+  `printService.printReceipt()`
+- Silent mode uses `window.print()` with a hidden iframe containing
+  print-optimized CSS
 - Preview mode opens browser print dialog directly
 
 ### Requirement 14: RFID Linking Post-Checkout
@@ -407,7 +445,8 @@ interface RFIDLinkingState {
 4. 15s timeout per scan → show error + retry/skip
 5. Skip proceeds to standard post-payment state
 
-**RFID input:** Listen for `keydown` events (RFID readers emit keyboard input) or a dedicated `WebSerial` / `WebHID` API integration.
+**RFID input:** Listen for `keydown` events (RFID readers emit keyboard input)
+or a dedicated `WebSerial` / `WebHID` API integration.
 
 ### Requirement 15: Experience Builder Flow
 
@@ -448,9 +487,12 @@ interface BuilderState {
 
 1. **Step 1 — Categories:** Grid of category tiles (reuses `EventCategory` data)
 2. **Step 2 — Events:** Filtered event list for selected category
-3. **Step 3 — Tickets:** Ticket types with quantity steppers for the selected event
+3. **Step 3 — Tickets:** Ticket types with quantity steppers for the selected
+   event
 
-Uses `SubViewNavigator` from `@abdokouta/react-ui` for step transitions within a single drawer. Running cart summary shown as a sticky footer. "Back" navigation preserves selections from other steps.
+Uses `SubViewNavigator` from `@abdokouta/react-ui` for step transitions within a
+single drawer. Running cart summary shown as a sticky footer. "Back" navigation
+preserves selections from other steps.
 
 **Entry points:**
 
@@ -512,7 +554,9 @@ interface CartMessage {
 }
 ```
 
-Rendered in `POSCartPanel` between the item list and totals section. Messages are generated by the `PromotionEngine` and cart validation rules. Dismissed messages are tracked in a `Set<string>` scoped to the cart session.
+Rendered in `POSCartPanel` between the item list and totals section. Messages
+are generated by the `PromotionEngine` and cart validation rules. Dismissed
+messages are tracked in a `Set<string>` scoped to the cart session.
 
 ### Requirement 18: B2B Account Loading
 
@@ -574,9 +618,12 @@ interface CartItemMetadata {
 }
 ```
 
-- `EventDetailDrawer`: Show available tags as selectable chips below each ticket type row
-- `POSCartPanel`: Show applied tags as small colored badges on each cart item row
-- Tags are stored in cart item metadata and persisted with the ticket record on purchase
+- `EventDetailDrawer`: Show available tags as selectable chips below each ticket
+  type row
+- `POSCartPanel`: Show applied tags as small colored badges on each cart item
+  row
+- Tags are stored in cart item metadata and persisted with the ticket record on
+  purchase
 
 ### Requirement 20: Inventory Pools on Calendar
 

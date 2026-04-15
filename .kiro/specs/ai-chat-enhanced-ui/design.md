@@ -2,18 +2,26 @@
 
 ## Overview
 
-This design transforms the existing plain-text AI chat panel (`ai-chat.tsx`) into a rich, interactive assistant interface. The current system streams GPT-4o tokens over WebSocket and renders them as raw text. This feature adds:
+This design transforms the existing plain-text AI chat panel (`ai-chat.tsx`)
+into a rich, interactive assistant interface. The current system streams GPT-4o
+tokens over WebSocket and renders them as raw text. This feature adds:
 
 1. **Markdown rendering** in chat bubbles via `react-markdown` with sanitization
-2. **Interactive tool call/result cards** displayed inline as the LLM invokes tools
-3. **High-trust approval cards** with Approve/Reject buttons for sensitive operations
-4. **Real POS tool handlers** replacing the 24 stub handlers with actual POS operations
+2. **Interactive tool call/result cards** displayed inline as the LLM invokes
+   tools
+3. **High-trust approval cards** with Approve/Reject buttons for sensitive
+   operations
+4. **Real POS tool handlers** replacing the 24 stub handlers with actual POS
+   operations
 5. **Walkthrough overlay** for AI-generated step-by-step UI tutorials
 6. **UI navigation tool** that opens drawers and highlights elements
 7. **Full UI context snapshots** sent to the gateway with debouncing
-8. **Answer caching** with pgvector similarity search for cross-cashier knowledge sharing
+8. **Answer caching** with pgvector similarity search for cross-cashier
+   knowledge sharing
 
-The design builds on the existing `AISidekickProvider`, `useAIGatewaySocket` hook, `WSServer`, `TrustGate`, `ToolRegistry`, and `RAGService` without replacing them.
+The design builds on the existing `AISidekickProvider`, `useAIGatewaySocket`
+hook, `WSServer`, `TrustGate`, `ToolRegistry`, and `RAGService` without
+replacing them.
 
 ## Architecture
 
@@ -124,22 +132,26 @@ sequenceDiagram
 
 ### Frontend-Executed vs Backend-Executed Tools
 
-Two tools execute on the frontend rather than the backend because they manipulate the DOM:
+Two tools execute on the frontend rather than the backend because they
+manipulate the DOM:
 
-| Tool | Execution | Reason |
-|------|-----------|--------|
-| `navigateUI` | Frontend | Opens drawers, scrolls to sections, highlights DOM elements |
-| `startWalkthrough` | Frontend | Creates spotlight overlay, positions popovers on DOM elements |
-| All other 24 tools | Backend | Operate on data (cart, customer, inventory, etc.) |
+| Tool               | Execution | Reason                                                        |
+| ------------------ | --------- | ------------------------------------------------------------- |
+| `navigateUI`       | Frontend  | Opens drawers, scrolls to sections, highlights DOM elements   |
+| `startWalkthrough` | Frontend  | Creates spotlight overlay, positions popovers on DOM elements |
+| All other 24 tools | Backend   | Operate on data (cart, customer, inventory, etc.)             |
 
-The gateway sends `tool-call` messages for these tools with a `frontendExecutable: true` flag. The frontend's `FrontendToolExecutor` intercepts them, executes locally, and sends a `tool-result` message back to the gateway so the LLM conversation history stays consistent.
-
+The gateway sends `tool-call` messages for these tools with a
+`frontendExecutable: true` flag. The frontend's `FrontendToolExecutor`
+intercepts them, executes locally, and sends a `tool-result` message back to the
+gateway so the LLM conversation history stays consistent.
 
 ## Components and Interfaces
 
 ### 1. Enhanced Chat Message Types
 
-The current `ChatMessage` type in `ai-chat.tsx` only supports `user | assistant` roles with a `content` string. The enhanced system needs a discriminated union:
+The current `ChatMessage` type in `ai-chat.tsx` only supports `user | assistant`
+roles with a `content` string. The enhanced system needs a discriminated union:
 
 ```typescript
 // apps/vite-template/src/contexts/ai-sidekick/chat-types.ts
@@ -174,7 +186,14 @@ interface ToolCallMessage extends ChatMessageBase {
   requiresApproval: boolean;
   /** Whether this tool runs on the frontend */
   frontendExecutable: boolean;
-  status: "pending" | "approved" | "rejected" | "executing" | "success" | "failed" | "timed-out";
+  status:
+    | "pending"
+    | "approved"
+    | "rejected"
+    | "executing"
+    | "success"
+    | "failed"
+    | "timed-out";
   result?: unknown;
   error?: string;
 }
@@ -249,12 +268,17 @@ interface MarkdownRendererProps {
 ```
 
 Implementation approach:
+
 - Use `react-markdown` with `rehype-sanitize` for XSS prevention
 - Use `remark-gfm` for GitHub-flavored markdown (tables, strikethrough)
-- Custom component overrides for `code`, `a`, `pre` to match the POS design system
+- Custom component overrides for `code`, `a`, `pre` to match the POS design
+  system
 - Links render with `target="_blank"` and `rel="noopener noreferrer"`
-- Code blocks get a dark background with monospace font, matching the existing `bg-surface-secondary` token
-- During streaming, `react-markdown` re-renders on each token update; the component uses `React.memo` with content comparison to avoid unnecessary re-renders of completed message bubbles
+- Code blocks get a dark background with monospace font, matching the existing
+  `bg-surface-secondary` token
+- During streaming, `react-markdown` re-renders on each token update; the
+  component uses `React.memo` with content comparison to avoid unnecessary
+  re-renders of completed message bubbles
 
 ### 4. ToolCallCard Component
 
@@ -270,9 +294,11 @@ interface ToolCallCardProps {
 ```
 
 Renders as a compact card within the message flow:
+
 - Header: tool icon + human-readable tool name (mapped from registry)
 - Body: summarized arguments (e.g., "Cart: Order #1, Promo: SUMMER25")
-- Footer: status badge (spinner for pending/executing, checkmark for success, X for failed)
+- Footer: status badge (spinner for pending/executing, checkmark for success, X
+  for failed)
 - Expandable result section on success
 
 ### 5. ApprovalCard Component
@@ -290,6 +316,7 @@ interface ApprovalCardProps {
 ```
 
 Renders as a prominent card with warning styling:
+
 - Header: warning icon + "Approval Required"
 - Body: tool name, action description, monetary amounts highlighted
 - Footer: Approve (green) and Reject (red) buttons, disabled when not pending
@@ -309,6 +336,7 @@ interface NavigationCardProps {
 ```
 
 Renders inline showing where the AI navigated:
+
 - Icon + "Navigated to {target}" description
 - "Go There" button that re-executes the navigation if the drawer was closed
 
@@ -331,12 +359,17 @@ interface WalkthroughOverlayProps {
 ```
 
 Implementation:
+
 - Rendered as a React portal attached to `document.body`
-- Uses an SVG mask overlay that dims the entire screen except a spotlight cutout around the target element
-- Target element rect is obtained via `getBoundingClientRect()` with a `ResizeObserver` for dynamic updates
-- Popover is positioned using CSS `position: fixed` anchored to the target rect + the specified position
+- Uses an SVG mask overlay that dims the entire screen except a spotlight cutout
+  around the target element
+- Target element rect is obtained via `getBoundingClientRect()` with a
+  `ResizeObserver` for dynamic updates
+- Popover is positioned using CSS `position: fixed` anchored to the target
+  rect + the specified position
 - Step navigation: Next, Back, Skip (or Done on last step)
-- If a target selector doesn't match any DOM element, that step is skipped automatically
+- If a target selector doesn't match any DOM element, that step is skipped
+  automatically
 - Escape key dismisses the walkthrough
 - Step counter shows "Step X of Y"
 
@@ -362,8 +395,12 @@ type FrontendToolResult = {
 ```
 
 This module handles tools that must execute on the frontend:
-- `navigateUI`: Uses the drawer stack's `push()` to open drawers, scrolls to sections via `element.scrollIntoView()`, applies highlight animation via a temporary CSS class
-- `startWalkthrough`: Sets walkthrough state in the provider, which triggers the `WalkthroughOverlay` portal
+
+- `navigateUI`: Uses the drawer stack's `push()` to open drawers, scrolls to
+  sections via `element.scrollIntoView()`, applies highlight animation via a
+  temporary CSS class
+- `startWalkthrough`: Sets walkthrough state in the provider, which triggers the
+  `WalkthroughOverlay` portal
 
 ### 9. UIContextCollector
 
@@ -400,10 +437,13 @@ interface UIContextSnapshot {
 ```
 
 Collection strategy:
-- A `useUIContextCollector` hook inside `AISidekickProvider` aggregates state from `usePOS()`, `useLocation()`, and `useDrawerStack()`
+
+- A `useUIContextCollector` hook inside `AISidekickProvider` aggregates state
+  from `usePOS()`, `useLocation()`, and `useDrawerStack()`
 - Changes are debounced at 500ms using a `useRef` + `setTimeout` pattern
 - The debounced snapshot is sent via `gateway.sendPosStateUpdate()`
-- Sensitive data (payment card numbers, auth tokens) is explicitly excluded from the snapshot
+- Sensitive data (payment card numbers, auth tokens) is explicitly excluded from
+  the snapshot
 
 ### 10. AnswerCacheService (Backend)
 
@@ -422,21 +462,32 @@ interface CachedAnswer {
 }
 
 interface AnswerCacheConfig {
-  similarityThreshold: number;  // default 0.92
-  ttlDays: number;              // default 30
+  similarityThreshold: number; // default 0.92
+  ttlDays: number; // default 30
 }
 
 class AnswerCacheService {
   constructor(pool: Pool, llm: LLMService, config?: Partial<AnswerCacheConfig>);
 
   /** Search for a cached answer. Returns null if no match above threshold. */
-  async findSimilar(tenantId: string, question: string): Promise<CachedAnswer | null>;
+  async findSimilar(
+    tenantId: string,
+    question: string,
+  ): Promise<CachedAnswer | null>;
 
   /** Store a new Q&A pair in the cache. */
-  async store(tenantId: string, question: string, answer: string): Promise<void>;
+  async store(
+    tenantId: string,
+    question: string,
+    answer: string,
+  ): Promise<void>;
 
   /** List cached Q&A pairs for admin review. */
-  async list(tenantId: string, offset: number, limit: number): Promise<CachedAnswer[]>;
+  async list(
+    tenantId: string,
+    offset: number,
+    limit: number,
+  ): Promise<CachedAnswer[]>;
 
   /** Update a cached answer (admin edit). */
   async update(id: string, answer: string): Promise<void>;
@@ -510,8 +561,8 @@ New client→server message type for frontend tool results:
   }
 ```
 
-The existing message types (`chat`, `pos-state-update`, `approve`, `reject`, `dismiss`, `delegation-change`) remain unchanged for backward compatibility.
-
+The existing message types (`chat`, `pos-state-update`, `approve`, `reject`,
+`dismiss`, `delegation-change`) remain unchanged for backward compatibility.
 
 ## Data Models
 
@@ -539,7 +590,8 @@ CREATE INDEX idx_answer_cache_stale ON answer_cache (tenant_id, updated_at);
 
 ### Frontend State: MessageStore
 
-The `AISidekickProvider` gains a `messages: ChatMessage[]` array in its state, replacing the current simple `chatTokens: string` approach:
+The `AISidekickProvider` gains a `messages: ChatMessage[]` array in its state,
+replacing the current simple `chatTokens: string` approach:
 
 ```typescript
 // State additions to AISidekickProvider
@@ -556,11 +608,14 @@ interface EnhancedChatState {
 }
 ```
 
-The `messages` array is the single source of truth for the chat UI. It persists in React state for the browser session lifetime (cleared on page refresh per Requirement 6.3).
+The `messages` array is the single source of truth for the chat UI. It persists
+in React state for the browser session lifetime (cleared on page refresh per
+Requirement 6.3).
 
 ### Frontend State: UIContextSnapshot
 
-Collected by `useUIContextCollector` hook, stored as a ref (not state, to avoid re-renders), and sent to the gateway on change:
+Collected by `useUIContextCollector` hook, stored as a ref (not state, to avoid
+re-renders), and sent to the gateway on change:
 
 ```typescript
 // Stored as useRef<UIContextSnapshot> in AISidekickProvider
@@ -600,11 +655,17 @@ Two new frontend-executable tool definitions added to the registry:
 const uiTools: ToolDefinition[] = [
   {
     name: "navigateUI",
-    description: "Navigate the cashier to a specific screen, drawer, or UI element.",
+    description:
+      "Navigate the cashier to a specific screen, drawer, or UI element.",
     parameters: z.object({
-      drawer: z.string().describe("Drawer to open: profile, notifications, shift, membership"),
+      drawer: z
+        .string()
+        .describe("Drawer to open: profile, notifications, shift, membership"),
       section: z.string().optional().describe("Section within the drawer"),
-      element: z.string().optional().describe("CSS selector of element to highlight"),
+      element: z
+        .string()
+        .optional()
+        .describe("CSS selector of element to highlight"),
     }),
     trustLevel: "low",
     roles: ["cashier"],
@@ -612,15 +673,29 @@ const uiTools: ToolDefinition[] = [
   },
   {
     name: "startWalkthrough",
-    description: "Start an interactive walkthrough with highlights and popovers on UI elements.",
+    description:
+      "Start an interactive walkthrough with highlights and popovers on UI elements.",
     parameters: z.object({
-      steps: z.array(z.object({
-        targetSelector: z.string().describe("CSS selector or data attribute for the target element"),
-        title: z.string().describe("Popover title"),
-        description: z.string().describe("Popover description"),
-        position: z.enum(["top", "bottom", "left", "right"]).describe("Popover position relative to target"),
-        actionHint: z.string().optional().describe("Action hint text, e.g. 'tap here'"),
-      })).describe("Ordered array of walkthrough steps"),
+      steps: z
+        .array(
+          z.object({
+            targetSelector: z
+              .string()
+              .describe(
+                "CSS selector or data attribute for the target element",
+              ),
+            title: z.string().describe("Popover title"),
+            description: z.string().describe("Popover description"),
+            position: z
+              .enum(["top", "bottom", "left", "right"])
+              .describe("Popover position relative to target"),
+            actionHint: z
+              .string()
+              .optional()
+              .describe("Action hint text, e.g. 'tap here'"),
+          }),
+        )
+        .describe("Ordered array of walkthrough steps"),
     }),
     trustLevel: "low",
     roles: ["cashier"],
@@ -629,229 +704,301 @@ const uiTools: ToolDefinition[] = [
 ];
 ```
 
-
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: Markdown renders all syntax elements as correct HTML
 
-*For any* string containing valid markdown syntax (bold, italic, inline code, code blocks, ordered lists, unordered lists, links), the MarkdownRenderer output SHALL contain the corresponding HTML elements (`<strong>`, `<em>`, `<code>`, `<pre>`, `<ol>`, `<ul>`, `<a>`), and all `<a>` tags SHALL have `target="_blank"` and `rel="noopener noreferrer"` attributes.
+_For any_ string containing valid markdown syntax (bold, italic, inline code,
+code blocks, ordered lists, unordered lists, links), the MarkdownRenderer output
+SHALL contain the corresponding HTML elements (`<strong>`, `<em>`, `<code>`,
+`<pre>`, `<ol>`, `<ul>`, `<a>`), and all `<a>` tags SHALL have `target="_blank"`
+and `rel="noopener noreferrer"` attributes.
 
 **Validates: Requirements 1.1, 1.3**
 
 ### Property 2: Markdown sanitization removes XSS vectors
 
-*For any* input string containing HTML script tags, event handler attributes (onclick, onerror, etc.), or `javascript:` URLs, the MarkdownRenderer output SHALL NOT contain any of those dangerous elements in the rendered HTML.
+_For any_ input string containing HTML script tags, event handler attributes
+(onclick, onerror, etc.), or `javascript:` URLs, the MarkdownRenderer output
+SHALL NOT contain any of those dangerous elements in the rendered HTML.
 
 **Validates: Requirements 1.4**
 
 ### Property 3: Tool-call messages are created from WebSocket tool-call events
 
-*For any* incoming WebSocket message of type "tool-call" with a toolCallId, toolName, args, and trustLevel, the message store SHALL contain a ChatMessage of type "tool-call" with matching fields and initial status "pending".
+_For any_ incoming WebSocket message of type "tool-call" with a toolCallId,
+toolName, args, and trustLevel, the message store SHALL contain a ChatMessage of
+type "tool-call" with matching fields and initial status "pending".
 
 **Validates: Requirements 2.1**
 
 ### Property 4: Tool result updates the corresponding tool-call message status
 
-*For any* incoming WebSocket message of type "tool-result" with a toolCallId and success boolean, the corresponding tool-call ChatMessage in the store SHALL be updated to status "success" (with result data) if success is true, or status "failed" (with error message) if success is false.
+_For any_ incoming WebSocket message of type "tool-result" with a toolCallId and
+success boolean, the corresponding tool-call ChatMessage in the store SHALL be
+updated to status "success" (with result data) if success is true, or status
+"failed" (with error message) if success is false.
 
 **Validates: Requirements 2.3, 2.4**
 
 ### Property 5: Tool-related cards display all required information
 
-*For any* ToolCallCard, the rendered output SHALL contain the tool name, a summary of the arguments, and a status indicator. *For any* ApprovalCard, the rendered output SHALL contain the tool name, action description, arguments (including monetary amounts if present), and the approval reason.
+_For any_ ToolCallCard, the rendered output SHALL contain the tool name, a
+summary of the arguments, and a status indicator. _For any_ ApprovalCard, the
+rendered output SHALL contain the tool name, action description, arguments
+(including monetary amounts if present), and the approval reason.
 
 **Validates: Requirements 2.2, 3.2**
 
 ### Property 6: Gateway tool-call messages contain all required fields
 
-*For any* tool call processed by the AI Gateway, the emitted WebSocket "tool-call" message SHALL contain a non-empty toolName, a toolCallId, the args object, and the trustLevel. For tools with trustLevel "high", the message SHALL include `requiresApproval: true`.
+_For any_ tool call processed by the AI Gateway, the emitted WebSocket
+"tool-call" message SHALL contain a non-empty toolName, a toolCallId, the args
+object, and the trustLevel. For tools with trustLevel "high", the message SHALL
+include `requiresApproval: true`.
 
 **Validates: Requirements 2.5, 8.1, 8.5**
 
 ### Property 7: High-trust tool calls render as ApprovalCards
 
-*For any* tool-call ChatMessage with trustLevel "high" and requiresApproval true, the chat panel SHALL render an ApprovalCard component (not a regular ToolCallCard) with Approve and Reject buttons.
+_For any_ tool-call ChatMessage with trustLevel "high" and requiresApproval
+true, the chat panel SHALL render an ApprovalCard component (not a regular
+ToolCallCard) with Approve and Reject buttons.
 
 **Validates: Requirements 3.1**
 
 ### Property 8: Approval actions send correct WebSocket messages
 
-*For any* pending ApprovalCard with a requestId, pressing Approve SHALL cause a WebSocket message of type "approve" with that requestId to be sent, and pressing Reject SHALL cause a WebSocket message of type "reject" with that requestId to be sent.
+_For any_ pending ApprovalCard with a requestId, pressing Approve SHALL cause a
+WebSocket message of type "approve" with that requestId to be sent, and pressing
+Reject SHALL cause a WebSocket message of type "reject" with that requestId to
+be sent.
 
 **Validates: Requirements 3.3, 3.4**
 
 ### Property 9: Pending approval disables chat input
 
-*For any* state where the message store contains at least one tool-call ChatMessage with status "pending" and requiresApproval true, the chat input SHALL be disabled.
+_For any_ state where the message store contains at least one tool-call
+ChatMessage with status "pending" and requiresApproval true, the chat input
+SHALL be disabled.
 
 **Validates: Requirements 3.6**
 
 ### Property 10: Tool handler result contract
 
-*For any* tool handler invocation with any arguments (valid or invalid), the returned result SHALL be an object containing a `success` boolean and a `message` string. If the arguments are invalid, the result SHALL have `success: false` and an error code.
+_For any_ tool handler invocation with any arguments (valid or invalid), the
+returned result SHALL be an object containing a `success` boolean and a
+`message` string. If the arguments are invalid, the result SHALL have
+`success: false` and an error code.
 
 **Validates: Requirements 4.9, 4.10**
 
 ### Property 11: Hold/resume cart round-trip
 
-*For any* active cart, invoking holdCart followed by resumeCart with the same cart ID SHALL restore the cart to active status.
+_For any_ active cart, invoking holdCart followed by resumeCart with the same
+cart ID SHALL restore the cart to active status.
 
 **Validates: Requirements 4.3, 4.4**
 
 ### Property 12: toggleDarkMode inverts theme state
 
-*For any* current dark mode state (true or false), invoking the toggleDarkMode tool handler SHALL result in the dark mode state being the logical negation of the original state.
+_For any_ current dark mode state (true or false), invoking the toggleDarkMode
+tool handler SHALL result in the dark mode state being the logical negation of
+the original state.
 
 **Validates: Requirements 4.1**
 
 ### Property 13: Customer lookup returns only matching records
 
-*For any* customer dataset and search query, all records returned by the lookupCustomer handler SHALL contain the query string (case-insensitive) in at least one of: name, email, or phone fields.
+_For any_ customer dataset and search query, all records returned by the
+lookupCustomer handler SHALL contain the query string (case-insensitive) in at
+least one of: name, email, or phone fields.
 
 **Validates: Requirements 4.5**
 
 ### Property 14: Connection state transitions produce system messages
 
-*For any* WebSocket connection status transition (connected→disconnected or disconnected→connected), the message store SHALL gain a new SystemMessage of the appropriate variant ("warning" for disconnection, "success" for reconnection).
+_For any_ WebSocket connection status transition (connected→disconnected or
+disconnected→connected), the message store SHALL gain a new SystemMessage of the
+appropriate variant ("warning" for disconnection, "success" for reconnection).
 
 **Validates: Requirements 5.4, 5.5**
 
 ### Property 15: Chat history persists across panel close/reopen
 
-*For any* sequence of ChatMessages added to the message store, closing the chat panel (unmounting) and reopening it SHALL render the same messages in the same chronological order.
+_For any_ sequence of ChatMessages added to the message store, closing the chat
+panel (unmounting) and reopening it SHALL render the same messages in the same
+chronological order.
 
 **Validates: Requirements 6.1, 6.2**
 
 ### Property 16: Message store accepts all ChatMessage types
 
-*For any* ChatMessage variant (user, assistant, tool-call, tool-result, navigation, system), the message store SHALL accept and retain the message, and the stored message SHALL be retrievable with all original fields intact.
+_For any_ ChatMessage variant (user, assistant, tool-call, tool-result,
+navigation, system), the message store SHALL accept and retain the message, and
+the stored message SHALL be retrievable with all original fields intact.
 
 **Validates: Requirements 6.4**
 
 ### Property 17: UI context changes trigger debounced pos-state-update
 
-*For any* change to the UI context snapshot (cart, customer, route, drawers, sidebar, dark mode, event), a "pos-state-update" WebSocket message SHALL be sent within 500ms, and rapid successive changes SHALL be debounced into a single message.
+_For any_ change to the UI context snapshot (cart, customer, route, drawers,
+sidebar, dark mode, event), a "pos-state-update" WebSocket message SHALL be sent
+within 500ms, and rapid successive changes SHALL be debounced into a single
+message.
 
 **Validates: Requirements 7.1, 7.2, 11.2**
 
 ### Property 18: Prompt builder includes full UI context snapshot
 
-*For any* non-empty UI context snapshot stored on the session, the system prompt produced by PromptBuilder SHALL contain the cart contents, customer info, route, open drawers, sidebar state, dark mode state, and terminal ID.
+_For any_ non-empty UI context snapshot stored on the session, the system prompt
+produced by PromptBuilder SHALL contain the cart contents, customer info, route,
+open drawers, sidebar state, dark mode state, and terminal ID.
 
 **Validates: Requirements 7.3, 11.3**
 
 ### Property 19: UI context snapshot contains all required fields and excludes sensitive data
 
-*For any* POS state, the collected UIContextSnapshot SHALL contain route, activeCart, assignedCustomer, selectedEvent, openDrawers, sidebarCollapsed, darkMode, terminalId, currency, and language fields. The snapshot SHALL NOT contain any strings matching payment card number patterns or authentication token patterns.
+_For any_ POS state, the collected UIContextSnapshot SHALL contain route,
+activeCart, assignedCustomer, selectedEvent, openDrawers, sidebarCollapsed,
+darkMode, terminalId, currency, and language fields. The snapshot SHALL NOT
+contain any strings matching payment card number patterns or authentication
+token patterns.
 
 **Validates: Requirements 11.1, 11.5**
 
 ### Property 20: Gateway tool-result messages contain required fields
 
-*For any* tool execution result emitted by the AI Gateway, the "tool-result" WebSocket message SHALL contain a toolCallId, a success boolean, and either a data field (on success) or an error field (on failure).
+_For any_ tool execution result emitted by the AI Gateway, the "tool-result"
+WebSocket message SHALL contain a toolCallId, a success boolean, and either a
+data field (on success) or an error field (on failure).
 
 **Validates: Requirements 8.2**
 
 ### Property 21: NavigateUI executor opens correct drawer and returns confirmation
 
-*For any* valid navigateUI tool invocation with a drawer name and optional section, the frontend executor SHALL open the specified drawer and return a result with success=true and a message describing which screen was opened.
+_For any_ valid navigateUI tool invocation with a drawer name and optional
+section, the frontend executor SHALL open the specified drawer and return a
+result with success=true and a message describing which screen was opened.
 
 **Validates: Requirements 9.2, 9.5**
 
 ### Property 22: Walkthrough step schema validation
 
-*For any* walkthrough step object, the Zod schema SHALL require targetSelector (string), title (string), description (string), and position (one of "top", "bottom", "left", "right"). The actionHint field SHALL be optional.
+_For any_ walkthrough step object, the Zod schema SHALL require targetSelector
+(string), title (string), description (string), and position (one of "top",
+"bottom", "left", "right"). The actionHint field SHALL be optional.
 
 **Validates: Requirements 10.2**
 
 ### Property 23: Walkthrough navigation advances and retreats correctly
 
-*For any* active walkthrough with N steps and current step index i, pressing Next when i < N-1 SHALL result in step i+1, pressing Back when i > 0 SHALL result in step i-1, and pressing Skip or Escape SHALL dismiss the walkthrough entirely.
+_For any_ active walkthrough with N steps and current step index i, pressing
+Next when i < N-1 SHALL result in step i+1, pressing Back when i > 0 SHALL
+result in step i-1, and pressing Skip or Escape SHALL dismiss the walkthrough
+entirely.
 
 **Validates: Requirements 10.5, 10.6, 10.7**
 
 ### Property 24: Walkthrough popover displays all required elements
 
-*For any* walkthrough step, the rendered popover SHALL contain the step title, description, action hint (if provided), step counter ("Step X of Y"), and navigation buttons (Next/Back/Skip or Done on last step).
+_For any_ walkthrough step, the rendered popover SHALL contain the step title,
+description, action hint (if provided), step counter ("Step X of Y"), and
+navigation buttons (Next/Back/Skip or Done on last step).
 
 **Validates: Requirements 10.4**
 
 ### Property 25: Answer cache returns only same-tenant results
 
-*For any* tenant ID and question, the answer cache similarity search SHALL only return cached answers where the tenant_id matches the requesting tenant. No cached answer from a different tenant SHALL ever be returned.
+_For any_ tenant ID and question, the answer cache similarity search SHALL only
+return cached answers where the tenant_id matches the requesting tenant. No
+cached answer from a different tenant SHALL ever be returned.
 
 **Validates: Requirements 12.5**
 
 ### Property 26: Cache hit above threshold returns cached answer with flag
 
-*For any* question where the answer cache contains a matching Q&A pair with similarity score ≥ 0.92, the gateway SHALL return the cached answer content with `cached: true` in the response metadata, without invoking the LLM.
+_For any_ question where the answer cache contains a matching Q&A pair with
+similarity score ≥ 0.92, the gateway SHALL return the cached answer content with
+`cached: true` in the response metadata, without invoking the LLM.
 
 **Validates: Requirements 12.3**
 
 ### Property 27: Cached response indicator in chat UI
 
-*For any* assistant ChatMessage with `cached: true`, the chat panel SHALL render a visual cache indicator (lightning bolt icon) alongside the message.
+_For any_ assistant ChatMessage with `cached: true`, the chat panel SHALL render
+a visual cache indicator (lightning bolt icon) alongside the message.
 
 **Validates: Requirements 12.4**
 
 ### Property 28: Stale cache entries are refreshed after TTL
 
-*For any* cached Q&A pair with `updated_at` older than the configured TTL (default 30 days), the refreshStale function SHALL re-query the LLM and update the answer and `updated_at` timestamp.
+_For any_ cached Q&A pair with `updated_at` older than the configured TTL
+(default 30 days), the refreshStale function SHALL re-query the LLM and update
+the answer and `updated_at` timestamp.
 
 **Validates: Requirements 12.7**
 
 ### Property 29: Factual responses are cached in the knowledge base
 
-*For any* AI Gateway response classified as factual/procedural (not a transactional tool call), the question-answer pair SHALL be stored in the answer_cache table with the tenant_id and category "faq".
+_For any_ AI Gateway response classified as factual/procedural (not a
+transactional tool call), the question-answer pair SHALL be stored in the
+answer_cache table with the tenant_id and category "faq".
 
 **Validates: Requirements 12.1**
 
 ### Property 30: Session reconnect preserves conversation history
 
-*For any* WebSocket session that disconnects and reconnects within the 5-minute window, the resumed session SHALL contain the same conversation message history as before disconnection.
+_For any_ WebSocket session that disconnects and reconnects within the 5-minute
+window, the resumed session SHALL contain the same conversation message history
+as before disconnection.
 
 **Validates: Requirements 6.5**
-
 
 ## Error Handling
 
 ### Frontend Error Handling
 
-| Scenario | Handling |
-|----------|----------|
-| WebSocket disconnection during streaming | Stop streaming, add SystemMessage "warning", show reconnecting indicator. Partial assistant message is preserved as-is. |
-| Tool-call for unknown tool name | Display ToolCallCard with status "failed" and message "Unknown tool". |
-| Frontend tool execution failure (navigateUI target not found) | Return `{ success: false, message: "Drawer not found" }`, display error in ToolCallCard. |
-| Walkthrough target element not in DOM | Skip the step, advance to next. If all steps are skipped, dismiss walkthrough with a "No elements found" message. |
-| Approval timeout (60s) | Update ApprovalCard status to "timed-out", disable buttons, re-enable chat input. |
-| Malformed WebSocket message | Silently ignore (existing behavior in `use-ai-gateway-socket.ts`). |
-| MarkdownRenderer receives invalid markdown | `react-markdown` gracefully renders raw text for unparseable content. No crash. |
-| Rate limited response | Display SystemMessage with retry-after info. Disable send button temporarily. |
-| Chat input submitted while streaming | Prevent submission (send button already disabled during streaming). |
+| Scenario                                                      | Handling                                                                                                                |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| WebSocket disconnection during streaming                      | Stop streaming, add SystemMessage "warning", show reconnecting indicator. Partial assistant message is preserved as-is. |
+| Tool-call for unknown tool name                               | Display ToolCallCard with status "failed" and message "Unknown tool".                                                   |
+| Frontend tool execution failure (navigateUI target not found) | Return `{ success: false, message: "Drawer not found" }`, display error in ToolCallCard.                                |
+| Walkthrough target element not in DOM                         | Skip the step, advance to next. If all steps are skipped, dismiss walkthrough with a "No elements found" message.       |
+| Approval timeout (60s)                                        | Update ApprovalCard status to "timed-out", disable buttons, re-enable chat input.                                       |
+| Malformed WebSocket message                                   | Silently ignore (existing behavior in `use-ai-gateway-socket.ts`).                                                      |
+| MarkdownRenderer receives invalid markdown                    | `react-markdown` gracefully renders raw text for unparseable content. No crash.                                         |
+| Rate limited response                                         | Display SystemMessage with retry-after info. Disable send button temporarily.                                           |
+| Chat input submitted while streaming                          | Prevent submission (send button already disabled during streaming).                                                     |
 
 ### Backend Error Handling
 
-| Scenario | Handling |
-|----------|----------|
-| Tool handler throws exception | TrustGate catches, logs to audit, returns `{ error: true, message }`. Gateway sends "tool-result" with success=false. |
-| Tool argument validation failure | ToolRegistry.validateArgs throws ToolValidationError. Gateway sends "tool-result" with validation error details. |
-| Answer cache DB query failure | Log error, fall through to LLM (cache is best-effort). |
-| Answer cache store failure | Log error, continue (response already sent to client). |
-| LLM timeout on primary model | Existing fallback to GPT-4o-mini in LLMService. |
-| Embedding generation failure | Log error, skip cache operation. |
-| Session not found on reconnect | Create new session (existing behavior). |
-| POS state update with invalid payload | Log warning, ignore update (don't crash session). |
+| Scenario                              | Handling                                                                                                              |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Tool handler throws exception         | TrustGate catches, logs to audit, returns `{ error: true, message }`. Gateway sends "tool-result" with success=false. |
+| Tool argument validation failure      | ToolRegistry.validateArgs throws ToolValidationError. Gateway sends "tool-result" with validation error details.      |
+| Answer cache DB query failure         | Log error, fall through to LLM (cache is best-effort).                                                                |
+| Answer cache store failure            | Log error, continue (response already sent to client).                                                                |
+| LLM timeout on primary model          | Existing fallback to GPT-4o-mini in LLMService.                                                                       |
+| Embedding generation failure          | Log error, skip cache operation.                                                                                      |
+| Session not found on reconnect        | Create new session (existing behavior).                                                                               |
+| POS state update with invalid payload | Log warning, ignore update (don't crash session).                                                                     |
 
 ### Error Message Format
 
 All error messages sent to the client follow the existing format:
+
 ```typescript
 { type: "error", payload: { code: string, message: string }, requestId?: string }
 ```
 
 New error codes:
+
 - `TOOL_EXECUTION_FAILED` — tool handler threw an exception
 - `TOOL_VALIDATION_FAILED` — tool arguments failed Zod validation
 - `APPROVAL_TIMEOUT` — high-trust approval request timed out
@@ -861,30 +1008,36 @@ New error codes:
 
 ### Testing Framework
 
-- **Unit tests**: Vitest (already configured in both `apps/vite-template` and `packages/ai-gateway`)
-- **Property-based tests**: `fast-check` (already in devDependencies of both packages)
+- **Unit tests**: Vitest (already configured in both `apps/vite-template` and
+  `packages/ai-gateway`)
+- **Property-based tests**: `fast-check` (already in devDependencies of both
+  packages)
 - **Component tests**: Vitest + jsdom (already in devDependencies)
 
 ### Unit Tests
 
 Unit tests cover specific examples, edge cases, and integration points:
 
-- MarkdownRenderer: renders specific markdown examples (heading, list, code block, link)
+- MarkdownRenderer: renders specific markdown examples (heading, list, code
+  block, link)
 - ToolCallCard: renders each status variant correctly
 - ApprovalCard: approve/reject button click handlers fire correctly
 - WalkthroughOverlay: step navigation with specific step arrays
 - NavigateUI: specific drawer targets (profile, notifications, shift)
-- Answer cache: specific similarity threshold boundary cases (0.91 miss, 0.92 hit)
+- Answer cache: specific similarity threshold boundary cases (0.91 miss, 0.92
+  hit)
 - WebSocket message parsing: specific message type examples
 - Tool handler edge cases: empty cart, non-existent customer, invalid promo code
 
 ### Property-Based Tests
 
-Each property test uses `fast-check` with a minimum of 100 iterations and references its design document property.
+Each property test uses `fast-check` with a minimum of 100 iterations and
+references its design document property.
 
 Property tests are organized by component/module:
 
 **Frontend (apps/vite-template):**
+
 - `markdown-renderer.property.test.ts` — Properties 1, 2
 - `message-store.property.test.ts` — Properties 3, 4, 14, 15, 16
 - `tool-cards.property.test.ts` — Properties 5, 7, 9
@@ -894,6 +1047,7 @@ Property tests are organized by component/module:
 - `cache-indicator.property.test.ts` — Property 27
 
 **Backend (packages/ai-gateway):**
+
 - `tool-handler-contract.property.test.ts` — Properties 10, 11, 12, 13
 - `ws-protocol.property.test.ts` — Properties 6, 20
 - `prompt-builder.property.test.ts` — Property 18
@@ -902,6 +1056,7 @@ Property tests are organized by component/module:
 - `navigate-ui.property.test.ts` — Property 21
 
 Each test file tags its tests with:
+
 ```typescript
 // Feature: ai-chat-enhanced-ui, Property 1: Markdown renders all syntax elements as correct HTML
 ```
@@ -921,6 +1076,7 @@ fc.assert(
 ### Coverage Goals
 
 - All 30 correctness properties covered by property-based tests
-- Edge cases (approval timeout, missing walkthrough targets, empty POS context) covered by unit tests
-- Integration points (WebSocket message flow, tool execution pipeline) covered by unit tests with mocked dependencies
-
+- Edge cases (approval timeout, missing walkthrough targets, empty POS context)
+  covered by unit tests
+- Integration points (WebSocket message flow, tool execution pipeline) covered
+  by unit tests with mocked dependencies

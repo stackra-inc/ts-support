@@ -2,11 +2,21 @@
 
 ## Overview
 
-The Invitation package (`packages/invitation/`, namespace `Pixielity\Invitation`, composer `pixielity/laravel-invitation`) is a standalone, reusable invitation lifecycle system extracted from the family package. It provides polymorphic invitations that any bounded context can consume — family invites, tenant invites, team invites, referral invites, etc.
+The Invitation package (`packages/invitation/`, namespace
+`Pixielity\Invitation`, composer `pixielity/laravel-invitation`) is a
+standalone, reusable invitation lifecycle system extracted from the family
+package. It provides polymorphic invitations that any bounded context can
+consume — family invites, tenant invites, team invites, referral invites, etc.
 
-The package follows all Pixielity steering conventions: attribute-driven configuration, interface-first design with `ATTR_*` constants, layered architecture (Model → Repository → Service → Controller), `#[AsEvent]` domain events as readonly DTOs, and cross-context FK columns as `unsignedBigInteger` + index (no `constrained()`).
+The package follows all Pixielity steering conventions: attribute-driven
+configuration, interface-first design with `ATTR_*` constants, layered
+architecture (Model → Repository → Service → Controller), `#[AsEvent]` domain
+events as readonly DTOs, and cross-context FK columns as `unsignedBigInteger` +
+index (no `constrained()`).
 
-The invitation package is its own bounded context. Consumer packages (family, tenancy, etc.) integrate via the `InvitableInterface` contract and domain event listeners.
+The invitation package is its own bounded context. Consumer packages (family,
+tenancy, etc.) integrate via the `InvitableInterface` contract and domain event
+listeners.
 
 **Validates: Requirements 1.1–1.8, 11.1–11.4**
 
@@ -76,10 +86,14 @@ pixielity/laravel-invitation
 
 ### Bounded Context Rules
 
-- `invited_by` references `users.id` — cross-context FK: `unsignedBigInteger` + index, no `constrained()`
-- `invitable_type` + `invitable_id` — polymorphic morph columns, no FK constraints
-- Consumer packages listen to domain events (`InvitationAccepted`, etc.) for side effects
-- Consumer packages resolve `InvitationServiceInterface` from the container for operations
+- `invited_by` references `users.id` — cross-context FK: `unsignedBigInteger` +
+  index, no `constrained()`
+- `invitable_type` + `invitable_id` — polymorphic morph columns, no FK
+  constraints
+- Consumer packages listen to domain events (`InvitationAccepted`, etc.) for
+  side effects
+- Consumer packages resolve `InvitationServiceInterface` from the container for
+  operations
 
 **Validates: Requirements 1.1, 1.3, 11.3–11.4, 12.4**
 
@@ -350,7 +364,8 @@ classDiagram
 | `created_at`     | `timestamp`          | Yes      | auto        | —         | Laravel timestamp                 |
 | `updated_at`     | `timestamp`          | Yes      | auto        | —         | Laravel timestamp                 |
 
-**Composite index:** `(invitable_type, invitable_id, email, status)` — for duplicate detection queries.
+**Composite index:** `(invitable_type, invitable_id, email, status)` — for
+duplicate detection queries.
 
 **Validates: Requirements 2.1, 2.8, 2.9**
 
@@ -628,7 +643,8 @@ return [
 
 ## Event Catalog
 
-All events are `final readonly` DTOs with `#[AsEvent]`, carrying only IDs for queue serialization.
+All events are `final readonly` DTOs with `#[AsEvent]`, carrying only IDs for
+queue serialization.
 
 | Event                | Properties                                                                         | Dispatched When                    | Validates     |
 | -------------------- | ---------------------------------------------------------------------------------- | ---------------------------------- | ------------- |
@@ -645,7 +661,8 @@ All events are `final readonly` DTOs with `#[AsEvent]`, carrying only IDs for qu
 
 ## Exception Catalog
 
-All exceptions extend a base `InvitationException` (which extends `\RuntimeException`).
+All exceptions extend a base `InvitationException` (which extends
+`\RuntimeException`).
 
 | Exception                        | Thrown When                                                          | HTTP Status       | Validates |
 | -------------------------------- | -------------------------------------------------------------------- | ----------------- | --------- |
@@ -672,7 +689,9 @@ All exceptions extend a base `InvitationException` (which extends `\RuntimeExcep
 | `InvitationDeclinedNotification` | `InvitationDeclined` event                    | Inviter (User model, Notifiable) | `mail`, `database` | Invitee email, invitable context                             | 7.3       |
 | `InvitationReminderNotification` | Scheduled reminder check                      | Invitee (via email)              | `mail`             | Token URL, days remaining                                    | 7.4       |
 
-All notifications are standard Laravel `Notification` classes. Consumer packages can override by binding custom notification classes in the config or by listening to events and dispatching their own notifications.
+All notifications are standard Laravel `Notification` classes. Consumer packages
+can override by binding custom notification classes in the config or by
+listening to events and dispatching their own notifications.
 
 **Validates: Requirements 7.1–7.6**
 
@@ -747,7 +766,8 @@ Schema::create(InvitationInterface::TABLE, function (Blueprint $table): void {
 
 **Validates: Requirement 12.2**
 
-**`src/Models/FamilyAccount.php`** — Implement `Pixielity\Invitation\Contracts\InvitableInterface`:
+**`src/Models/FamilyAccount.php`** — Implement
+`Pixielity\Invitation\Contracts\InvitableInterface`:
 
 ```php
 use Pixielity\Invitation\Contracts\InvitableInterface;
@@ -783,7 +803,8 @@ class FamilyAccount extends Model implements FamilyAccountInterface, InvitableIn
 
 **Validates: Requirements 12.3, 11.1–11.2**
 
-**`src/Services/FamilyAccountService.php`** — Replace `InvitationRepositoryInterface` with `InvitationServiceInterface`:
+**`src/Services/FamilyAccountService.php`** — Replace
+`InvitationRepositoryInterface` with `InvitationServiceInterface`:
 
 ```php
 use Pixielity\Invitation\Contracts\InvitationServiceInterface;
@@ -835,7 +856,9 @@ class FamilyAccountService extends Service implements FamilyAccountServiceInterf
 
 **Validates: Requirements 12.4, 12.5**
 
-**`src/Contracts/FamilyAccountServiceInterface.php`** — Retain `invite()` and `acceptInvitation()` signatures unchanged. Only the internal implementation changes.
+**`src/Contracts/FamilyAccountServiceInterface.php`** — Retain `invite()` and
+`acceptInvitation()` signatures unchanged. Only the internal implementation
+changes.
 
 **Validates: Requirement 12.5**
 
@@ -843,113 +866,174 @@ class FamilyAccountService extends Service implements FamilyAccountServiceInterf
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: InvitationStatus enum correctness
 
-_For any_ valid invitation status string value (`'pending'`, `'accepted'`, `'declined'`, `'expired'`, `'revoked'`), casting to `InvitationStatus` should produce the correct enum case, and the helper methods should return consistent results: `isPending()` returns true only for PENDING, `isTerminal()` returns true for ACCEPTED/DECLINED/EXPIRED/REVOKED, and `isActionable()` returns true only for PENDING.
+_For any_ valid invitation status string value (`'pending'`, `'accepted'`,
+`'declined'`, `'expired'`, `'revoked'`), casting to `InvitationStatus` should
+produce the correct enum case, and the helper methods should return consistent
+results: `isPending()` returns true only for PENDING, `isTerminal()` returns
+true for ACCEPTED/DECLINED/EXPIRED/REVOKED, and `isActionable()` returns true
+only for PENDING.
 
 **Validates: Requirements 2.3, 2.7**
 
 ### Property 2: JSON field round-trip
 
-_For any_ valid PHP array, storing it as `metadata` or `permissions` on an Invitation model and then retrieving it should produce an equivalent array (serialization round-trip via JSON casting).
+_For any_ valid PHP array, storing it as `metadata` or `permissions` on an
+Invitation model and then retrieving it should produce an equivalent array
+(serialization round-trip via JSON casting).
 
 **Validates: Requirement 2.4**
 
 ### Property 3: Invitation creation invariants
 
-_For any_ valid invitation creation input (email, invitable context, role, inviter), the created invitation should have: a non-empty cryptographically random token, status equal to PENDING, and `expires_at` equal to `now() + resolvedTtl` where `resolvedTtl` is the per-context override if configured, the invitable model's `getInvitationTtl()` if non-null, or the default TTL from config.
+_For any_ valid invitation creation input (email, invitable context, role,
+inviter), the created invitation should have: a non-empty cryptographically
+random token, status equal to PENDING, and `expires_at` equal to
+`now() + resolvedTtl` where `resolvedTtl` is the per-context override if
+configured, the invitable model's `getInvitationTtl()` if non-null, or the
+default TTL from config.
 
 **Validates: Requirements 3.1, 4.2, 4.3**
 
 ### Property 4: State transitions produce correct status and timestamps
 
-_For any_ PENDING, non-expired invitation and any valid transition action (accept, decline, revoke, force-accept, force-expire), the resulting invitation should have the correct terminal status and the corresponding timestamp column set (`accepted_at`, `declined_at`, `revoked_at`), and the matching domain event should be dispatched with the correct invitation ID and invitable context.
+_For any_ PENDING, non-expired invitation and any valid transition action
+(accept, decline, revoke, force-accept, force-expire), the resulting invitation
+should have the correct terminal status and the corresponding timestamp column
+set (`accepted_at`, `declined_at`, `revoked_at`), and the matching domain event
+should be dispatched with the correct invitation ID and invitable context.
 
 **Validates: Requirements 3.2, 3.3, 3.4, 3.7, 9.1, 9.2**
 
 ### Property 5: Resend regenerates token and resets TTL
 
-_For any_ PENDING invitation, resending should produce a new token different from the original, reset `expires_at` to `now() + resolvedTtl`, and dispatch an `InvitationResent` event.
+_For any_ PENDING invitation, resending should produce a new token different
+from the original, reset `expires_at` to `now() + resolvedTtl`, and dispatch an
+`InvitationResent` event.
 
 **Validates: Requirements 3.5, 3.7**
 
 ### Property 6: Non-actionable invitations reject operations
 
-_For any_ invitation that is not in PENDING status (ACCEPTED, DECLINED, EXPIRED, REVOKED), or any PENDING invitation whose `expires_at` is in the past, attempting accept, decline, revoke, resend, force-accept, or force-expire should throw a domain-specific exception (`InvalidTransitionException` or `ExpiredInvitationException`). For lazy expiration, the status should transition to EXPIRED before the exception is thrown.
+_For any_ invitation that is not in PENDING status (ACCEPTED, DECLINED, EXPIRED,
+REVOKED), or any PENDING invitation whose `expires_at` is in the past,
+attempting accept, decline, revoke, resend, force-accept, or force-expire should
+throw a domain-specific exception (`InvalidTransitionException` or
+`ExpiredInvitationException`). For lazy expiration, the status should transition
+to EXPIRED before the exception is thrown.
 
 **Validates: Requirements 3.6, 4.4, 9.3**
 
 ### Property 7: Duplicate invitation guard
 
-_For any_ invitable context and email address that already has a PENDING invitation, attempting to create another invitation for the same email and context should throw `DuplicateInvitationException`, and the total number of invitations should remain unchanged.
+_For any_ invitable context and email address that already has a PENDING
+invitation, attempting to create another invitation for the same email and
+context should throw `DuplicateInvitationException`, and the total number of
+invitations should remain unchanged.
 
 **Validates: Requirement 5.1**
 
 ### Property 8: Self-invite guard
 
-_For any_ user, attempting to create an invitation where the invitee email matches the inviter's email should throw `SelfInviteException`, and no invitation should be created.
+_For any_ user, attempting to create an invitation where the invitee email
+matches the inviter's email should throw `SelfInviteException`, and no
+invitation should be created.
 
 **Validates: Requirement 5.2**
 
 ### Property 9: Max pending guard
 
-_For any_ invitable context that has reached the configured `max_pending_per_context` limit of PENDING invitations, attempting to create one more should throw `MaxPendingInvitationsException`.
+_For any_ invitable context that has reached the configured
+`max_pending_per_context` limit of PENDING invitations, attempting to create one
+more should throw `MaxPendingInvitationsException`.
 
 **Validates: Requirement 5.3**
 
 ### Property 10: Rate limit guard
 
-_For any_ inviter who has sent `max_per_window` invitations within the configured `window_minutes`, the next invitation attempt should throw `RateLimitExceededException`.
+_For any_ inviter who has sent `max_per_window` invitations within the
+configured `window_minutes`, the next invitation attempt should throw
+`RateLimitExceededException`.
 
 **Validates: Requirement 5.4**
 
 ### Property 11: Domain restriction guard
 
-_For any_ email address and domain restriction configuration (allowlist or blocklist mode with a set of domains), the invitation service should accept the email if and only if: (a) in allowlist mode, the email domain is in the allowed list, or (b) in blocklist mode, the email domain is not in the blocked list. Non-compliant emails should throw `DomainRestrictedException`.
+_For any_ email address and domain restriction configuration (allowlist or
+blocklist mode with a set of domains), the invitation service should accept the
+email if and only if: (a) in allowlist mode, the email domain is in the allowed
+list, or (b) in blocklist mode, the email domain is not in the blocked list.
+Non-compliant emails should throw `DomainRestrictedException`.
 
 **Validates: Requirement 5.5**
 
 ### Property 12: Already-member guard
 
-_For any_ invitable context where `isAlreadyMember(email)` returns true, attempting to create an invitation should throw `AlreadyMemberException`.
+_For any_ invitable context where `isAlreadyMember(email)` returns true,
+attempting to create an invitation should throw `AlreadyMemberException`.
 
 **Validates: Requirement 5.7**
 
 ### Property 13: Link channel skips notification
 
-_For any_ invitation created with channel `'link'`, no notification should be dispatched, and the returned invitation should contain a valid token that can be used to construct a URL.
+_For any_ invitation created with channel `'link'`, no notification should be
+dispatched, and the returned invitation should contain a valid token that can be
+used to construct a URL.
 
 **Validates: Requirement 6.4**
 
 ### Property 14: Bulk invite partitions successes and failures
 
-_For any_ set of email addresses containing a mix of valid and invalid emails (where invalid means duplicate, self-invite, domain-restricted, etc.), the bulk invite operation should return a `BulkInvitationResult` where: the successful collection contains invitations for all valid emails, the failed collection contains error entries for all invalid emails, and `successful.count() + failed.count() == input.count()`.
+_For any_ set of email addresses containing a mix of valid and invalid emails
+(where invalid means duplicate, self-invite, domain-restricted, etc.), the bulk
+invite operation should return a `BulkInvitationResult` where: the successful
+collection contains invitations for all valid emails, the failed collection
+contains error entries for all invalid emails, and
+`successful.count() + failed.count() == input.count()`.
 
 **Validates: Requirements 6.5, 6.6**
 
 ### Property 15: Repository findByToken round-trip
 
-_For any_ created invitation, calling `findByToken()` with that invitation's token should return the same invitation. For any random string that is not a valid token, `findByToken()` should return null.
+_For any_ created invitation, calling `findByToken()` with that invitation's
+token should return the same invitation. For any random string that is not a
+valid token, `findByToken()` should return null.
 
 **Validates: Requirement 8.1**
 
 ### Property 16: Repository filter queries return correct subsets
 
-_For any_ set of invitations across multiple invitable contexts, emails, inviters, and statuses: `findByInvitable(type, id)` returns only invitations matching that context, `findPendingByInvitable(type, id)` returns only PENDING invitations for that context, `findByEmail(email)` returns only invitations for that email, and `findByInviter(inviterId)` returns only invitations sent by that inviter.
+_For any_ set of invitations across multiple invitable contexts, emails,
+inviters, and statuses: `findByInvitable(type, id)` returns only invitations
+matching that context, `findPendingByInvitable(type, id)` returns only PENDING
+invitations for that context, `findByEmail(email)` returns only invitations for
+that email, and `findByInviter(inviterId)` returns only invitations sent by that
+inviter.
 
 **Validates: Requirements 8.2, 8.3, 8.4, 8.5**
 
 ### Property 17: Repository count queries return correct counts
 
-_For any_ set of invitations, `countPendingByInvitable(type, id)` should equal the number of PENDING invitations for that context, and `countRecentByInviter(inviterId, minutes)` should equal the number of invitations created by that inviter within the last `minutes` minutes.
+_For any_ set of invitations, `countPendingByInvitable(type, id)` should equal
+the number of PENDING invitations for that context, and
+`countRecentByInviter(inviterId, minutes)` should equal the number of
+invitations created by that inviter within the last `minutes` minutes.
 
 **Validates: Requirements 8.6, 8.7**
 
 ### Property 18: Batch expiration command expires all overdue invitations
 
-_For any_ set of PENDING invitations where some have `expires_at` in the past and some in the future, running the `invitation:expire` command should transition exactly the overdue ones to EXPIRED status, dispatch `InvitationExpired` events for each, and leave future-dated invitations unchanged.
+_For any_ set of PENDING invitations where some have `expires_at` in the past
+and some in the future, running the `invitation:expire` command should
+transition exactly the overdue ones to EXPIRED status, dispatch
+`InvitationExpired` events for each, and leave future-dated invitations
+unchanged.
 
 **Validates: Requirements 4.5, 4.6**
 
@@ -959,7 +1043,9 @@ _For any_ set of PENDING invitations where some have `expires_at` in the past an
 
 ### Exception Hierarchy
 
-All invitation exceptions extend `InvitationException` (which extends `\RuntimeException`), enabling consumers to catch all invitation errors with a single catch block or specific exceptions individually.
+All invitation exceptions extend `InvitationException` (which extends
+`\RuntimeException`), enabling consumers to catch all invitation errors with a
+single catch block or specific exceptions individually.
 
 ```php
 abstract class InvitationException extends \RuntimeException {}
@@ -977,10 +1063,16 @@ class InvalidTransitionException extends InvitationException {}
 
 ### Error Flow
 
-1. Validation guards run in order during `createInvitation()`: self-invite → already-member → duplicate → domain restriction → rate limit → max pending.
-2. Token-based operations (`acceptInvitation`, `declineInvitation`) first resolve the invitation by token (throw `InvalidTokenException` if not found), then check expiration (lazy-expire + throw `ExpiredInvitationException`), then check status (throw `InvalidTransitionException` if not PENDING).
-3. Admin force operations check status only (throw `InvalidTransitionException` if not PENDING).
-4. Bulk operations catch all `InvitationException` subclasses per-email and collect them in the `BulkInvitationResult.failed` collection.
+1. Validation guards run in order during `createInvitation()`: self-invite →
+   already-member → duplicate → domain restriction → rate limit → max pending.
+2. Token-based operations (`acceptInvitation`, `declineInvitation`) first
+   resolve the invitation by token (throw `InvalidTokenException` if not found),
+   then check expiration (lazy-expire + throw `ExpiredInvitationException`),
+   then check status (throw `InvalidTransitionException` if not PENDING).
+3. Admin force operations check status only (throw `InvalidTransitionException`
+   if not PENDING).
+4. Bulk operations catch all `InvitationException` subclasses per-email and
+   collect them in the `BulkInvitationResult.failed` collection.
 
 **Validates: Requirements 3.6, 5.1–5.5, 5.7, 6.5, 9.3**
 
@@ -990,19 +1082,25 @@ class InvalidTransitionException extends InvitationException {}
 
 ### Property-Based Testing
 
-The invitation system has significant pure business logic (validation guards, state transitions, TTL resolution, domain restriction matching, bulk partitioning) that is well-suited for property-based testing.
+The invitation system has significant pure business logic (validation guards,
+state transitions, TTL resolution, domain restriction matching, bulk
+partitioning) that is well-suited for property-based testing.
 
-**Library:** [PHPUnit with `phpunit/phpunit` + `innmind/black-box`](https://github.com/Innmind/BlackBox) for PHP property-based testing.
+**Library:**
+[PHPUnit with `phpunit/phpunit` + `innmind/black-box`](https://github.com/Innmind/BlackBox)
+for PHP property-based testing.
 
 **Configuration:**
 
 - Minimum 100 iterations per property test
-- Each property test tagged with: `Feature: invitation-system, Property {N}: {title}`
+- Each property test tagged with:
+  `Feature: invitation-system, Property {N}: {title}`
 - Property tests located in `packages/invitation/tests/Unit/Properties/`
 
 ### Unit Tests
 
-Unit tests complement property tests for specific examples, edge cases, and integration points:
+Unit tests complement property tests for specific examples, edge cases, and
+integration points:
 
 - Enum case values and labels (smoke)
 - Model relationship definitions (smoke)
@@ -1018,10 +1116,12 @@ Unit tests located in `packages/invitation/tests/Unit/`.
 
 Integration tests verify end-to-end flows with a real database:
 
-- Full invitation lifecycle: create → accept → verify member added (via event listener)
+- Full invitation lifecycle: create → accept → verify member added (via event
+  listener)
 - Notification dispatch verification with `Notification::fake()`
 - `invitation:expire` command with real database records
-- Family package integration: `FamilyAccountService::invite()` delegates to invitation package
+- Family package integration: `FamilyAccountService::invite()` delegates to
+  invitation package
 
 Integration tests located in `packages/invitation/tests/Feature/`.
 

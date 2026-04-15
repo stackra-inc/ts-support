@@ -2,7 +2,11 @@
 
 ## Overview
 
-This design addresses 7 bugs in the drawer-stack system at `packages/ui/src/components/drawer-stack/`. The fixes span across the SubViewNavigator component, useFocusTrap hook, useDrawerDrag hook, usePreventScroll hook, MobilePanel/DrawerContainer components, and the Escape key handler. Each fix is scoped to a specific file with minimal blast radius.
+This design addresses 7 bugs in the drawer-stack system at
+`packages/ui/src/components/drawer-stack/`. The fixes span across the
+SubViewNavigator component, useFocusTrap hook, useDrawerDrag hook,
+usePreventScroll hook, MobilePanel/DrawerContainer components, and the Escape
+key handler. Each fix is scoped to a specific file with minimal blast radius.
 
 ### Files Affected
 
@@ -35,19 +39,25 @@ graph TD
     I --> J[SubViewContext]
 ```
 
-All 7 fixes are leaf-level changes — none alter the provider/context architecture or the reducer logic. The fixes touch hooks and components that sit at the edges of the system.
+All 7 fixes are leaf-level changes — none alter the provider/context
+architecture or the reducer logic. The fixes touch hooks and components that sit
+at the edges of the system.
 
 ## Components and Interfaces
 
 ### Fix 1: SubViewNavigator — Inline CSS Transitions
 
-**Current bug:** The component references CSS class names `animate-slide-in-right` and `animate-slide-in-left` that don't exist in the project's Tailwind config, resulting in no visible animation.
+**Current bug:** The component references CSS class names
+`animate-slide-in-right` and `animate-slide-in-left` that don't exist in the
+project's Tailwind config, resulting in no visible animation.
 
-**Fix:** Replace the class-based animation with inline `style` props using `transform` and `transition`.
+**Fix:** Replace the class-based animation with inline `style` props using
+`transform` and `transition`.
 
 **Implementation detail:**
 
-In `sub-view-navigator.component.tsx`, replace the `animClass` string logic with an inline style object:
+In `sub-view-navigator.component.tsx`, replace the `animClass` string logic with
+an inline style object:
 
 ```typescript
 // Current (broken):
@@ -67,7 +77,9 @@ const animStyle: React.CSSProperties = animating
   : {};
 ```
 
-The component needs a two-phase approach: mount with the offset transform, then on the next frame remove it to trigger the slide-in. This requires a `useEffect` + `requestAnimationFrame` pattern:
+The component needs a two-phase approach: mount with the offset transform, then
+on the next frame remove it to trigger the slide-in. This requires a
+`useEffect` + `requestAnimationFrame` pattern:
 
 ```typescript
 const [animStyle, setAnimStyle] = useState<React.CSSProperties>({});
@@ -102,9 +114,14 @@ Apply the style to the view container div instead of the class:
 
 ### Fix 2: useFocusTrap — Focus Restoration on Unmount
 
-**Current bug:** The hook stores `previouslyFocusedRef` on activation but never restores focus when the hook deactivates or unmounts. The `DrawerContainer` has a separate focus restoration mechanism using `triggerRef`, but it only fires when `isOpen` becomes false and `visual.every(v => v.isLeaving)` — which misses the case of popping a single drawer from a multi-drawer stack.
+**Current bug:** The hook stores `previouslyFocusedRef` on activation but never
+restores focus when the hook deactivates or unmounts. The `DrawerContainer` has
+a separate focus restoration mechanism using `triggerRef`, but it only fires
+when `isOpen` becomes false and `visual.every(v => v.isLeaving)` — which misses
+the case of popping a single drawer from a multi-drawer stack.
 
-**Fix:** Add a cleanup return in the auto-focus `useEffect` that restores focus to `previouslyFocusedRef.current`.
+**Fix:** Add a cleanup return in the auto-focus `useEffect` that restores focus
+to `previouslyFocusedRef.current`.
 
 **Implementation detail:**
 
@@ -139,13 +156,21 @@ useEffect(() => {
 }, [isActive, enabled, getFocusableElements]);
 ```
 
-The `document.body.contains(prev)` check handles the edge case where the trigger element was removed from the DOM before the drawer closed (Req 2.3).
+The `document.body.contains(prev)` check handles the edge case where the trigger
+element was removed from the DOM before the drawer closed (Req 2.3).
 
 ### Fix 3: useDrawerDrag — Respect onBeforeClose Guard
 
-**Current bug:** In `onPointerUp`, when `shouldDismiss` is true, the hook first animates the panel to `translateX(100%)` and then calls `onDismiss()` inside a `transitionend` listener. If `onDismiss` triggers `operations.pop()` which calls `onBeforeClose` and the guard returns `false`, the panel is already visually off-screen.
+**Current bug:** In `onPointerUp`, when `shouldDismiss` is true, the hook first
+animates the panel to `translateX(100%)` and then calls `onDismiss()` inside a
+`transitionend` listener. If `onDismiss` triggers `operations.pop()` which calls
+`onBeforeClose` and the guard returns `false`, the panel is already visually
+off-screen.
 
-**Fix:** Invert the order — call `onDismiss` first (which is `operations.pop()`), and only animate off-screen if the pop actually succeeds. Since `pop()` is async (it awaits `onBeforeClose`), the hook needs to accept an async `onDismiss` and await it.
+**Fix:** Invert the order — call `onDismiss` first (which is
+`operations.pop()`), and only animate off-screen if the pop actually succeeds.
+Since `pop()` is async (it awaits `onBeforeClose`), the hook needs to accept an
+async `onDismiss` and await it.
 
 **Implementation detail:**
 
@@ -213,13 +238,21 @@ const onPointerUp = useCallback(
 );
 ```
 
-However, there's a subtlety: `operations.pop()` is async and dispatches after the await. The DOM won't update synchronously. A cleaner approach is to have `onDismiss` return a boolean indicating whether the dismiss was allowed:
+However, there's a subtlety: `operations.pop()` is async and dispatches after
+the await. The DOM won't update synchronously. A cleaner approach is to have
+`onDismiss` return a boolean indicating whether the dismiss was allowed:
 
-**Revised approach:** Change the `onDismiss` prop in `DrawerContainer` to pass a callback that returns whether the pop succeeded. The `DrawerStackProvider.pop()` already returns void but we can check the stack length before/after.
+**Revised approach:** Change the `onDismiss` prop in `DrawerContainer` to pass a
+callback that returns whether the pop succeeded. The `DrawerStackProvider.pop()`
+already returns void but we can check the stack length before/after.
 
-Actually, the simplest approach: the `DrawerContainer` already has access to `operations.pop()`. We change the `onDismiss` callback passed to `DesktopPanel` to be an async function that calls `pop()` and returns whether it succeeded by comparing stack lengths:
+Actually, the simplest approach: the `DrawerContainer` already has access to
+`operations.pop()`. We change the `onDismiss` callback passed to `DesktopPanel`
+to be an async function that calls `pop()` and returns whether it succeeded by
+comparing stack lengths:
 
-In `drawer-container.component.tsx`, change the `onDismiss` prop for DesktopPanel:
+In `drawer-container.component.tsx`, change the `onDismiss` prop for
+DesktopPanel:
 
 ```typescript
 onDismiss={async () => {
@@ -230,7 +263,10 @@ onDismiss={async () => {
 }}
 ```
 
-And in `useDrawerDrag`, after calling `await onDismiss()`, check if the element's `data-drawer-active` attribute changed or if the element is still in the DOM. The simplest reliable check: after the async pop, use a microtask to check if the panel element still has `data-drawer-active="true"`:
+And in `useDrawerDrag`, after calling `await onDismiss()`, check if the
+element's `data-drawer-active` attribute changed or if the element is still in
+the DOM. The simplest reliable check: after the async pop, use a microtask to
+check if the panel element still has `data-drawer-active="true"`:
 
 ```typescript
 if (shouldDismiss) {
@@ -262,9 +298,12 @@ const handleDismiss = useCallback(async (): Promise<boolean> => {
 }, [stack.length, operations]);
 ```
 
-Wait — `DrawerContainer` doesn't have a `stackRef`. But `operations.pop()` is already async and only dispatches POP if the guard allows. We need a way to know if it succeeded.
+Wait — `DrawerContainer` doesn't have a `stackRef`. But `operations.pop()` is
+already async and only dispatches POP if the guard allows. We need a way to know
+if it succeeded.
 
-**Final approach:** The cleanest fix is to make `operations.pop()` return `Promise<boolean>` from the provider, then thread that through:
+**Final approach:** The cleanest fix is to make `operations.pop()` return
+`Promise<boolean>` from the provider, then thread that through:
 
 1. In `DrawerStackProvider`, change `pop` to return `Promise<boolean>`:
 
@@ -314,9 +353,13 @@ onDismiss: () => Promise<boolean> | boolean;
 
 ### Fix 4: usePreventScroll — Instance-Safe Shared State
 
-**Current bug:** The hook uses module-level `let` variables (`lockCount`, `savedScrollY`, `savedBodyStyles`, `cleanupFns`). If the module is loaded in multiple bundle chunks (e.g., code-splitting), each chunk gets its own copy of these variables, causing lock count mismatches and scroll restoration failures.
+**Current bug:** The hook uses module-level `let` variables (`lockCount`,
+`savedScrollY`, `savedBodyStyles`, `cleanupFns`). If the module is loaded in
+multiple bundle chunks (e.g., code-splitting), each chunk gets its own copy of
+these variables, causing lock count mismatches and scroll restoration failures.
 
-**Fix:** Move the shared state to a singleton attached to `window` (or `document.body` dataset), ensuring all instances share the same lock counter.
+**Fix:** Move the shared state to a singleton attached to `window` (or
+`document.body` dataset), ensuring all instances share the same lock counter.
 
 **Implementation detail:**
 
@@ -346,13 +389,18 @@ function getSharedState(): ScrollLockState {
 }
 ```
 
-Then replace all references to `lockCount`, `savedScrollY`, etc. with `getSharedState().lockCount`, etc. throughout the hook and its helper functions.
+Then replace all references to `lockCount`, `savedScrollY`, etc. with
+`getSharedState().lockCount`, etc. throughout the hook and its helper functions.
 
 ### Fix 5: useDrawerDrag — AbortController for transitionend Cleanup
 
-**Current bug:** The `onPointerUp` handler adds `transitionend` listeners with `{ once: true }` but has no cleanup path if the component unmounts before the transition completes. This leaks listeners and can cause errors when the callback references stale refs.
+**Current bug:** The `onPointerUp` handler adds `transitionend` listeners with
+`{ once: true }` but has no cleanup path if the component unmounts before the
+transition completes. This leaks listeners and can cause errors when the
+callback references stale refs.
 
-**Fix:** Use an `AbortController` to manage `transitionend` listeners, and abort it on unmount.
+**Fix:** Use an `AbortController` to manage `transitionend` listeners, and abort
+it on unmount.
 
 **Implementation detail:**
 
@@ -410,13 +458,21 @@ export function useDrawerDrag({
 }
 ```
 
-The `{ once: true, signal }` combination means: the listener auto-removes after firing (normal case), OR is removed when the AbortController aborts (unmount case). No double-removal occurs because `once: true` already removed it if it fired.
+The `{ once: true, signal }` combination means: the listener auto-removes after
+firing (normal case), OR is removed when the AbortController aborts (unmount
+case). No double-removal occurs because `once: true` already removed it if it
+fired.
 
 ### Fix 6: MobilePanel — Defensive Wrapper Access
 
-**Current bug:** `MobilePanel.onPointerMove`, `MobilePanel.onPointerUp`, and `DrawerContainer`'s Vaul-style background scale effect all call `document.querySelector("[data-drawer-wrapper]")` and immediately access properties on the result without null checks. If the consumer forgets to add `data-drawer-wrapper`, this throws.
+**Current bug:** `MobilePanel.onPointerMove`, `MobilePanel.onPointerUp`, and
+`DrawerContainer`'s Vaul-style background scale effect all call
+`document.querySelector("[data-drawer-wrapper]")` and immediately access
+properties on the result without null checks. If the consumer forgets to add
+`data-drawer-wrapper`, this throws.
 
-**Fix:** Add null guards at every `querySelector` call site, and add a `console.warn` in development mode.
+**Fix:** Add null guards at every `querySelector` call site, and add a
+`console.warn` in development mode.
 
 **Implementation detail:**
 
@@ -437,9 +493,12 @@ function getDrawerWrapper(): HTMLElement | null {
 }
 ```
 
-Replace all `document.querySelector("[data-drawer-wrapper]") as HTMLElement` calls with `getDrawerWrapper()`, and guard all property accesses with `if (wrapper) { ... }`.
+Replace all `document.querySelector("[data-drawer-wrapper]") as HTMLElement`
+calls with `getDrawerWrapper()`, and guard all property accesses with
+`if (wrapper) { ... }`.
 
-The warning should only log once per session to avoid console spam. Use a module-level flag:
+The warning should only log once per session to avoid console spam. Use a
+module-level flag:
 
 ```typescript
 let wrapperWarned = false;
@@ -460,9 +519,14 @@ function getDrawerWrapper(): HTMLElement | null {
 
 ### Fix 7: Escape Key — Respect Nested Event Handling
 
-**Current bug:** The DrawerContainer's Escape key handler uses `window.addEventListener("keydown", h, true)` (capture phase) and calls `e.preventDefault()` + `e.stopPropagation()` + `operations.pop()` without checking if another handler (e.g., a modal inside the drawer) already handled the event.
+**Current bug:** The DrawerContainer's Escape key handler uses
+`window.addEventListener("keydown", h, true)` (capture phase) and calls
+`e.preventDefault()` + `e.stopPropagation()` + `operations.pop()` without
+checking if another handler (e.g., a modal inside the drawer) already handled
+the event.
 
-**Fix:** Check `event.defaultPrevented` at the top of the handler. If true, bail out without calling `pop()` or `stopPropagation()`.
+**Fix:** Check `event.defaultPrevented` at the top of the handler. If true, bail
+out without calling `pop()` or `stopPropagation()`.
 
 **Implementation detail:**
 
@@ -484,11 +548,15 @@ useEffect(() => {
 }, [isOpen, activeDrawer, operations]);
 ```
 
-The capture phase listener is preserved (Req 7.3) so the drawer stack still has priority ordering within itself. The `defaultPrevented` check allows nested components (modals, dropdowns) to call `e.preventDefault()` in their own handlers first.
+The capture phase listener is preserved (Req 7.3) so the drawer stack still has
+priority ordering within itself. The `defaultPrevented` check allows nested
+components (modals, dropdowns) to call `e.preventDefault()` in their own
+handlers first.
 
 ## Data Models
 
-No data model changes are required. All fixes operate on existing interfaces (`DrawerConfig`, `DrawerEntry`, `StackOperations`, `UseDrawerDragOptions`).
+No data model changes are required. All fixes operate on existing interfaces
+(`DrawerConfig`, `DrawerEntry`, `StackOperations`, `UseDrawerDragOptions`).
 
 The only interface change is:
 
@@ -500,39 +568,58 @@ pop: () => Promise<boolean>;
 onDismiss: () => Promise<boolean> | boolean;
 ```
 
-These are backward-compatible since existing callers that ignore the return value continue to work.
+These are backward-compatible since existing callers that ignore the return
+value continue to work.
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: SubViewNavigator inline transition direction
 
-_For any_ SubViewNavigator with a set of views and a sequence of goTo/goBack operations, the view container's inline style SHALL reflect the correct animation direction (translateX with positive offset for forward, negative for back) during transitions, and SHALL have no transform applied when no transition is in progress.
+_For any_ SubViewNavigator with a set of views and a sequence of goTo/goBack
+operations, the view container's inline style SHALL reflect the correct
+animation direction (translateX with positive offset for forward, negative for
+back) during transitions, and SHALL have no transform applied when no transition
+is in progress.
 
 **Validates: Requirements 1.1, 1.2, 1.4**
 
 ### Property 2: Focus trap round-trip restoration
 
-_For any_ focusable DOM element that has focus when a focus trap activates, deactivating or unmounting the focus trap SHALL restore focus to that element, provided it is still present in the DOM.
+_For any_ focusable DOM element that has focus when a focus trap activates,
+deactivating or unmounting the focus trap SHALL restore focus to that element,
+provided it is still present in the DOM.
 
 **Validates: Requirements 2.1, 2.2**
 
 ### Property 3: Drag dismiss respects onBeforeClose guard
 
-_For any_ drag gesture that exceeds the dismiss threshold on a DesktopPanel whose drawer has an `onBeforeClose` guard that returns `false`, the panel SHALL snap back to its original position and SHALL never have its transform set to `translateX(100%)`.
+_For any_ drag gesture that exceeds the dismiss threshold on a DesktopPanel
+whose drawer has an `onBeforeClose` guard that returns `false`, the panel SHALL
+snap back to its original position and SHALL never have its transform set to
+`translateX(100%)`.
 
 **Validates: Requirements 3.1, 3.2**
 
 ### Property 4: Scroll lock round-trip
 
-_For any_ sequence of scroll lock acquisitions and releases across one or more usePreventScroll instances, the document body's scroll styles SHALL be applied when the first lock is acquired and SHALL be fully restored to their original values when the last lock is released.
+_For any_ sequence of scroll lock acquisitions and releases across one or more
+usePreventScroll instances, the document body's scroll styles SHALL be applied
+when the first lock is acquired and SHALL be fully restored to their original
+values when the last lock is released.
 
 **Validates: Requirements 4.3, 4.4**
 
 ### Property 5: Escape key respects defaultPrevented
 
-_For any_ Escape key event dispatched while a drawer is open, if `event.defaultPrevented` is `true` at the time the DrawerContainer's handler fires, the handler SHALL not call `operations.pop()` and SHALL not call `event.stopPropagation()`.
+_For any_ Escape key event dispatched while a drawer is open, if
+`event.defaultPrevented` is `true` at the time the DrawerContainer's handler
+fires, the handler SHALL not call `operations.pop()` and SHALL not call
+`event.stopPropagation()`.
 
 **Validates: Requirements 7.1, 7.2**
 
@@ -569,9 +656,11 @@ _For any_ Escape key event dispatched while a drawer is open, if `event.defaultP
 
 ### Property-Based Tests
 
-Property-based testing library: **fast-check** (already standard for TypeScript/React projects).
+Property-based testing library: **fast-check** (already standard for
+TypeScript/React projects).
 
-Each property test runs a minimum of 100 iterations and is tagged with the corresponding design property.
+Each property test runs a minimum of 100 iterations and is tagged with the
+corresponding design property.
 
 | Property Test                                | Tag                                              | Min Iterations |
 | -------------------------------------------- | ------------------------------------------------ | -------------- |

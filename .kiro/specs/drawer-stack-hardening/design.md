@@ -2,7 +2,12 @@
 
 ## Overview
 
-This design covers 6 hardening improvements to the drawer stack system at `packages/ui/src/components/drawer-stack/`. Each improvement targets a specific robustness gap: a hardcoded counter threshold in StackDots, missing horizontal scroll detection in drag handling, unbounded z-index calculation, inconsistent subtitle visibility in compact headers, focus trap portal limitations, and a misleading `pop()` return type.
+This design covers 6 hardening improvements to the drawer stack system at
+`packages/ui/src/components/drawer-stack/`. Each improvement targets a specific
+robustness gap: a hardcoded counter threshold in StackDots, missing horizontal
+scroll detection in drag handling, unbounded z-index calculation, inconsistent
+subtitle visibility in compact headers, focus trap portal limitations, and a
+misleading `pop()` return type.
 
 ### Files Affected
 
@@ -17,7 +22,9 @@ This design covers 6 hardening improvements to the drawer stack system at `packa
 
 ## Architecture
 
-The drawer-stack system's layered architecture remains unchanged. All 6 improvements are leaf-level changes to existing components, hooks, constants, and interfaces.
+The drawer-stack system's layered architecture remains unchanged. All 6
+improvements are leaf-level changes to existing components, hooks, constants,
+and interfaces.
 
 ```mermaid
 graph TD
@@ -40,13 +47,17 @@ graph TD
 
 ### Improvement 1: Configurable StackDots Counter Threshold
 
-**Current issue:** `MAX_DOTS` is a hardcoded `const MAX_DOTS = 5` inside `stack-dots.component.tsx`. Consumers cannot customize when the component switches from dots to counter mode.
+**Current issue:** `MAX_DOTS` is a hardcoded `const MAX_DOTS = 5` inside
+`stack-dots.component.tsx`. Consumers cannot customize when the component
+switches from dots to counter mode.
 
-**Fix:** Move `MAX_DOTS` to `DRAWER_DEFAULTS`, add an optional `maxDots` prop to `StackDots`.
+**Fix:** Move `MAX_DOTS` to `DRAWER_DEFAULTS`, add an optional `maxDots` prop to
+`StackDots`.
 
 **Implementation:**
 
-1. In `drawer-defaults.constant.ts`, add `MAX_DOTS: 5` to the `DRAWER_DEFAULTS` object.
+1. In `drawer-defaults.constant.ts`, add `MAX_DOTS: 5` to the `DRAWER_DEFAULTS`
+   object.
 
 2. In `stack-dots.component.tsx`:
 
@@ -74,17 +85,23 @@ export function StackDots({
 }
 ```
 
-Remove the local `const MAX_DOTS = 5` and import `DRAWER_DEFAULTS` from `@drawer/constants`.
+Remove the local `const MAX_DOTS = 5` and import `DRAWER_DEFAULTS` from
+`@drawer/constants`.
 
 ### Improvement 2: Horizontal Scroll Detection in Drag Handler
 
-**Current issue:** Both `useDrawerDrag` (desktop) and `MobilePanel` (mobile) check for vertical scroll (`scrollHeight > clientHeight && scrollTop > 0`) but ignore horizontal scroll. Dragging inside a horizontally scrollable carousel or wide table triggers drag-to-dismiss instead of scrolling.
+**Current issue:** Both `useDrawerDrag` (desktop) and `MobilePanel` (mobile)
+check for vertical scroll (`scrollHeight > clientHeight && scrollTop > 0`) but
+ignore horizontal scroll. Dragging inside a horizontally scrollable carousel or
+wide table triggers drag-to-dismiss instead of scrolling.
 
-**Fix:** Add a horizontal scroll check alongside the existing vertical one. If a horizontally scrollable ancestor has `scrollLeft > 0`, cancel drag initiation.
+**Fix:** Add a horizontal scroll check alongside the existing vertical one. If a
+horizontally scrollable ancestor has `scrollLeft > 0`, cancel drag initiation.
 
 **Implementation:**
 
-Create a shared utility `hasScrollableAncestor` in a new file or extend the existing `get-scroll-parent` util:
+Create a shared utility `hasScrollableAncestor` in a new file or extend the
+existing `get-scroll-parent` util:
 
 ```typescript
 /**
@@ -106,7 +123,8 @@ function hasHorizontalScrollAncestor(
 }
 ```
 
-In `use-drawer-drag.hook.ts`, add the check in `onPointerDown` after the existing vertical scroll check:
+In `use-drawer-drag.hook.ts`, add the check in `onPointerDown` after the
+existing vertical scroll check:
 
 ```typescript
 // Existing vertical scroll check
@@ -124,7 +142,8 @@ while (el && el !== dragRef.current) {
 }
 ```
 
-In `MobilePanel`'s `onPointerDown`, add the same horizontal scroll check in the ancestor walk loop:
+In `MobilePanel`'s `onPointerDown`, add the same horizontal scroll check in the
+ancestor walk loop:
 
 ```typescript
 let el = target;
@@ -136,13 +155,20 @@ while (el && el !== panelRef.current) {
 }
 ```
 
-The condition `scrollLeft > 0` means: if the user has already scrolled horizontally, they're interacting with the scrollable content, so don't hijack the gesture. If `scrollLeft === 0`, the user is at the left edge and a rightward drag can still initiate dismiss.
+The condition `scrollLeft > 0` means: if the user has already scrolled
+horizontally, they're interacting with the scrollable content, so don't hijack
+the gesture. If `scrollLeft === 0`, the user is at the left edge and a rightward
+drag can still initiate dismiss.
 
 ### Improvement 3: Z-Index Calculation Safeguard
 
-**Current issue:** The z-index is computed as `DRAWER_DEFAULTS.BASE_Z_INDEX + index * DRAWER_DEFAULTS.Z_INDEX_STEP` with no upper bound. At extreme stack depths (theoretical), this could exceed the browser max of `2147483647`.
+**Current issue:** The z-index is computed as
+`DRAWER_DEFAULTS.BASE_Z_INDEX + index * DRAWER_DEFAULTS.Z_INDEX_STEP` with no
+upper bound. At extreme stack depths (theoretical), this could exceed the
+browser max of `2147483647`.
 
-**Fix:** Add `MAX_STACK_DEPTH` to `DRAWER_DEFAULTS`, clamp z-index, and log a warning when the limit is exceeded.
+**Fix:** Add `MAX_STACK_DEPTH` to `DRAWER_DEFAULTS`, clamp z-index, and log a
+warning when the limit is exceeded.
 
 **Implementation:**
 
@@ -169,7 +195,8 @@ function computeZIndex(index: number): number {
 }
 ```
 
-3. In `drawer-container.component.tsx`, replace all inline z-index calculations in both `DesktopPanel` and `MobilePanel`:
+3. In `drawer-container.component.tsx`, replace all inline z-index calculations
+   in both `DesktopPanel` and `MobilePanel`:
 
 ```typescript
 // Before:
@@ -178,7 +205,8 @@ const z = DRAWER_DEFAULTS.BASE_Z_INDEX + index * DRAWER_DEFAULTS.Z_INDEX_STEP;
 const z = computeZIndex(index);
 ```
 
-4. In `DrawerStackProvider.push()`, add a warning when stack depth exceeds `MAX_STACK_DEPTH`:
+4. In `DrawerStackProvider.push()`, add a warning when stack depth exceeds
+   `MAX_STACK_DEPTH`:
 
 ```typescript
 const push = useCallback((config: DrawerConfig, component: ReactNode) => {
@@ -201,13 +229,25 @@ const push = useCallback((config: DrawerConfig, component: ReactNode) => {
 }, []);
 ```
 
-The push is never blocked — the warning is advisory only, and z-index clamping handles the rendering.
+The push is never blocked — the warning is advisory only, and z-index clamping
+handles the rendering.
 
 ### Improvement 4: Consistent Subtitle Visibility in Compact DrawerHeader
 
-**Current issue:** In the compact variant, the subtitle is conditionally rendered with `{subtitle && !pills && (...)}` on desktop, which hides the subtitle whenever pills are present. On mobile, the subtitle is rendered in a separate `md:hidden` span, but only when `subtitle` is truthy — and it's placed outside the pills conditional, so it shows regardless of pills. However, the desktop inline subtitle (`hidden md:inline`) is gated by `!pills`, creating inconsistency.
+**Current issue:** In the compact variant, the subtitle is conditionally
+rendered with `{subtitle && !pills && (...)}` on desktop, which hides the
+subtitle whenever pills are present. On mobile, the subtitle is rendered in a
+separate `md:hidden` span, but only when `subtitle` is truthy — and it's placed
+outside the pills conditional, so it shows regardless of pills. However, the
+desktop inline subtitle (`hidden md:inline`) is gated by `!pills`, creating
+inconsistency.
 
-**Fix:** On mobile, always show subtitle when provided (already works). On desktop, hide subtitle only when pills are present (preserve current behavior). The issue is the mobile subtitle span is gated by `{subtitle && (...)}` but placed after the pills block with a condition `{subtitle && !pills && (...)}` — the mobile span only renders when `!pills` too because of the outer conditional structure.
+**Fix:** On mobile, always show subtitle when provided (already works). On
+desktop, hide subtitle only when pills are present (preserve current behavior).
+The issue is the mobile subtitle span is gated by `{subtitle && (...)}` but
+placed after the pills block with a condition `{subtitle && !pills && (...)}` —
+the mobile span only renders when `!pills` too because of the outer conditional
+structure.
 
 Looking at the actual code more carefully:
 
@@ -231,7 +271,12 @@ Looking at the actual code more carefully:
 }
 ```
 
-Wait — the mobile subtitle span IS outside the `!pills` check. But looking at the actual code, the mobile subtitle is rendered after the `min-w-0` flex div, and it's only gated by `{subtitle && (...)}`. So mobile already shows subtitle regardless of pills. The issue is that the mobile subtitle span has `text-ellipsis overflow-hidden` but the desktop one inside the flex div is gated by `!pills`.
+Wait — the mobile subtitle span IS outside the `!pills` check. But looking at
+the actual code, the mobile subtitle is rendered after the `min-w-0` flex div,
+and it's only gated by `{subtitle && (...)}`. So mobile already shows subtitle
+regardless of pills. The issue is that the mobile subtitle span has
+`text-ellipsis overflow-hidden` but the desktop one inside the flex div is gated
+by `!pills`.
 
 The actual fix needed per the requirements:
 
@@ -239,9 +284,12 @@ The actual fix needed per the requirements:
 - Desktop with pills: hide subtitle (already works ✓)
 - Desktop without pills: show subtitle (already works ✓)
 
-Re-reading the requirement more carefully: "I want to see the subtitle regardless of whether pills are present" on mobile. Let me re-check the code...
+Re-reading the requirement more carefully: "I want to see the subtitle
+regardless of whether pills are present" on mobile. Let me re-check the code...
 
-The mobile subtitle `{subtitle && (...)}` with class `md:hidden` renders on mobile regardless of pills — this is correct. But wait, there's a second subtitle rendering inside the `min-w-0` flex div:
+The mobile subtitle `{subtitle && (...)}` with class `md:hidden` renders on
+mobile regardless of pills — this is correct. But wait, there's a second
+subtitle rendering inside the `min-w-0` flex div:
 
 ```tsx
 {
@@ -251,18 +299,28 @@ The mobile subtitle `{subtitle && (...)}` with class `md:hidden` renders on mobi
 }
 ```
 
-This only renders on desktop (`hidden md:inline`) and only when no pills. So the current behavior is:
+This only renders on desktop (`hidden md:inline`) and only when no pills. So the
+current behavior is:
 
 - Mobile + pills: subtitle shown via the `md:hidden` span ✓
 - Mobile + no pills: subtitle shown via the `md:hidden` span ✓
 - Desktop + pills: subtitle hidden ✓
 - Desktop + no pills: subtitle shown via `hidden md:inline` span ✓
 
-Actually, looking again at the code structure — the mobile subtitle span `{subtitle && (...)}` is OUTSIDE the `min-w-0` flex container. But it's only rendered when `subtitle` is truthy. Let me trace through the exact JSX...
+Actually, looking again at the code structure — the mobile subtitle span
+`{subtitle && (...)}` is OUTSIDE the `min-w-0` flex container. But it's only
+rendered when `subtitle` is truthy. Let me trace through the exact JSX...
 
-The issue is actually that the mobile subtitle span is rendered with `shrink min-w-0` and `text-ellipsis overflow-hidden`, but when pills ARE present, the subtitle text still shows on mobile. However, looking at the requirement again: "THE DrawerHeader SHALL display the subtitle text when a subtitle prop is provided, regardless of whether pills are also provided" — this suggests the current code might NOT show subtitle on mobile when pills are present.
+The issue is actually that the mobile subtitle span is rendered with
+`shrink min-w-0` and `text-ellipsis overflow-hidden`, but when pills ARE
+present, the subtitle text still shows on mobile. However, looking at the
+requirement again: "THE DrawerHeader SHALL display the subtitle text when a
+subtitle prop is provided, regardless of whether pills are also provided" — this
+suggests the current code might NOT show subtitle on mobile when pills are
+present.
 
-Let me re-read the compact variant code block carefully. The mobile subtitle block is:
+Let me re-read the compact variant code block carefully. The mobile subtitle
+block is:
 
 ```tsx
 {
@@ -274,15 +332,26 @@ Let me re-read the compact variant code block carefully. The mobile subtitle blo
 }
 ```
 
-This IS outside the pills conditional and IS gated only by `subtitle`. So it DOES render on mobile when pills are present. But wait — this span is placed AFTER the `Slot` for `AFTER_TITLE`. Let me check if there's a layout issue where the subtitle gets pushed off-screen by pills.
+This IS outside the pills conditional and IS gated only by `subtitle`. So it
+DOES render on mobile when pills are present. But wait — this span is placed
+AFTER the `Slot` for `AFTER_TITLE`. Let me check if there's a layout issue where
+the subtitle gets pushed off-screen by pills.
 
-Actually, the real bug might be more subtle. The pills are rendered inside the `min-w-0` flex div with `hidden md:flex` — so pills are hidden on mobile. And the subtitle inside that div is `{subtitle && !pills && (...)}` with `hidden md:inline` — hidden on mobile. The mobile subtitle is the separate span below.
+Actually, the real bug might be more subtle. The pills are rendered inside the
+`min-w-0` flex div with `hidden md:flex` — so pills are hidden on mobile. And
+the subtitle inside that div is `{subtitle && !pills && (...)}` with
+`hidden md:inline` — hidden on mobile. The mobile subtitle is the separate span
+below.
 
-So the current behavior on mobile is: pills hidden, subtitle shown. That seems correct already.
+So the current behavior on mobile is: pills hidden, subtitle shown. That seems
+correct already.
 
-Re-reading the requirement one more time: "I want to see the subtitle regardless of whether pills are present, so that I have consistent access to contextual information across breakpoints."
+Re-reading the requirement one more time: "I want to see the subtitle regardless
+of whether pills are present, so that I have consistent access to contextual
+information across breakpoints."
 
-The key phrase is "across breakpoints." The inconsistency is that on desktop, when pills are present, the subtitle disappears entirely. The requirement says:
+The key phrase is "across breakpoints." The inconsistency is that on desktop,
+when pills are present, the subtitle disappears entirely. The requirement says:
 
 - Mobile: always show subtitle ✓ (already works)
 - Desktop + pills: hide subtitle ✓ (requirement 4.2 says this is desired)
@@ -290,11 +359,15 @@ The key phrase is "across breakpoints." The inconsistency is that on desktop, wh
 
 So all three acceptance criteria are already met? Let me re-read...
 
-Requirement 4.1: "on mobile viewports, THE DrawerHeader SHALL display the subtitle text when a subtitle prop is provided, regardless of whether pills are also provided."
+Requirement 4.1: "on mobile viewports, THE DrawerHeader SHALL display the
+subtitle text when a subtitle prop is provided, regardless of whether pills are
+also provided."
 
-Requirement 4.2: "on desktop viewports with pills present, THE DrawerHeader SHALL hide the subtitle text."
+Requirement 4.2: "on desktop viewports with pills present, THE DrawerHeader
+SHALL hide the subtitle text."
 
-Requirement 4.3: "on desktop viewports without pills, THE DrawerHeader SHALL display the subtitle text."
+Requirement 4.3: "on desktop viewports without pills, THE DrawerHeader SHALL
+display the subtitle text."
 
 Looking at the code again very carefully — the mobile subtitle span:
 
@@ -303,11 +376,14 @@ Looking at the code again very carefully — the mobile subtitle span:
   <span className="md:hidden ...">
 ```
 
-This renders when `subtitle` is truthy, visible only below `md` breakpoint. This is correct for 4.1.
+This renders when `subtitle` is truthy, visible only below `md` breakpoint. This
+is correct for 4.1.
 
-But wait — I need to check if there's a `!pills` guard I'm missing. Let me look at the full compact variant JSX flow...
+But wait — I need to check if there's a `!pills` guard I'm missing. Let me look
+at the full compact variant JSX flow...
 
-Actually, I see the issue now. In the current code, the subtitle inside the flex container is:
+Actually, I see the issue now. In the current code, the subtitle inside the flex
+container is:
 
 ```tsx
 {
@@ -331,11 +407,21 @@ And the mobile subtitle OUTSIDE the flex container is:
 }
 ```
 
-So the mobile subtitle renders regardless of pills. The requirements match the current code. But the requirement exists as a "hardening" item, which suggests the current code might have a subtle bug or the requirement is documenting desired behavior that should be explicitly tested.
+So the mobile subtitle renders regardless of pills. The requirements match the
+current code. But the requirement exists as a "hardening" item, which suggests
+the current code might have a subtle bug or the requirement is documenting
+desired behavior that should be explicitly tested.
 
-Looking more carefully at the JSX, I notice the mobile subtitle span is placed between `<Slot name={DRAWER_SLOTS.HEADER.AFTER_TITLE} />` and `{actions}`. But the pills block inside the flex div uses `hidden md:flex` — so pills are desktop-only. On mobile, the flex div shows only the title. The subtitle shows via the separate mobile span.
+Looking more carefully at the JSX, I notice the mobile subtitle span is placed
+between `<Slot name={DRAWER_SLOTS.HEADER.AFTER_TITLE} />` and `{actions}`. But
+the pills block inside the flex div uses `hidden md:flex` — so pills are
+desktop-only. On mobile, the flex div shows only the title. The subtitle shows
+via the separate mobile span.
 
-The actual bug: when `pills` is provided (even as an empty array or truthy value), the desktop subtitle `{subtitle && !pills && (...)}` is hidden. But `pills` could be `[]` (empty array), which is truthy in JS, so the subtitle would be hidden on desktop even with no actual pills. This is a minor edge case.
+The actual bug: when `pills` is provided (even as an empty array or truthy
+value), the desktop subtitle `{subtitle && !pills && (...)}` is hidden. But
+`pills` could be `[]` (empty array), which is truthy in JS, so the subtitle
+would be hidden on desktop even with no actual pills. This is a minor edge case.
 
 The fix should ensure:
 
@@ -351,13 +437,17 @@ The fix should ensure:
 }
 ```
 
-This is a minor but real fix — an empty `pills={[]}` prop would incorrectly hide the desktop subtitle.
+This is a minor but real fix — an empty `pills={[]}` prop would incorrectly hide
+the desktop subtitle.
 
 ### Improvement 5: Focus Trap Portal Support
 
-**Current issue:** `useFocusTrap` only queries focusable elements within `containerRef.current`. Elements rendered via React portals (e.g., tooltips, dropdowns inside a drawer) are outside the container DOM and escape the trap.
+**Current issue:** `useFocusTrap` only queries focusable elements within
+`containerRef.current`. Elements rendered via React portals (e.g., tooltips,
+dropdowns inside a drawer) are outside the container DOM and escape the trap.
 
-**Fix:** Add an optional `portalContainers` parameter and a `@remarks` JSDoc section documenting the limitation.
+**Fix:** Add an optional `portalContainers` parameter and a `@remarks` JSDoc
+section documenting the limitation.
 
 **Implementation:**
 
@@ -410,9 +500,12 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
 }
 ```
 
-The `getFocusableElements` function now queries all containers. The Tab/Shift+Tab handler and auto-focus effect already use `getFocusableElements()`, so they automatically pick up portal elements.
+The `getFocusableElements` function now queries all containers. The
+Tab/Shift+Tab handler and auto-focus effect already use
+`getFocusableElements()`, so they automatically pick up portal elements.
 
-The `containerRef.current?.contains(active)` check in the Tab handler needs updating to check all containers:
+The `containerRef.current?.contains(active)` check in the Tab handler needs
+updating to check all containers:
 
 ```typescript
 const isInAnyContainer = (el: HTMLElement): boolean => {
@@ -441,9 +534,14 @@ if (e.shiftKey) {
 
 ### Improvement 6: Explicit Async Return Type for pop()
 
-**Current issue:** `StackOperations.pop` is typed as `pop: () => void` but the implementation in `DrawerStackProvider` is `async` (it awaits `onBeforeClose`). Callers that don't handle the returned promise risk unhandled rejections. Internal call sites (backdrop click, Escape key, drag dismiss, mobile swipe) all call `operations.pop()` without `.catch()` or `void` operator.
+**Current issue:** `StackOperations.pop` is typed as `pop: () => void` but the
+implementation in `DrawerStackProvider` is `async` (it awaits `onBeforeClose`).
+Callers that don't handle the returned promise risk unhandled rejections.
+Internal call sites (backdrop click, Escape key, drag dismiss, mobile swipe) all
+call `operations.pop()` without `.catch()` or `void` operator.
 
-**Fix:** Change the interface to `pop: () => Promise<void>`, and handle the promise at all internal call sites.
+**Fix:** Change the interface to `pop: () => Promise<void>`, and handle the
+promise at all internal call sites.
 
 **Implementation:**
 
@@ -458,9 +556,11 @@ if (e.shiftKey) {
 pop: () => Promise<void>;
 ```
 
-2. The provider implementation already returns a promise (it's `async`), so no change needed there.
+2. The provider implementation already returns a promise (it's `async`), so no
+   change needed there.
 
-3. In `drawer-container.component.tsx`, handle the promise at all internal call sites:
+3. In `drawer-container.component.tsx`, handle the promise at all internal call
+   sites:
 
 ```typescript
 // Backdrop click handler
@@ -476,7 +576,10 @@ onDismiss={() => void operations.pop()}
 onDismiss={() => void operations.pop()}
 ```
 
-The `void` operator explicitly discards the promise, signaling intent and preventing unhandled rejection warnings. The `onBeforeClose` guard's error handling is already in the provider's `pop()` implementation (catch block returns early).
+The `void` operator explicitly discards the promise, signaling intent and
+preventing unhandled rejection warnings. The `onBeforeClose` guard's error
+handling is already in the provider's `pop()` implementation (catch block
+returns early).
 
 ## Data Models
 
@@ -509,45 +612,63 @@ function useFocusTrap<T extends HTMLElement>(
 ): React.RefObject<T>;
 ```
 
-All changes are backward-compatible. Existing callers that ignore `pop()`'s return value continue to work (the `void` operator is only needed at internal call sites to satisfy linting).
+All changes are backward-compatible. Existing callers that ignore `pop()`'s
+return value continue to work (the `void` operator is only needed at internal
+call sites to satisfy linting).
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: StackDots threshold determines rendering mode
 
-_For any_ `maxDots` value (positive integer) and any `stackSize` (positive integer), the StackDots component SHALL render individual dot indicators when `stackSize <= maxDots` and a numeric counter badge when `stackSize > maxDots`.
+_For any_ `maxDots` value (positive integer) and any `stackSize` (positive
+integer), the StackDots component SHALL render individual dot indicators when
+`stackSize <= maxDots` and a numeric counter badge when `stackSize > maxDots`.
 
 **Validates: Requirements 1.1, 1.4, 1.5**
 
 ### Property 2: Horizontal scroll detection blocks drag initiation
 
-_For any_ DOM hierarchy where a pointer-down target has an ancestor with `scrollWidth > clientWidth`, the drag handler SHALL cancel drag initiation if and only if that ancestor's `scrollLeft` is greater than `0`.
+_For any_ DOM hierarchy where a pointer-down target has an ancestor with
+`scrollWidth > clientWidth`, the drag handler SHALL cancel drag initiation if
+and only if that ancestor's `scrollLeft` is greater than `0`.
 
 **Validates: Requirements 2.1, 2.2, 2.3**
 
 ### Property 3: Z-index clamping
 
-_For any_ stack index, the computed z-index value SHALL equal `min(BASE_Z_INDEX + index * Z_INDEX_STEP, 2147483647)`, ensuring it never exceeds the browser maximum.
+_For any_ stack index, the computed z-index value SHALL equal
+`min(BASE_Z_INDEX + index * Z_INDEX_STEP, 2147483647)`, ensuring it never
+exceeds the browser maximum.
 
 **Validates: Requirements 3.2, 3.4**
 
 ### Property 4: Mobile compact subtitle visibility
 
-_For any_ compact DrawerHeader rendered at a mobile viewport with a non-empty subtitle prop, the subtitle text SHALL be visible in the DOM regardless of whether a `pills` prop is provided.
+_For any_ compact DrawerHeader rendered at a mobile viewport with a non-empty
+subtitle prop, the subtitle text SHALL be visible in the DOM regardless of
+whether a `pills` prop is provided.
 
 **Validates: Requirements 4.1**
 
 ### Property 5: Focus trap includes portal containers
 
-_For any_ set of portal container refs provided to `useFocusTrap`, the combined focusable element set SHALL include all focusable elements from both the main container and every portal container, and Tab/Shift+Tab SHALL cycle through the entire combined set.
+_For any_ set of portal container refs provided to `useFocusTrap`, the combined
+focusable element set SHALL include all focusable elements from both the main
+container and every portal container, and Tab/Shift+Tab SHALL cycle through the
+entire combined set.
 
 **Validates: Requirements 5.3, 5.4**
 
 ### Property 6: Async pop guard sequencing
 
-_For any_ `onBeforeClose` guard (sync or async, returning true or false), calling `pop()` SHALL await the guard's result before dispatching the POP action, and SHALL not dispatch POP when the guard returns `false`.
+_For any_ `onBeforeClose` guard (sync or async, returning true or false),
+calling `pop()` SHALL await the guard's result before dispatching the POP
+action, and SHALL not dispatch POP when the guard returns `false`.
 
 **Validates: Requirements 6.2**
 
@@ -587,9 +708,11 @@ _For any_ `onBeforeClose` guard (sync or async, returning true or false), callin
 
 ### Property-Based Tests
 
-Property-based testing library: **fast-check** (standard for TypeScript/React projects).
+Property-based testing library: **fast-check** (standard for TypeScript/React
+projects).
 
-Each property test runs a minimum of 100 iterations and is tagged with the corresponding design property.
+Each property test runs a minimum of 100 iterations and is tagged with the
+corresponding design property.
 
 | Property Test                                 | Tag                                         | Min Iterations |
 | --------------------------------------------- | ------------------------------------------- | -------------- |
@@ -602,7 +725,8 @@ Each property test runs a minimum of 100 iterations and is tagged with the corre
 
 ### Test Environment
 
-- **JSDOM** for DOM simulation (focus, element queries, scroll properties, event dispatch)
+- **JSDOM** for DOM simulation (focus, element queries, scroll properties, event
+  dispatch)
 - **React Testing Library** for component rendering
 - **fast-check** for property-based test generation
 - Mock `requestAnimationFrame` with synchronous execution for animation tests

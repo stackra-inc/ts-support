@@ -2,13 +2,19 @@
 
 ## Overview
 
-Incrementally add four opt-in features to the drawer stack system: lifecycle hooks (`onBeforeOpen`, `onAfterOpen`, `onAfterClose`), stack persistence via `localStorage`, keyboard navigation between stacked drawers, and a `ResizeObserver` integration for mobile bottom sheets. Each task extends existing interfaces and components without breaking current consumers.
+Incrementally add four opt-in features to the drawer stack system: lifecycle
+hooks (`onBeforeOpen`, `onAfterOpen`, `onAfterClose`), stack persistence via
+`localStorage`, keyboard navigation between stacked drawers, and a
+`ResizeObserver` integration for mobile bottom sheets. Each task extends
+existing interfaces and components without breaking current consumers.
 
 ## Tasks
 
 - [x] 1. Extend DrawerConfig interface with lifecycle hooks and observeResize
-  - [x] 1.1 Add `onBeforeOpen`, `onAfterOpen`, `onAfterClose`, and `observeResize` fields to `DrawerConfig`
-    - Modify `packages/ui/src/components/drawer-stack/interfaces/drawer-config/drawer-config.interface.ts`
+  - [x] 1.1 Add `onBeforeOpen`, `onAfterOpen`, `onAfterClose`, and
+        `observeResize` fields to `DrawerConfig`
+    - Modify
+      `packages/ui/src/components/drawer-stack/interfaces/drawer-config/drawer-config.interface.ts`
     - Add `onBeforeOpen?: () => boolean | Promise<boolean>`
     - Add `onAfterOpen?: () => void`
     - Add `onAfterClose?: () => void`
@@ -23,7 +29,8 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
 - [x] 2. Implement onBeforeOpen lifecycle hook
   - [x] 2.1 Add async guard to `push` in `DrawerStackProvider`
-    - Modify `packages/ui/src/components/drawer-stack/providers/drawer-stack.provider.tsx`
+    - Modify
+      `packages/ui/src/components/drawer-stack/providers/drawer-stack.provider.tsx`
     - Make `push` async: invoke `config.onBeforeOpen()` before dispatching PUSH
     - If callback returns `false`, cancel push
     - If callback throws or Promise rejects, cancel push
@@ -44,15 +51,20 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
 - [x] 3. Implement onAfterOpen lifecycle hook
   - [x] 3.1 Fire `onAfterOpen` after enter animation in `DrawerContainer`
-    - Modify `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
-    - In both DesktopPanel and MobilePanel, add `afterOpenCalledRef` to track invocation
-    - When `entered` becomes true and `isLeaving` is false, invoke `entry.config.onAfterOpen?.()` once
+    - Modify
+      `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
+    - In both DesktopPanel and MobilePanel, add `afterOpenCalledRef` to track
+      invocation
+    - When `entered` becomes true and `isLeaving` is false, invoke
+      `entry.config.onAfterOpen?.()` once
     - Ensure singleton re-activation does not re-invoke the callback
     - _Requirements: 2.2, 2.4, 2.5_
 
-  - [ ]\* 3.2 Write property test: onAfterOpen fires exactly once after enter animation
+  - [ ]\* 3.2 Write property test: onAfterOpen fires exactly once after enter
+    animation
     - **Property 2: onAfterOpen fires exactly once after enter animation**
-    - Push drawers with onAfterOpen callbacks, simulate enter animation completion
+    - Push drawers with onAfterOpen callbacks, simulate enter animation
+      completion
     - Assert callback count equals exactly 1 per push
     - **Validates: Requirements 2.2, 2.4, 2.5**
 
@@ -63,14 +75,19 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
 - [x] 4. Implement onAfterClose lifecycle hook
   - [x] 4.1 Fire `onAfterClose` after exit animation in `DrawerContainer`
-    - Modify `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
-    - In the visual sync useEffect exit timer, invoke `entry.config.onAfterClose?.()` after exit animation duration, before purging the visual entry
-    - When `clear` is called, each exiting drawer gets its own timer and fires its own `onAfterClose`
+    - Modify
+      `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
+    - In the visual sync useEffect exit timer, invoke
+      `entry.config.onAfterClose?.()` after exit animation duration, before
+      purging the visual entry
+    - When `clear` is called, each exiting drawer gets its own timer and fires
+      its own `onAfterClose`
     - _Requirements: 3.2, 3.4, 3.5_
 
   - [ ]\* 4.2 Write property test: onAfterClose fires exactly once per removal
     - **Property 3: onAfterClose fires exactly once per removal**
-    - Push N drawers with onAfterClose, remove K drawers, assert exactly K invocations
+    - Push N drawers with onAfterClose, remove K drawers, assert exactly K
+      invocations
     - **Validates: Requirements 3.2, 3.4, 3.5**
 
   - [ ]\* 4.3 Write unit tests for onAfterClose
@@ -83,19 +100,24 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
 - [x] 6. Implement stack persistence via localStorage
   - [x] 6.1 Add `persistKey` and `onRestore` props to `DrawerStackProvider`
-    - Modify `packages/ui/src/components/drawer-stack/providers/drawer-stack.provider.tsx`
-    - Add `persistKey?: string` and `onRestore?: (ids: string[]) => void` to provider props
+    - Modify
+      `packages/ui/src/components/drawer-stack/providers/drawer-stack.provider.tsx`
+    - Add `persistKey?: string` and `onRestore?: (ids: string[]) => void` to
+      provider props
     - Define `PersistedDrawerState` interface for serializable config fields
     - _Requirements: 4.1, 4.4_
 
   - [x] 6.2 Implement persistence write effect
-    - Add `useEffect` in `DrawerStackProvider` that serializes stack to `localStorage` on every stack change when `persistKey` is set
-    - Exclude `component`, callback functions — only persist `id`, `width`, `closeOnEscape`, `singleton`, `metadata`, `observeResize`
+    - Add `useEffect` in `DrawerStackProvider` that serializes stack to
+      `localStorage` on every stack change when `persistKey` is set
+    - Exclude `component`, callback functions — only persist `id`, `width`,
+      `closeOnEscape`, `singleton`, `metadata`, `observeResize`
     - Wrap in try/catch, log warning on failure in dev mode
     - _Requirements: 4.2, 4.7, 4.8_
 
   - [x] 6.3 Implement persistence restore effect
-    - Add mount-only `useEffect` that reads `localStorage` when `persistKey` is set
+    - Add mount-only `useEffect` that reads `localStorage` when `persistKey` is
+      set
     - Parse stored JSON, extract drawer IDs
     - If `onRestore` is provided, call it with the ID array
     - If `onRestore` is not provided, discard persisted data
@@ -104,7 +126,8 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
   - [ ]\* 6.4 Write property test: persistence round-trip preserves drawer IDs
     - **Property 4: Persistence round-trip preserves drawer IDs**
-    - Generate random push/pop sequences, verify localStorage contains current stack IDs
+    - Generate random push/pop sequences, verify localStorage contains current
+      stack IDs
     - Simulate remount, verify onRestore receives the same IDs
     - **Validates: Requirements 4.2, 4.5**
 
@@ -116,27 +139,34 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
 - [x] 7. Implement keyboard navigation between stacked drawers
   - [x] 7.1 Extend `DrawerStackContextValue` with `enableKeyboardNavigation`
-    - Modify `packages/ui/src/components/drawer-stack/contexts/drawer-stack/drawer-stack.context.ts`
+    - Modify
+      `packages/ui/src/components/drawer-stack/contexts/drawer-stack/drawer-stack.context.ts`
     - Add `enableKeyboardNavigation: boolean` to the context value interface
     - _Requirements: 5.1_
 
   - [x] 7.2 Thread `enableKeyboardNavigation` prop through provider to context
-    - Modify `packages/ui/src/components/drawer-stack/providers/drawer-stack.provider.tsx`
-    - Add `enableKeyboardNavigation?: boolean` to provider props (default `false`)
+    - Modify
+      `packages/ui/src/components/drawer-stack/providers/drawer-stack.provider.tsx`
+    - Add `enableKeyboardNavigation?: boolean` to provider props (default
+      `false`)
     - Include in context value `useMemo`
     - _Requirements: 5.1, 5.7_
 
   - [x] 7.3 Add keyboard listener in `DrawerContainer`
-    - Modify `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
-    - Add `useEffect` that registers `keydown` handler on `window` when `enableKeyboardNavigation` is true and stack has 2+ drawers
-    - Handle `Ctrl+Tab` (cycle next), `Ctrl+Shift+Tab` (cycle previous), `Ctrl+1..9` (direct access)
+    - Modify
+      `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
+    - Add `useEffect` that registers `keydown` handler on `window` when
+      `enableKeyboardNavigation` is true and stack has 2+ drawers
+    - Handle `Ctrl+Tab` (cycle next), `Ctrl+Shift+Tab` (cycle previous),
+      `Ctrl+1..9` (direct access)
     - Call `operations.bringToTop` with the target drawer ID
     - Clean up listener on unmount or when conditions change
     - _Requirements: 5.2, 5.3, 5.4, 5.5, 5.6, 5.8_
 
   - [ ]\* 7.4 Write property test: keyboard cycling is bidirectional and wraps
     - **Property 5: Keyboard cycling is bidirectional and wraps**
-    - Generate stacks of N drawers, simulate K Ctrl+Tab presses then K Ctrl+Shift+Tab presses
+    - Generate stacks of N drawers, simulate K Ctrl+Tab presses then K
+      Ctrl+Shift+Tab presses
     - Assert original top drawer is restored
     - **Validates: Requirements 5.3, 5.4**
 
@@ -147,7 +177,8 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
     - **Validates: Requirements 5.5**
 
   - [ ]\* 7.6 Write unit tests for keyboard navigation
-    - Test enableKeyboardNavigation defaults to false, no listeners registered (Req 5.7)
+    - Test enableKeyboardNavigation defaults to false, no listeners registered
+      (Req 5.7)
     - Test Ctrl+Tab with fewer than 2 drawers is no-op (Req 5.8)
     - Test keyboard navigation animates with standard timing (Req 5.6)
     - _Requirements: 5.6, 5.7, 5.8_
@@ -157,10 +188,13 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
 - [x] 9. Implement ResizeObserver for mobile bottom sheets
   - [x] 9.1 Attach ResizeObserver in MobilePanel when `observeResize` is true
-    - Modify `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
+    - Modify
+      `packages/ui/src/components/drawer-stack/components/drawer-container/drawer-container.component.tsx`
     - Add `contentRef` to the MobilePanel content container
-    - Add `useEffect` that creates a `ResizeObserver` when `entry.config.observeResize` is true
-    - Toggle `overflow-y: auto` when scrollHeight > clientHeight, `overflow-y: hidden` otherwise
+    - Add `useEffect` that creates a `ResizeObserver` when
+      `entry.config.observeResize` is true
+    - Toggle `overflow-y: auto` when scrollHeight > clientHeight,
+      `overflow-y: hidden` otherwise
     - Disconnect observer in cleanup
     - Do NOT attach ResizeObserver in DesktopPanel regardless of config
     - _Requirements: 6.2, 6.3, 6.4, 6.5, 6.6, 6.7_
@@ -178,7 +212,9 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 
 - [x] 10. Wire up barrel exports and final integration
   - [x] 10.1 Update barrel exports
-    - Ensure `packages/ui/src/components/drawer-stack/index.ts` exports any new types (`PersistedDrawerState` if public, updated `DrawerStackProviderProps`)
+    - Ensure `packages/ui/src/components/drawer-stack/index.ts` exports any new
+      types (`PersistedDrawerState` if public, updated
+      `DrawerStackProviderProps`)
     - Verify all new props and config fields are accessible to consumers
     - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1_
 
@@ -196,6 +232,7 @@ Incrementally add four opt-in features to the drawer stack system: lifecycle hoo
 - Tasks marked with `*` are optional and can be skipped for faster MVP
 - Each task references specific requirements for traceability
 - Checkpoints ensure incremental validation
-- Property tests validate universal correctness properties from the design document
+- Property tests validate universal correctness properties from the design
+  document
 - Unit tests validate specific examples and edge cases
 - All changes are additive — existing consumers are unaffected

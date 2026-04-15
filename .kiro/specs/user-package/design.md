@@ -2,8 +2,8 @@
 
 ## Architecture
 
-See `packages/user/ARCHITECTURE.md` for the full design document including
-data model, auth flows, package split, and type-specific metadata patterns.
+See `packages/user/ARCHITECTURE.md` for the full design document including data
+model, auth flows, package split, and type-specific metadata patterns.
 
 ## Package Structure
 
@@ -46,13 +46,16 @@ packages/user/src/
 
 ## Bounded Context: Identity
 
-The User package is part of the Identity bounded context along with Auth and RBAC.
+The User package is part of the Identity bounded context along with Auth and
+RBAC.
 
 Within-context relationships (FK constraints OK):
+
 - Profile → User (foreignId + constrained + cascadeOnDelete)
 - AuthIdentity → User (foreignId + constrained + cascadeOnDelete)
 
 Cross-context FKs (unsignedBigInteger + index only):
+
 - User.tenant_id → Tenancy context
 - User.family_account_id → Family context
 - ActorType.tenant_id → Tenancy context
@@ -61,6 +64,7 @@ Cross-context FKs (unsignedBigInteger + index only):
 
 1. No password on User model — auth_identities table owns credentials
 2. Actor enum for system behavior, ActorType model for business categorization
-3. Domain events carry IDs only — serializable to queue for cross-context listeners
+3. Domain events carry IDs only — serializable to queue for cross-context
+   listeners
 4. Profile is a separate table (not JSON on users) for query performance
 5. ActorMiddleware for route-level protection, RequireActor for method-level AOP

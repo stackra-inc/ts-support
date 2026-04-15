@@ -2,25 +2,55 @@
 
 ## Overview
 
-The `pixielity/laravel-reporting` package provides the reporting and analytics engine for the MNGO venue management platform. It builds on the framework Indexer sub-package (which owns `#[Aggregatable]`, `AggregationType`, `IndexerRegistry`, `IndexConfigurationDTO`) and the search package (which owns the Elasticsearch implementation via `pdphilip/elasticsearch`). Reports are ES aggregation queries on the same indexes the search package manages — no separate data store, no materialized views.
+The `pixielity/laravel-reporting` package provides the reporting and analytics
+engine for the MNGO venue management platform. It builds on the framework
+Indexer sub-package (which owns `#[Aggregatable]`, `AggregationType`,
+`IndexerRegistry`, `IndexConfigurationDTO`) and the search package (which owns
+the Elasticsearch implementation via `pdphilip/elasticsearch`). Reports are ES
+aggregation queries on the same indexes the search package manages — no separate
+data store, no materialized views.
 
 ### Key Design Decisions
 
-1. **ES Aggregation on Existing Indexes** — Reports execute ES aggregation queries (`terms`, `sum`, `avg`, `date_histogram`, `range`, `geo_distance`, `cardinality`, `percentiles`) on the same indexes the search package manages. No separate data pipeline.
+1. **ES Aggregation on Existing Indexes** — Reports execute ES aggregation
+   queries (`terms`, `sum`, `avg`, `date_histogram`, `range`, `geo_distance`,
+   `cardinality`, `percentiles`) on the same indexes the search package manages.
+   No separate data pipeline.
 
-2. **Attribute-Driven Report Discovery** — `#[AsReport]` on report classes declares metadata (name, label, entity, schedule). `ReportRegistryCompiler` discovers these at compile time via `Discovery::attribute(AsReport::class)->get()` and caches to `bootstrap/cache/report_registry.php`. Zero runtime Discovery calls.
+2. **Attribute-Driven Report Discovery** — `#[AsReport]` on report classes
+   declares metadata (name, label, entity, schedule). `ReportRegistryCompiler`
+   discovers these at compile time via
+   `Discovery::attribute(AsReport::class)->get()` and caches to
+   `bootstrap/cache/report_registry.php`. Zero runtime Discovery calls.
 
-3. **Aggregatable Field Validation** — Every aggregation request is validated against the entity's `#[Aggregatable]` fields from `IndexerRegistry`. If a field is not declared aggregatable or the requested `AggregationType` is not allowed for that field, `InvalidAggregationException` is thrown.
+3. **Aggregatable Field Validation** — Every aggregation request is validated
+   against the entity's `#[Aggregatable]` fields from `IndexerRegistry`. If a
+   field is not declared aggregatable or the requested `AggregationType` is not
+   allowed for that field, `InvalidAggregationException` is thrown.
 
-4. **No Direct ES Dependency** — All ES access goes through the search package's `pdphilip/elasticsearch` `Connection`. The reporting package declares `pixielity/laravel-search` as a composer dependency, not `pdphilip/elasticsearch` or `elasticsearch/elasticsearch`.
+4. **No Direct ES Dependency** — All ES access goes through the search package's
+   `pdphilip/elasticsearch` `Connection`. The reporting package declares
+   `pixielity/laravel-search` as a composer dependency, not
+   `pdphilip/elasticsearch` or `elasticsearch/elasticsearch`.
 
-5. **PostgreSQL for Historical Results** — Report execution results are stored in the `report_results` PostgreSQL table for historical access. This keeps historical data independent of ES availability.
+5. **PostgreSQL for Historical Results** — Report execution results are stored
+   in the `report_results` PostgreSQL table for historical access. This keeps
+   historical data independent of ES availability.
 
-6. **Export via Import-Export Package** — Report export delegates to the import-export package's `ExportManager`. No duplication of CSV/XLSX/JSON/PDF generation logic.
+6. **Export via Import-Export Package** — Report export delegates to the
+   import-export package's `ExportManager`. No duplication of CSV/XLSX/JSON/PDF
+   generation logic.
 
-7. **Tenant Isolation via Search Bootstrapper** — Tenant-scoped aggregations use the search package's `SearchBootstrapper` which sets `Connection::setIndexPrefix('tenant_{key}_')`. The reporting package reads `isTenantScoped` from `IndexerRegistry` to determine which entities are tenant-scoped.
+7. **Tenant Isolation via Search Bootstrapper** — Tenant-scoped aggregations use
+   the search package's `SearchBootstrapper` which sets
+   `Connection::setIndexPrefix('tenant_{key}_')`. The reporting package reads
+   `isTenantScoped` from `IndexerRegistry` to determine which entities are
+   tenant-scoped.
 
-8. **Ad-Hoc Aggregations for AI** — The `ReportManager::aggregate()` method supports ad-hoc aggregation queries not tied to pre-defined report classes, enabling the AI Gateway to translate natural language queries into structured aggregation requests.
+8. **Ad-Hoc Aggregations for AI** — The `ReportManager::aggregate()` method
+   supports ad-hoc aggregation queries not tied to pre-defined report classes,
+   enabling the AI Gateway to translate natural language queries into structured
+   aggregation requests.
 
 ## Architecture
 
@@ -216,7 +246,8 @@ sequenceDiagram
 
 ### `#[AsReport]` Attribute
 
-Resides at `packages/reporting/src/Attributes/AsReport.php` under `Pixielity\Reporting\Attributes`.
+Resides at `packages/reporting/src/Attributes/AsReport.php` under
+`Pixielity\Reporting\Attributes`.
 
 ```php
 #[Attribute(Attribute::TARGET_CLASS)]
@@ -246,7 +277,8 @@ final readonly class AsReport
 
 #### `ReportInterface`
 
-Resides at `packages/reporting/src/Contracts/ReportInterface.php` under `Pixielity\Reporting\Contracts`.
+Resides at `packages/reporting/src/Contracts/ReportInterface.php` under
+`Pixielity\Reporting\Contracts`.
 
 ```php
 interface ReportInterface
@@ -282,7 +314,8 @@ interface ReportInterface
 
 #### `ReportManagerInterface`
 
-Resides at `packages/reporting/src/Contracts/ReportManagerInterface.php` under `Pixielity\Reporting\Contracts`.
+Resides at `packages/reporting/src/Contracts/ReportManagerInterface.php` under
+`Pixielity\Reporting\Contracts`.
 
 ```php
 #[Bind(ReportManager::class)]
@@ -327,7 +360,8 @@ interface ReportManagerInterface
 
 #### `AggregationBuilderInterface`
 
-Resides at `packages/reporting/src/Contracts/AggregationBuilderInterface.php` under `Pixielity\Reporting\Contracts`.
+Resides at `packages/reporting/src/Contracts/AggregationBuilderInterface.php`
+under `Pixielity\Reporting\Contracts`.
 
 ```php
 #[Bind(AggregationBuilder::class)]
@@ -348,7 +382,8 @@ interface AggregationBuilderInterface
 
 #### `ReportExportServiceInterface`
 
-Resides at `packages/reporting/src/Contracts/ReportExportServiceInterface.php` under `Pixielity\Reporting\Contracts`.
+Resides at `packages/reporting/src/Contracts/ReportExportServiceInterface.php`
+under `Pixielity\Reporting\Contracts`.
 
 ```php
 #[Bind(ReportExportService::class)]
@@ -367,7 +402,9 @@ interface ReportExportServiceInterface
 
 #### `ReportResultRepositoryInterface`
 
-Resides at `packages/reporting/src/Contracts/ReportResultRepositoryInterface.php` under `Pixielity\Reporting\Contracts`.
+Resides at
+`packages/reporting/src/Contracts/ReportResultRepositoryInterface.php` under
+`Pixielity\Reporting\Contracts`.
 
 ```php
 #[Bind(ReportResultRepository::class)]
@@ -406,7 +443,8 @@ interface ReportResultRepositoryInterface
 
 #### `ReportManager`
 
-Resides at `packages/reporting/src/Services/ReportManager.php` under `Pixielity\Reporting\Services`.
+Resides at `packages/reporting/src/Services/ReportManager.php` under
+`Pixielity\Reporting\Services`.
 
 ```php
 #[Scoped]
@@ -499,7 +537,8 @@ class ReportManager implements ReportManagerInterface
 
 #### `AggregationBuilder`
 
-Resides at `packages/reporting/src/Services/AggregationBuilder.php` under `Pixielity\Reporting\Services`.
+Resides at `packages/reporting/src/Services/AggregationBuilder.php` under
+`Pixielity\Reporting\Services`.
 
 ```php
 #[Scoped]
@@ -604,7 +643,8 @@ class AggregationBuilder implements AggregationBuilderInterface
 
 #### `ReportExportService`
 
-Resides at `packages/reporting/src/Services/ReportExportService.php` under `Pixielity\Reporting\Services`.
+Resides at `packages/reporting/src/Services/ReportExportService.php` under
+`Pixielity\Reporting\Services`.
 
 ```php
 #[Scoped]
@@ -637,7 +677,8 @@ class ReportExportService implements ReportExportServiceInterface
 
 #### `ReportScheduler`
 
-Resides at `packages/reporting/src/Services/ReportScheduler.php` under `Pixielity\Reporting\Services`.
+Resides at `packages/reporting/src/Services/ReportScheduler.php` under
+`Pixielity\Reporting\Services`.
 
 ```php
 class ReportScheduler
@@ -683,7 +724,8 @@ class ReportScheduler
 
 #### `ReportRegistry`
 
-Resides at `packages/reporting/src/Registry/ReportRegistry.php` under `Pixielity\Reporting\Registry`.
+Resides at `packages/reporting/src/Registry/ReportRegistry.php` under
+`Pixielity\Reporting\Registry`.
 
 ```php
 #[Scoped]
@@ -750,7 +792,8 @@ class ReportRegistry
 
 #### `ReportRegistryCompiler`
 
-Resides at `packages/reporting/src/Compiler/ReportRegistryCompiler.php` under `Pixielity\Reporting\Compiler`.
+Resides at `packages/reporting/src/Compiler/ReportRegistryCompiler.php` under
+`Pixielity\Reporting\Compiler`.
 
 ```php
 #[AsCompiler(priority: 30, phase: CompilerPhase::REGISTRY)]
@@ -788,7 +831,8 @@ class ReportRegistryCompiler implements CompilerInterface
 
 ### ReportController
 
-Resides at `packages/reporting/src/Controllers/ReportController.php` under `Pixielity\Reporting\Controllers`.
+Resides at `packages/reporting/src/Controllers/ReportController.php` under
+`Pixielity\Reporting\Controllers`.
 
 ```php
 #[AsController]
@@ -835,7 +879,8 @@ class ReportController extends Controller
 
 ### Artisan Commands
 
-All commands use Laravel Prompts for output. No `$this->info()` or `$this->error()`.
+All commands use Laravel Prompts for output. No `$this->info()` or
+`$this->error()`.
 
 | Command                  | Signature                                             | Description                                                    |
 | ------------------------ | ----------------------------------------------------- | -------------------------------------------------------------- |
@@ -846,7 +891,8 @@ All commands use Laravel Prompts for output. No `$this->info()` or `$this->error
 
 ### Events
 
-All events are `final readonly` DTOs annotated with `#[AsEvent]`, carrying scalar values only.
+All events are `final readonly` DTOs annotated with `#[AsEvent]`, carrying
+scalar values only.
 
 | Event             | Properties                                                                                  | Dispatched By                   |
 | ----------------- | ------------------------------------------------------------------------------------------- | ------------------------------- |
@@ -894,7 +940,8 @@ final readonly class ReportScheduled
 
 ### Exceptions
 
-All exception classes reside in `packages/reporting/src/Exceptions/` under `Pixielity\Reporting\Exceptions`.
+All exception classes reside in `packages/reporting/src/Exceptions/` under
+`Pixielity\Reporting\Exceptions`.
 
 ```php
 class InvalidAggregationException extends \InvalidArgumentException {}
@@ -928,7 +975,9 @@ class ReportingServiceProvider extends ServiceProvider implements HasBindings, H
 
 ### MNGO Phase 1 Report Definitions
 
-All report classes reside in `packages/reporting/src/Reports/` under `Pixielity\Reporting\Reports`. Each implements `ReportInterface` and is annotated with `#[AsReport]`.
+All report classes reside in `packages/reporting/src/Reports/` under
+`Pixielity\Reporting\Reports`. Each implements `ReportInterface` and is
+annotated with `#[AsReport]`.
 
 #### `SalesRevenueReport`
 
@@ -1219,7 +1268,8 @@ class AccessControlReport implements ReportInterface
 
 ### DTOs
 
-All DTOs reside in `packages/reporting/src/Data/` under `Pixielity\Reporting\Data`.
+All DTOs reside in `packages/reporting/src/Data/` under
+`Pixielity\Reporting\Data`.
 
 #### `ReportConfigurationDTO`
 
@@ -1315,7 +1365,8 @@ final readonly class AggregationDefinitionDTO
 
 #### `ReportStatus`
 
-Resides at `packages/reporting/src/Enums/ReportStatus.php` under `Pixielity\Reporting\Enums`.
+Resides at `packages/reporting/src/Enums/ReportStatus.php` under
+`Pixielity\Reporting\Enums`.
 
 ```php
 enum ReportStatus: string
@@ -1378,7 +1429,8 @@ enum ReportStatus: string
 
 #### `ReportResult`
 
-Resides at `packages/reporting/src/Models/ReportResult.php` under `Pixielity\Reporting\Models`.
+Resides at `packages/reporting/src/Models/ReportResult.php` under
+`Pixielity\Reporting\Models`.
 
 ```php
 #[Table('report_results')]
@@ -1448,23 +1500,38 @@ return [
 
 ## Correctness Properties
 
-_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
+_A property is a characteristic or behavior that should hold true across all
+valid executions of a system — essentially, a formal statement about what the
+system should do. Properties serve as the bridge between human-readable
+specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: Value object construction round-trip
 
-_For any_ valid combination of parameters, constructing an `#[AsReport]` attribute, `ReportConfigurationDTO`, `ReportResultDTO`, `AggregationDefinitionDTO`, `ReportGenerated`, `ReportExported`, or `ReportScheduled` event and reading back all public properties SHALL yield values identical to the input parameters. This includes strings, integers, arrays, nullable values, and `AggregationType` enum values.
+_For any_ valid combination of parameters, constructing an `#[AsReport]`
+attribute, `ReportConfigurationDTO`, `ReportResultDTO`,
+`AggregationDefinitionDTO`, `ReportGenerated`, `ReportExported`, or
+`ReportScheduled` event and reading back all public properties SHALL yield
+values identical to the input parameters. This includes strings, integers,
+arrays, nullable values, and `AggregationType` enum values.
 
 **Validates: Requirements 2.1, 16.1, 16.2, 16.3, 17.1, 17.2, 17.3**
 
 ### Property 2: Aggregation field validation
 
-_For any_ entity class with a known set of `#[Aggregatable]` fields and allowed `AggregationType`s, the `ReportManager` validation SHALL accept aggregation requests where the field exists in the aggregatable set AND the requested type is in the allowed types for that field, and SHALL throw `InvalidAggregationException` for any request where the field is not aggregatable OR the type is not allowed for that field.
+_For any_ entity class with a known set of `#[Aggregatable]` fields and allowed
+`AggregationType`s, the `ReportManager` validation SHALL accept aggregation
+requests where the field exists in the aggregatable set AND the requested type
+is in the allowed types for that field, and SHALL throw
+`InvalidAggregationException` for any request where the field is not
+aggregatable OR the type is not allowed for that field.
 
 **Validates: Requirements 4.5, 4.6, 4.7, 14.3**
 
 ### Property 3: AggregationBuilder produces structurally valid ES DSL
 
-_For any_ valid `AggregationDefinitionDTO` (with any `AggregationType`, optional params, optional sub-aggregations), optional date range, and optional filter map, the `AggregationBuilder::build()` output SHALL:
+_For any_ valid `AggregationDefinitionDTO` (with any `AggregationType`, optional
+params, optional sub-aggregations), optional date range, and optional filter
+map, the `AggregationBuilder::build()` output SHALL:
 
 - contain a `size` key equal to `0`
 - contain a `query.bool.filter` array
@@ -1473,41 +1540,66 @@ _For any_ valid `AggregationDefinitionDTO` (with any `AggregationType`, optional
 - include `term`/`terms` filter clauses for each additional filter
 - nest sub-aggregations under their parent aggregation's `aggs` key
 
-**Validates: Requirements 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11, 5.12**
+**Validates: Requirements 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11,
+5.12**
 
 ### Property 4: ReportRegistry CRUD consistency
 
-_For any_ set of `ReportConfigurationDTO` instances registered into `ReportRegistry`, `has()` SHALL return `true` for every registered report name and `false` for unregistered names, `get()` SHALL return the exact DTO that was registered, `all()` SHALL return all registered DTOs, and `scheduled()` SHALL return only DTOs where `schedule` is non-null.
+_For any_ set of `ReportConfigurationDTO` instances registered into
+`ReportRegistry`, `has()` SHALL return `true` for every registered report name
+and `false` for unregistered names, `get()` SHALL return the exact DTO that was
+registered, `all()` SHALL return all registered DTOs, and `scheduled()` SHALL
+return only DTOs where `schedule` is non-null.
 
 **Validates: Requirements 4.2, 6.5**
 
 ### Property 5: ReportResult store/retrieve round-trip
 
-_For any_ valid `ReportResultDTO`, storing it via `ReportResultRepository::store()` and then retrieving it via `findByReport()` or `latest()` SHALL return a record whose `report_name`, `filters`, `date_range`, `aggregation_data`, `execution_time_ms`, and `status` match the original DTO values.
+_For any_ valid `ReportResultDTO`, storing it via
+`ReportResultRepository::store()` and then retrieving it via `findByReport()` or
+`latest()` SHALL return a record whose `report_name`, `filters`, `date_range`,
+`aggregation_data`, `execution_time_ms`, and `status` match the original DTO
+values.
 
 **Validates: Requirements 9.1, 9.3**
 
 ### Property 6: Aggregation data flattening preserves leaf values
 
-_For any_ nested aggregation data structure (buckets containing sub-buckets containing metric values), the `ReportExportService` flattening logic SHALL produce one row per leaf bucket, where each row contains columns for every aggregation dimension traversed and the metric value at the leaf. The total number of rows SHALL equal the product of bucket counts at each nesting level.
+_For any_ nested aggregation data structure (buckets containing sub-buckets
+containing metric values), the `ReportExportService` flattening logic SHALL
+produce one row per leaf bucket, where each row contains columns for every
+aggregation dimension traversed and the metric value at the leaf. The total
+number of rows SHALL equal the product of bucket counts at each nesting level.
 
 **Validates: Requirements 10.3**
 
 ### Property 7: ReportStatus categorization is mutually exclusive and exhaustive
 
-_For any_ `ReportStatus` case, exactly one of `isTerminal()` or `isActive()` SHALL return `true`. The mapping SHALL be: `COMPLETED`/`FAILED` → terminal, `RUNNING`/`PENDING` → active.
+_For any_ `ReportStatus` case, exactly one of `isTerminal()` or `isActive()`
+SHALL return `true`. The mapping SHALL be: `COMPLETED`/`FAILED` → terminal,
+`RUNNING`/`PENDING` → active.
 
 **Validates: Requirements 18.1, 18.2**
 
 ### Property 8: MNGO report definitions return valid structures
 
-_For any_ MNGO Phase 1 report class (`SalesRevenueReport`, `AttendanceCapacityReport`, `PosPerformanceReport`, `MembershipLoyaltyReport`, `PromotionEffectivenessReport`, `B2BPerformanceReport`, `AccessControlReport`), calling `aggregations()` SHALL return a non-empty array of `AggregationDefinitionDTO` instances where each has a non-empty `field` and a valid `AggregationType`, calling `filters()` SHALL return an array where each element has `name`, `field`, and `type` keys, and calling `defaultDateRange()` SHALL return an array with `from` and `to` keys containing non-empty strings.
+_For any_ MNGO Phase 1 report class (`SalesRevenueReport`,
+`AttendanceCapacityReport`, `PosPerformanceReport`, `MembershipLoyaltyReport`,
+`PromotionEffectivenessReport`, `B2BPerformanceReport`, `AccessControlReport`),
+calling `aggregations()` SHALL return a non-empty array of
+`AggregationDefinitionDTO` instances where each has a non-empty `field` and a
+valid `AggregationType`, calling `filters()` SHALL return an array where each
+element has `name`, `field`, and `type` keys, and calling `defaultDateRange()`
+SHALL return an array with `from` and `to` keys containing non-empty strings.
 
 **Validates: Requirements 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7, 22.9**
 
 ### Property 9: Entity resolution by class-string or label
 
-_For any_ entity registered in the `IndexerRegistry` with a known class-string and label, the `ReportManager` entity resolution SHALL return the same class-string when given either the class-string directly or the human-readable label.
+_For any_ entity registered in the `IndexerRegistry` with a known class-string
+and label, the `ReportManager` entity resolution SHALL return the same
+class-string when given either the class-string directly or the human-readable
+label.
 
 **Validates: Requirements 23.3**
 
@@ -1536,37 +1628,67 @@ _For any_ entity registered in the `IndexerRegistry` with a known class-string a
 
 Unit tests cover structural constraints, specific examples, and edge cases:
 
-- **Attribute structure**: Verify `#[AsReport]` has `Attribute::TARGET_CLASS` target, `final readonly` modifier, and `ATTR_*` constants (Requirements 2.2, 2.3)
-- **Interface structure**: Verify `ReportInterface`, `ReportManagerInterface`, `AggregationBuilderInterface`, `ReportExportServiceInterface`, `ReportResultRepositoryInterface` define correct method signatures (Requirements 3.1–3.4)
-- **Enum structure**: Verify `ReportStatus` has correct backing values, `use Enum` trait, `#[Label]`/`#[Description]` on each case (Requirements 18.1)
-- **Event structure**: Verify `ReportGenerated`, `ReportExported`, `ReportScheduled` are `final readonly` with `#[AsEvent]` and scalar properties (Requirements 16.4)
-- **Exception hierarchy**: Verify `InvalidAggregationException` extends `\InvalidArgumentException`, others extend `\RuntimeException` (Requirements 24.1–24.4)
-- **Compiler annotation**: Verify `ReportRegistryCompiler` has `#[AsCompiler(priority: 30, phase: CompilerPhase::REGISTRY)]` (Requirements 7.1–7.2)
-- **Compiler skip**: Verify `CompilerResult::skipped()` returned when no reports found (Requirement 7.5)
-- **Service provider**: Verify `#[Module]` and `#[LoadsResources]` annotations, `HasBindings` and `HasScheduledTasks` implementation (Requirements 1.1–1.3)
-- **Config defaults**: Verify all config keys exist with documented defaults (Requirements 21.1–21.6)
-- **Report 404**: Verify controller returns 404 for non-existent report name (Requirement 12.3)
-- **Entity 422**: Verify controller returns 422 for unindexed entity (Requirement 14.4)
-- **Empty history**: Verify controller returns empty array with 200 for no historical results (Requirement 15.4)
+- **Attribute structure**: Verify `#[AsReport]` has `Attribute::TARGET_CLASS`
+  target, `final readonly` modifier, and `ATTR_*` constants (Requirements 2.2,
+  2.3)
+- **Interface structure**: Verify `ReportInterface`, `ReportManagerInterface`,
+  `AggregationBuilderInterface`, `ReportExportServiceInterface`,
+  `ReportResultRepositoryInterface` define correct method signatures
+  (Requirements 3.1–3.4)
+- **Enum structure**: Verify `ReportStatus` has correct backing values,
+  `use Enum` trait, `#[Label]`/`#[Description]` on each case (Requirements 18.1)
+- **Event structure**: Verify `ReportGenerated`, `ReportExported`,
+  `ReportScheduled` are `final readonly` with `#[AsEvent]` and scalar properties
+  (Requirements 16.4)
+- **Exception hierarchy**: Verify `InvalidAggregationException` extends
+  `\InvalidArgumentException`, others extend `\RuntimeException` (Requirements
+  24.1–24.4)
+- **Compiler annotation**: Verify `ReportRegistryCompiler` has
+  `#[AsCompiler(priority: 30, phase: CompilerPhase::REGISTRY)]` (Requirements
+  7.1–7.2)
+- **Compiler skip**: Verify `CompilerResult::skipped()` returned when no reports
+  found (Requirement 7.5)
+- **Service provider**: Verify `#[Module]` and `#[LoadsResources]` annotations,
+  `HasBindings` and `HasScheduledTasks` implementation (Requirements 1.1–1.3)
+- **Config defaults**: Verify all config keys exist with documented defaults
+  (Requirements 21.1–21.6)
+- **Report 404**: Verify controller returns 404 for non-existent report name
+  (Requirement 12.3)
+- **Entity 422**: Verify controller returns 422 for unindexed entity
+  (Requirement 14.4)
+- **Empty history**: Verify controller returns empty array with 200 for no
+  historical results (Requirement 15.4)
 
 ### Integration Tests
 
 Integration tests cover component interactions with mocked dependencies:
 
-- **ReportManager execution flow**: Mock ES connection and IndexerRegistry, verify full execute() pipeline (Requirement 4.3)
-- **ReportManager ad-hoc aggregation**: Mock ES connection, verify aggregate() pipeline (Requirement 4.4)
-- **ReportScheduler registration**: Mock scheduler, verify cron jobs registered for scheduled reports (Requirement 8.1)
-- **ReportScheduler execution**: Mock ReportManager, verify execute() called and result stored (Requirements 8.2–8.3)
-- **ReportScheduler auto-export**: Mock export service, verify export triggered when config set (Requirement 8.4)
-- **ReportScheduler failure handling**: Mock ReportManager to throw, verify error logged and event dispatched (Requirement 8.6)
-- **ReportExportService delegation**: Mock ExportManager, verify delegation with correct parameters (Requirement 10.2)
-- **Tenant-scoped execution**: Mock tenant context, verify tenant-prefixed ES connection used (Requirements 19.1–19.5)
-- **API endpoints**: Feature tests for all controller endpoints with mocked services (Requirements 11–15)
-- **Artisan commands**: Test command execution with mocked services (Requirements 20.1–20.4)
+- **ReportManager execution flow**: Mock ES connection and IndexerRegistry,
+  verify full execute() pipeline (Requirement 4.3)
+- **ReportManager ad-hoc aggregation**: Mock ES connection, verify aggregate()
+  pipeline (Requirement 4.4)
+- **ReportScheduler registration**: Mock scheduler, verify cron jobs registered
+  for scheduled reports (Requirement 8.1)
+- **ReportScheduler execution**: Mock ReportManager, verify execute() called and
+  result stored (Requirements 8.2–8.3)
+- **ReportScheduler auto-export**: Mock export service, verify export triggered
+  when config set (Requirement 8.4)
+- **ReportScheduler failure handling**: Mock ReportManager to throw, verify
+  error logged and event dispatched (Requirement 8.6)
+- **ReportExportService delegation**: Mock ExportManager, verify delegation with
+  correct parameters (Requirement 10.2)
+- **Tenant-scoped execution**: Mock tenant context, verify tenant-prefixed ES
+  connection used (Requirements 19.1–19.5)
+- **API endpoints**: Feature tests for all controller endpoints with mocked
+  services (Requirements 11–15)
+- **Artisan commands**: Test command execution with mocked services
+  (Requirements 20.1–20.4)
 
 ### Property-Based Tests
 
-Property-based tests use `innmind/black-box` (or `eris/eris`) for PHP with minimum 100 iterations per property. Each test references its design document property.
+Property-based tests use `innmind/black-box` (or `eris/eris`) for PHP with
+minimum 100 iterations per property. Each test references its design document
+property.
 
 | Property   | Test Description                                                                                                   | Tag                                                                                             |
 | ---------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |

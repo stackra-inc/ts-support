@@ -30,7 +30,7 @@ assignees: ""
 ## Environment
 
 | Field        | Value |
-|--------------|-------|
+| ------------ | ----- |
 | Node version |       |
 | npm version  |       |
 | OS           |       |
