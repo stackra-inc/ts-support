@@ -26,6 +26,7 @@ export type { SplashScreenConfig } from './splash-screen-config.interface';
 
 // ─── Pull to Refresh ───────────────────────────────────────────────
 export type { PullToRefreshConfig } from './pull-to-refresh-config.interface';
+export type { UsePullToRefreshReturn } from './use-pull-to-refresh-return.interface';
 
 // ─── Onboarding ────────────────────────────────────────────────────
 export type { OnboardingConfig } from './onboarding-config.interface';
@@ -33,9 +34,9 @@ export type { OnboardingContextValue } from './onboarding-context.interface';
 export type { OnboardingStepConfig } from './onboarding-step.interface';
 
 // ─── Vite Plugin ────────────────────────────────────────────────────
-export type { ManifestIcon } from './vite-pwa-plugin-options.interface';
-export type { ManifestOptions } from './vite-pwa-plugin-options.interface';
-export type { RuntimeCachingEntry } from './vite-pwa-plugin-options.interface';
+export type { ManifestIcon } from './manifest-icon.interface';
+export type { ManifestOptions } from './manifest-options.interface';
+export type { RuntimeCachingEntry } from './runtime-caching-entry.interface';
 export type { VitePwaPluginOptions } from './vite-pwa-plugin-options.interface';
 
 // ─── Module Options (unified config) ───────────────────────────────

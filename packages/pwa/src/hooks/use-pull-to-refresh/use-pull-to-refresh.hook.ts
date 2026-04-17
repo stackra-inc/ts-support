@@ -11,23 +11,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { PULL_TO_REFRESH_DEFAULTS } from '@/constants';
 import type { PullToRefreshConfig } from '@/interfaces';
-
-/** Return type for the usePullToRefresh hook. */
-export interface UsePullToRefreshReturn {
-  /** Current pull distance in px (dampened). */
-  pullDistance: number;
-  /** Whether a refresh is in progress. */
-  isRefreshing: boolean;
-  /** Whether the pull has exceeded the threshold. */
-  isPastThreshold: boolean;
-  /** Pointer event handlers to spread onto the container element. */
-  handlers: {
-    onPointerDown: (e: React.PointerEvent) => void;
-    onPointerMove: (e: React.PointerEvent) => void;
-    onPointerUp: () => void;
-    onPointerCancel: () => void;
-  };
-}
+import type { UsePullToRefreshReturn } from '@/interfaces/use-pull-to-refresh-return.interface';
 
 /**
  * Manage pull-to-refresh gesture state.

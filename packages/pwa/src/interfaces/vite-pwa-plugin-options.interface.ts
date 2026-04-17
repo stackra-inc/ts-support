@@ -1,89 +1,11 @@
 /**
- * @fileoverview VitePwaPluginOptions — configuration for the PWA Vite plugin wrapper.
- *
- * Extends vite-plugin-pwa options with sensible defaults and
- * additional convenience options for the @abdokouta/ts-pwa package.
+ * @fileoverview Configuration options for the PWA Vite plugin wrapper.
  *
  * @module pwa/plugins/interfaces/vite-pwa-plugin-options
  */
 
-/**
- * Manifest icon definition.
- */
-export interface ManifestIcon {
-  src: string;
-  sizes: string;
-  type: string;
-  purpose?: 'any' | 'maskable' | 'monochrome' | string;
-}
-
-/**
- * Web App Manifest configuration.
- *
- * Subset of the W3C Web App Manifest spec with the most commonly used fields.
- */
-export interface ManifestOptions {
-  /** Application name. */
-  name?: string;
-
-  /** Short name for the home screen icon. */
-  short_name?: string;
-
-  /** Application description. */
-  description?: string;
-
-  /** Theme color for the browser chrome. */
-  theme_color?: string;
-
-  /** Background color for the splash screen. */
-  background_color?: string;
-
-  /** Display mode. @default "standalone" */
-  display?: 'fullscreen' | 'standalone' | 'minimal-ui' | 'browser';
-
-  /** Preferred orientation. */
-  orientation?: 'any' | 'natural' | 'landscape' | 'portrait';
-
-  /** Start URL when the app is launched. @default "/" */
-  start_url?: string;
-
-  /** Scope of the PWA navigation. @default "/" */
-  scope?: string;
-
-  /** Application icons. */
-  icons?: ManifestIcon[];
-
-  /** Additional manifest properties. */
-  [key: string]: unknown;
-}
-
-/**
- * Workbox runtime caching strategy configuration.
- */
-export interface RuntimeCachingEntry {
-  /** URL pattern to match (string or RegExp). */
-  urlPattern: string | RegExp;
-
-  /** Caching strategy handler. */
-  handler: 'CacheFirst' | 'NetworkFirst' | 'NetworkOnly' | 'StaleWhileRevalidate' | 'CacheOnly';
-
-  /** Strategy options. */
-  options?: {
-    cacheName?: string;
-    expiration?: {
-      maxEntries?: number;
-      maxAgeSeconds?: number;
-    };
-    cacheableResponse?: {
-      statuses?: number[];
-    };
-    networkTimeoutSeconds?: number;
-    [key: string]: unknown;
-  };
-
-  /** HTTP method to match. @default "GET" */
-  method?: string;
-}
+import type { ManifestOptions } from './manifest-options.interface';
+import type { RuntimeCachingEntry } from './runtime-caching-entry.interface';
 
 /**
  * Configuration options for the PWA Vite plugin wrapper.
