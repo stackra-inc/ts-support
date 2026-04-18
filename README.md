@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/stackra-inc/ts-support/main/assets/banner.svg" alt="@stackra/ts-support" width="100%" />
+  <img src="https://raw.githubusercontent.com/stackra-co/ts-support/main/.github/assets/banner.svg" alt="@stackra/ts-support" width="100%" />
 </p>
 
 <h1 align="center">@stackra/ts-support</h1>
@@ -11,8 +11,8 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@stackra/ts-support"><img src="https://img.shields.io/npm/v/@stackra/ts-support.svg?style=flat-square" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@stackra/ts-support"><img src="https://img.shields.io/npm/dm/@stackra/ts-support.svg?style=flat-square" alt="npm downloads" /></a>
-  <a href="https://github.com/stackra-co-inc/ts-support/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@stackra/ts-support.svg?style=flat-square" alt="license" /></a>
-  <a href="https://github.com/stackra-co-inc/ts-support"><img src="https://img.shields.io/github/stars/stackra-inc/ts-support?style=flat-square" alt="GitHub stars" /></a>
+  <a href="https://github.com/stackra-co/ts-support/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@stackra/ts-support.svg?style=flat-square" alt="license" /></a>
+  <a href="https://github.com/stackra-co/ts-support"><img src="https://img.shields.io/github/stars/stackra-co/ts-support?style=flat-square" alt="GitHub stars" /></a>
 </p>
 
 <p align="center">
