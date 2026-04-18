@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.2] - 2026-04-18
+
+### Fixed
+
+- Use `jq` to build Slack JSON payloads — properly escapes backticks, em dashes,
+  and newlines in release notes that caused HTTP 400
+
 ## [2.5.1] - 2026-04-18
 
 ### Fixed
