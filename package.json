@@ -1,6 +1,6 @@
 {
   "name": "@stackra/ts-support",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Laravel-style Str, Collection, and Registry utilities for JavaScript/TypeScript",
   "keywords": [
     "laravel",

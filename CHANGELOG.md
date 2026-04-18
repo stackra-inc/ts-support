@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.1] - 2026-04-18
+
+### Fixed
+
+- Fixed broken quoting in Slack failure notification step
+
 ## [2.5.0] - 2026-04-18
 
 ### Fixed

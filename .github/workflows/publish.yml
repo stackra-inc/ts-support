@@ -355,6 +355,8 @@ jobs:
           (needs.publish.result == 'failure' || needs.release.result == 'failure')
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PUBLISH_STATUS: ${{ needs.publish.result == 'failure' && '❌ Failed' || '✅ OK' }}
+          RELEASE_STATUS: ${{ needs.release.result == 'failure' && '❌ Failed' || '✅ OK' }}
         run: |
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H 'Content-type: application/json' \
@@ -372,8 +374,8 @@ jobs:
                 {
                   "type": "section",
                   "fields": [
-                    { "type": "mrkdwn", "text": "*npm publish:*\n${{ needs.publish.result == '"'"'failure'"'"' && '"'"'❌ Failed'"'"' || '"'"'✅ OK'"'"' }}" },
-                    { "type": "mrkdwn", "text": "*GitHub Release:*\n${{ needs.release.result == '"'"'failure'"'"' && '"'"'❌ Failed'"'"' || '"'"'✅ OK'"'"' }}" },
+                    { "type": "mrkdwn", "text": "*npm publish:*\n'"$PUBLISH_STATUS"'" },
+                    { "type": "mrkdwn", "text": "*GitHub Release:*\n'"$RELEASE_STATUS"'" },
                     { "type": "mrkdwn", "text": "*Version:*\n`${{ needs.validate.outputs.version }}`" },
                     { "type": "mrkdwn", "text": "*Tag:*\n`${{ needs.validate.outputs.tag }}`" }
                   ]
