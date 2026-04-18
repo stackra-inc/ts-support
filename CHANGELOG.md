@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.4] - 2026-04-18
+
+### Fixed
+
+- Corrected org name and banner path in README
+
 ## [2.5.3] - 2026-04-18
 
 ### Fixed
