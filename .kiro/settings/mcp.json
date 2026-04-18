@@ -1,0 +1,194 @@
+{
+  "mcpServers": {
+    "heroui-react": {
+      "command": "npx",
+      "args": ["-y", "@heroui/react-mcp@latest"],
+      "disabled": false,
+      "autoApprove": [
+        "list_components",
+        "get_component_docs",
+        "get_component_source_code",
+        "get_component_source_styles",
+        "get_theme_variables",
+        "get_docs"
+      ]
+    },
+    "upstash": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/mcp-server@latest",
+        "--email",
+        "akouta66@gmail.com",
+        "--api-key",
+        "7cc28e73-5bbf-4b6b-bce9-1e0c9ad03bb4"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "redis_database_get_details",
+        "redis_database_run_redis_commands"
+      ]
+    },
+    "npm-package-docs": {
+      "command": "npx",
+      "args": ["-y", "npm-package-docs-mcp@latest"],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem@latest", "."],
+      "disabled": false,
+      "autoApprove": ["read_file"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github@latest"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "."],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres@latest"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "sqlite": {
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "./data.db"],
+      "disabled": true,
+      "autoApprove": []
+    },
+    "docker": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-docker@latest"],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory@latest"],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search@latest"],
+      "env": {
+        "BRAVE_API_KEY": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "refine": {
+      "command": "npx",
+      "args": ["-y", "@stackra/refine-mcp@latest"],
+      "disabled": true,
+      "autoApprove": [
+        "explore_structure",
+        "read_file",
+        "search_files",
+        "get_packages",
+        "read_core_files"
+      ]
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer@latest"],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch@latest"],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@executeautomation/playwright-mcp-server@latest"],
+      "disabled": false,
+      "autoApprove": []
+    },
+    "browserbase": {
+      "command": "npx",
+      "args": ["-y", "@browserbasehq/mcp-server-browserbase@latest"],
+      "env": {
+        "BROWSERBASE_API_KEY": "",
+        "BROWSERBASE_PROJECT_ID": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "sentry": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sentry@latest"],
+      "env": {
+        "SENTRY_AUTH_TOKEN": "",
+        "SENTRY_ORG_SLUG": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "cloudflare": {
+      "command": "npx",
+      "args": ["-y", "@cloudflare/mcp-server-cloudflare@latest"],
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "",
+        "CLOUDFLARE_ACCOUNT_ID": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "axiom": {
+      "command": "npx",
+      "args": ["-y", "@axiomhq/mcp-server-axiom@latest"],
+      "env": {
+        "AXIOM_API_TOKEN": "",
+        "AXIOM_DATASET": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-linear@latest"],
+      "env": {
+        "LINEAR_API_KEY": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "slack": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack@latest"],
+      "env": {
+        "SLACK_BOT_TOKEN": "",
+        "SLACK_TEAM_ID": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "everart": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everart@latest"],
+      "env": {
+        "EVERART_API_KEY": ""
+      },
+      "disabled": true,
+      "autoApprove": []
+    }
+  }
+}
