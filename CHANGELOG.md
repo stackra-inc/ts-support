@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.0] - 2026-04-18
+
+### Changed
+
+- Upgraded GitHub Actions to Node 24 compatible versions
+  - `actions/checkout` v4 → v5
+  - `actions/setup-node` v4 → v5
+  - `actions/upload-artifact` v4 → v6
+  - `actions/download-artifact` v4 → v6
+- Added `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` env var for remaining v2 actions
+
 ## [2.2.0] - 2026-04-18
 
 ### Stable Release
