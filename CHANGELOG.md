@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.3] - 2026-04-18
+
+### Fixed
+
+- Root cause: `banner.png` was missing (404) — Slack rejects image blocks with
+  invalid URLs, returning HTTP 400
+- Generated and committed `banner.png` from `banner.svg`
+- Restored `slackapi/slack-github-action@v2` (reverted curl approach)
+
 ## [2.5.2] - 2026-04-18
 
 ### Fixed
