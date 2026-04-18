@@ -30,11 +30,11 @@
 
 ## Commands
 
-| Command | Purpose |
-|---|---|
-| `pnpm build` | Production build |
-| `pnpm test` | Run tests once |
-| `pnpm typecheck` | Type-check |
-| `pnpm lint` | Lint |
-| `pnpm format` | Format |
-| `pnpm clean` | Remove dist/ |
+| Command          | Purpose          |
+| ---------------- | ---------------- |
+| `pnpm build`     | Production build |
+| `pnpm test`      | Run tests once   |
+| `pnpm typecheck` | Type-check       |
+| `pnpm lint`      | Lint             |
+| `pnpm format`    | Format           |
+| `pnpm clean`     | Remove dist/     |
