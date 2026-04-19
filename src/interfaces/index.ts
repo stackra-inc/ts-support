@@ -1,7 +1,7 @@
 /**
  * @fileoverview Barrel export for all interfaces in the support package.
  *
- * @module @stackra-inc/ts-support
+ * @module @stackra/ts-support
  * @category Interfaces
  */
 

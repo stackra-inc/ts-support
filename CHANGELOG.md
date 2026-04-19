@@ -6,9 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- 🏢 Org rename — migrated from `@stackra` → `@stackra-inc` across package
-  name, repository URLs, author field, peer dependencies, README, workflows,
-  and source file headers
+- 🏢 Org rename — migrated from `@stackra` → `@stackra` across package name,
+  repository URLs, author field, peer dependencies, README, workflows, and
+  source file headers
 - 🔧 Updated CI and publish workflows
 - 📝 Updated steering and product docs
 

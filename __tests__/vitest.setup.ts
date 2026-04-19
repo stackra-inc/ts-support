@@ -1,5 +1,5 @@
 /**
- * @fileoverview Vitest setup file for @stackra-inc/ts-support package
+ * @fileoverview Vitest setup file for @stackra/ts-support package
  *
  * This file configures the testing environment before running tests.
  * It mocks DI decorators so tests can run without the full IoC container.
@@ -13,14 +13,14 @@
  * This allows testing service logic in isolation without bootstrapping
  * the entire DI container.
  *
- * @module @stackra-inc/ts-support
+ * @module @stackra/ts-support
  * @category Configuration
  */
 
 import { vi } from 'vitest';
 
 /**
- * Mock @stackra-inc/ts-container decorators.
+ * Mock @stackra/ts-container decorators.
  *
  * Replaces DI decorators with no-op implementations so that:
  * - Classes decorated with @Injectable() are returned unchanged
@@ -31,9 +31,9 @@ import { vi } from 'vitest';
  * This ensures decorator metadata doesn't interfere with tests
  * and allows testing module behavior in isolation.
  */
-vi.mock('@stackra-inc/ts-container', async () => {
+vi.mock('@stackra/ts-container', async () => {
   // Import the actual module to preserve non-decorator exports
-  const actual = await vi.importActual('@stackra-inc/ts-container');
+  const actual = await vi.importActual('@stackra/ts-container');
 
   return {
     ...actual,

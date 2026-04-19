@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      '@stackra-inc/ts-container':
+      '@stackra/ts-container':
         specifier: ^2.0.4
         version: 2.0.7
       collect.js:
@@ -771,7 +771,7 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@stackra-inc/ts-container@2.0.7':
+  '@stackra/ts-container@2.0.7':
     resolution: {integrity: sha512-gBKvZQhlGBfuq9/03v8ojV3lfAzBjyJSfo2pW9P9w8FIfq/fr/PVWlwXrg3iI4XbLf4oSuww0X4nAgbylOWNqw==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -2431,7 +2431,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.2':
     optional: true
 
-  '@stackra-inc/ts-container@2.0.7':
+  '@stackra/ts-container@2.0.7':
     dependencies:
       '@vivtel/metadata': 1.0.5(reflect-metadata@0.2.2)
       reflect-metadata: 0.2.2

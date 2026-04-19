@@ -33,7 +33,7 @@
     <rect x="10" y="10" width="100" height="100" rx="12" fill="none" stroke="url(#iconGrad)" stroke-width="2.5"/>
     <text x="60" y="78" font-family="ui-monospace,'Cascadia Code',Menlo,monospace" font-size="56" font-weight="700" fill="url(#iconGrad)" text-anchor="middle" opacity="0.9">L</text>
   </g>
-  <text x="240" y="178" font-family="ui-monospace,'Cascadia Code','Fira Code',Menlo,monospace" font-size="42" font-weight="700" fill="#f1f5f9" letter-spacing="-0.5">@stackra-inc/ts-support</text>
+  <text x="240" y="178" font-family="ui-monospace,'Cascadia Code','Fira Code',Menlo,monospace" font-size="42" font-weight="700" fill="#f1f5f9" letter-spacing="-0.5">@stackra/ts-support</text>
   <text x="240" y="218" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="18" fill="#94a3b8">Laravel-style Str, Collection, and Registry utilities for TypeScript</text>
   <g transform="translate(240, 245)">
     <rect x="0" y="0" width="64" height="32" rx="6" fill="#38bdf8" opacity="0.12"/>

@@ -1,5 +1,5 @@
 # =============================================================================
-# CI — @stackra-inc/ts-support
+# CI — @stackra/ts-support
 #
 # Runs on every push to main/develop and on pull requests targeting those
 # branches. Jobs run in parallel where possible; test waits for build.

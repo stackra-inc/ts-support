@@ -1,5 +1,5 @@
 {
-  "name": "@stackra-inc/ts-support",
+  "name": "@stackra/ts-support",
   "version": "2.5.5",
   "description": "Laravel-style Str, Collection, and Registry utilities for JavaScript/TypeScript",
   "keywords": [
@@ -56,10 +56,10 @@
     "collect.js": "^4.36.1"
   },
   "peerDependencies": {
-    "@stackra-inc/ts-container": "^2.0.4"
+    "@stackra/ts-container": "^2.0.4"
   },
   "peerDependenciesMeta": {
-    "@stackra-inc/ts-container": {
+    "@stackra/ts-container": {
       "optional": true
     }
   },

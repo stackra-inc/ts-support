@@ -4,7 +4,7 @@
  * A generic key-value registry backed by {@link MapCollection}.
  * Provides O(1) lookups, optional default values, and validation hooks.
  *
- * @module @stackra-inc/support
+ * @module @stackra/support
  * @category Registries
  */
 
