@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.6] - 2026-04-20
+
+### Changed
+
+- Version bump for npm publish (v2.5.5 was already published)
+
 ## [2.5.5] - 2026-04-20
 
 ### Changed
