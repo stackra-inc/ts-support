@@ -2,9 +2,8 @@
 
 ## Commit Messages
 
-All commits must follow
-[Conventional Commits](https://www.conventionalcommits.org/). Enforced by
-commitlint via the husky commit-msg hook.
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/).
+Enforced by commitlint via the husky commit-msg hook.
 
 ### Format
 

@@ -86,8 +86,7 @@ typescript-config/
 ## Conventions
 
 - Each folder has an `index.ts` barrel export
-- Tests mirror source structure: `src/services/foo.ts` →
-  `__tests__/services/foo.test.ts`
+- Tests mirror source structure: `src/services/foo.ts` → `__tests__/services/foo.test.ts`
 - Examples in `.examples/` (excluded from build)
 - React hooks follow `src/hooks/use-<name>/use-<name>.hook.ts`
 - One interface per file in `src/interfaces/`

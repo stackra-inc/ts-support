@@ -53,8 +53,7 @@ validate → quality → publish → release → notify
 
 1. **Validate** — confirms tag matches `package.json` version
 2. **Quality Gate** — typecheck + build + format (uploads dist artifact)
-3. **Publish** — checks if version exists on npm first, then publishes with
-   provenance
+3. **Publish** — checks if version exists on npm first, then publishes with provenance
 4. **GitHub Release** — extracts notes from `CHANGELOG.md`
 5. **Slack Notification** — optional, requires `STACKRA_SLACK_WEBHOOK_URL`
 
@@ -80,8 +79,8 @@ failures from workflow re-runs or duplicate tag pushes.
 
 ### Auto-merge
 
-Dependabot PRs for `@stackra/*` internal packages are automatically approved and
-squash-merged after CI passes. External dependency updates require manual
+Dependabot PRs for `@stackra/*` internal packages are automatically approved
+and squash-merged after CI passes. External dependency updates require manual
 review. This is handled by the `dependabot-auto-merge.yml` workflow.
 
 Requires `allow_auto_merge: true` on the GitHub repo settings.
