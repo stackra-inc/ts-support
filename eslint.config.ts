@@ -1,7 +1,7 @@
 /**
  * @fileoverview ESLint configuration for @stackra/ts-support package
  *
- * This configuration extends the shared @nesvel/eslint-config with
+ * This configuration extends the shared @stackra/eslint-config with
  * project-specific ignore patterns. Uses the ESLint flat config format.
  *
  * Configuration Features:
@@ -18,12 +18,12 @@
 // Import the Linter type for type-safe configuration
 import type { Linter } from 'eslint';
 
-// Import the shared Vite-optimized ESLint configuration from @nesvel/eslint-config.
+// Import the shared Vite-optimized ESLint configuration from @stackra/eslint-config.
 // This includes TypeScript, import ordering, and style rules.
-import { viteConfig } from '@nesvel/eslint-config';
+import { viteConfig } from '@stackra/eslint-config';
 
 const config: Linter.Config[] = [
-  // Spread the shared Nesvel ESLint configuration.
+  // Spread the shared Stackra ESLint configuration.
   // Includes TypeScript, import, and style rules.
   ...viteConfig,
 

@@ -1,20 +1,12 @@
-# Dependencies
-node_modules/
-
-# Build output
 dist/
 *.tsbuildinfo
-
-# Testing
-coverage/
-
-# IDE
-.DS_Store
-.vscode/
+node_modules/
 .idea/
-
-# Turbo
-.turbo/
-
-# Logs
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+coverage/
 *.log
+npm-debug.log*
