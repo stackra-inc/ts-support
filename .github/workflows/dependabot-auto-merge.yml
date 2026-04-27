@@ -1,0 +1,38 @@
+# =============================================================================
+# Dependabot Auto-Merge — @stackra/* internal dependencies
+#
+# Automatically approves and merges Dependabot PRs for @stackra/* packages
+# after CI passes. External dependency updates still require manual review.
+# =============================================================================
+
+name: Dependabot Updates
+
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: 🤖 Auto-merge @stackra/* updates
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: 📋 Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ✅ Approve & auto-merge @stackra/* updates
+        if: contains(steps.metadata.outputs.dependency-names, '@stackra/')
+        run: |
+          echo "🔍 Dependencies: ${{ steps.metadata.outputs.dependency-names }}"
+          echo "📦 Update type: ${{ steps.metadata.outputs.update-type }}"
+          echo "✅ Auto-merging @stackra/* dependency update"
+          gh pr review "$PR_URL" --approve
+          gh pr merge "$PR_URL" --auto --squash
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
