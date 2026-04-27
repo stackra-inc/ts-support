@@ -144,7 +144,23 @@ jobs:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
+      - name: 🔍 Check if version already published
+        id: check_version
+        run: |
+          PKG_NAME=$(node -p "require('./package.json').name")
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if npm view "${PKG_NAME}@${PKG_VERSION}" version 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️ ${PKG_NAME}@${PKG_VERSION} is already published — skipping publish"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✅ ${PKG_NAME}@${PKG_VERSION} not yet published"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.STACKRA_NPM_TOKEN }}
+
       - name: 🚀 Publish
+        if: steps.check_version.outputs.exists == 'false'
         run: pnpm publish --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.STACKRA_NPM_TOKEN }}
