@@ -103,6 +103,11 @@
   },
   "stackra": {
     "publish": {
+      "config": {
+        "source": "config/",
+        "destination": "src/config/",
+        "description": "Support utilities configuration"
+      },
       "steering": {
         "source": ".kiro/steering/",
         "destination": ".kiro/steering/{module}/",
@@ -111,7 +116,7 @@
       "hooks": {
         "source": ".kiro/hooks/",
         "destination": ".kiro/hooks/",
-        "description": "Kiro hooks (SVG to PNG banner conversion)"
+        "description": "Kiro hooks"
       }
     }
   }
