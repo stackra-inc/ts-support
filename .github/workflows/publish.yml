@@ -106,7 +106,7 @@ jobs:
         run: pnpm test
 
       - name: 📤 Upload dist artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: dist-publish-${{ github.sha }}
           path: dist/
@@ -133,7 +133,7 @@ jobs:
           node-version: "22"
 
       - name: 📥 Download dist artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v4
         with:
           name: dist-publish-${{ github.sha }}
           path: dist/
@@ -194,7 +194,7 @@ jobs:
           echo "See [CHANGELOG](https://github.com/stackra-inc/ts-support/blob/main/CHANGELOG.md) for full details." >> release_body.md
 
       - name: 🎉 Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.validate.outputs.tag }}
           name: "${{ needs.validate.outputs.tag }}"
