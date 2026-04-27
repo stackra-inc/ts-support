@@ -4,9 +4,9 @@ inclusion: manual
 
 # Standardize Tool
 
-The `@stackra/tools-standardize` CLI tool audits and enforces consistency
-across all `@stackra/*` packages. It lives at `tools/standardize/` in the
-workspace root.
+The `@stackra/tools-standardize` CLI tool audits and enforces consistency across
+all `@stackra/*` packages. It lives at `tools/standardize/` in the workspace
+root.
 
 ## Commands
 
@@ -44,9 +44,9 @@ To change any standard, update `config.ts` and re-run `pnpm start`.
 
 ## Auto-Discovery
 
-The tool automatically discovers packages by scanning the workspace root
-for directories containing a `package.json` with a name starting with
-`@stackra/`. No hardcoded package list to maintain.
+The tool automatically discovers packages by scanning the workspace root for
+directories containing a `package.json` with a name starting with `@stackra/`.
+No hardcoded package list to maintain.
 
 Packages are sorted in dependency order:
 
@@ -103,8 +103,10 @@ The tool classifies packages into three types:
 
 ## Adding a New Package
 
-1. Create the directory with a `package.json` containing `"name": "@stackra/..."`
-2. Run `pnpm start` from `tools/standardize/` — it auto-discovers and standardizes
+1. Create the directory with a `package.json` containing
+   `"name": "@stackra/..."`
+2. Run `pnpm start` from `tools/standardize/` — it auto-discovers and
+   standardizes
 3. Run `pnpm deps` to install missing devDependencies
 4. Run `pnpm install-all` to install everything + init husky
 5. Run `pnpm verify` to confirm all checks pass

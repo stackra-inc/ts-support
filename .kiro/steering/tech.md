@@ -31,7 +31,8 @@
 
 ## Git Hooks (Husky)
 
-- **pre-commit**: runs `lint-staged` (eslint --fix + prettier --write on staged files)
+- **pre-commit**: runs `lint-staged` (eslint --fix + prettier --write on staged
+  files)
 - **commit-msg**: runs `commitlint` (enforces conventional commit format)
 
 ## Path Aliases

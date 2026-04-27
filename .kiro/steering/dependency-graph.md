@@ -41,14 +41,14 @@
 
 ## Update Propagation
 
-When you publish a new version of a core package, Dependabot detects it
-within 24 hours (daily schedule) and opens a grouped PR in each downstream
-repo. The auto-merge workflow approves and squash-merges `@stackra/*` PRs
-after CI passes.
+When you publish a new version of a core package, Dependabot detects it within
+24 hours (daily schedule) and opens a grouped PR in each downstream repo. The
+auto-merge workflow approves and squash-merges `@stackra/*` PRs after CI passes.
 
 ### Propagation Order
 
-1. Publish `typescript-config` → triggers updates in tsup-config, prettier-config, eslint-config
+1. Publish `typescript-config` → triggers updates in tsup-config,
+   prettier-config, eslint-config
 2. Publish config packages → triggers updates in container
 3. Publish `container` → triggers updates in support, redis, http
 4. Publish `support` → triggers updates in redis, http
