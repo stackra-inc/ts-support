@@ -4,3 +4,4 @@
  */
 
 export { Str } from './str';
+export { Stringable } from './stringable';

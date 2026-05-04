@@ -26,6 +26,7 @@ export { Env } from '@/env';
 // String Utilities
 // ============================================================================
 export { Str } from '@/str';
+export { Stringable } from '@/str/stringable';
 
 // ============================================================================
 // Array Utilities
@@ -52,7 +53,7 @@ export type { Collection as CollectJsCollection } from 'collect.js';
 // ============================================================================
 export { GlobalRegistry, bootGlobals } from '@/globals';
 export type { GlobalHelper, RegisterOptions } from '@/globals';
-export { env, value, tap, filled, blank, retry, sleep } from '@/globals';
+export { env, value, str, tap, filled, blank, retry, sleep } from '@/globals';
 
 // ============================================================================
 // Registries

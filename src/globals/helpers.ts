@@ -36,6 +36,7 @@
 import { Env } from '@/env';
 import { Collection, MapCollection, SetCollection } from '@/collections';
 import { Str } from '@/str';
+import { Stringable } from '@/str/stringable';
 
 // ============================================================================
 // Environment
@@ -169,24 +170,41 @@ export function value<T>(val: T | ((...args: any[]) => T), ...args: any[]): T {
 }
 
 /**
- * Get access to the Str utility class for string manipulation.
+ * String manipulation helper with dual interface.
  *
- * Returns the Str class which provides Laravel-style string helpers
- * like camel(), snake(), kebab(), slug(), and many more.
+ * **Without arguments**: Returns the Str utility class for static methods
+ * ```typescript
+ * str().camel('hello-world')  // 'helloWorld'
+ * str().snake('HelloWorld')   // 'hello_world'
+ * ```
  *
- * @returns The Str utility class
+ * **With a string argument**: Returns a fluent Stringable wrapper for chaining
+ * ```typescript
+ * str('hello-world').camel().ucfirst().toString()  // 'HelloWorld'
+ * str('foo_bar').studly().lower().toString()       // 'foobar'
+ * ```
+ *
+ * @param value - Optional string to wrap in a Stringable instance
+ * @returns The Str class (no args) or a Stringable instance (with args)
  *
  * @example
  * ```typescript
+ * // Static usage
  * str().camel('hello-world');      // 'helloWorld'
- * str().snake('HelloWorld');       // 'hello_world'
  * str().kebab('HelloWorld');       // 'hello-world'
- * str().slug('Hello World!');      // 'hello-world'
- * str().limit('Long text...', 10); // 'Long text...'
+ *
+ * // Fluent usage
+ * str('hello-world').camel();      // Stringable('helloWorld')
+ * str('hello').upper().toString(); // 'HELLO'
  * ```
  */
-export function str() {
-  return Str;
+export function str(): typeof Str;
+export function str(value: string): Stringable;
+export function str(value?: string): typeof Str | Stringable {
+  if (value === undefined) {
+    return Str;
+  }
+  return new Stringable(value);
 }
 
 /**

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.7.0] - 2026-05-04
+
+### Added
+
+- **Stringable class** — New fluent string wrapper for chainable string operations.
+  Provides a fluent interface for all Str methods, similar to Laravel's Stringable
+- **Dual-mode str() helper** — The `str()` function now supports two usage patterns:
+  - `str().camel('hello-world')` — Static usage, returns the Str class
+  - `str('hello-world').camel()` — Fluent usage, returns a Stringable instance for chaining
+- **Type declarations** — Updated `@types/index.d.ts` with function overloads for both patterns
+
+### Changed
+
+- **str() function signature** — Now uses TypeScript function overloads to support both
+  static and fluent usage patterns with full type safety
+
 ## [2.6.4] - 2026-05-04
 
 ### Added

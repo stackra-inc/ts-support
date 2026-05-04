@@ -37,7 +37,7 @@
  * @module @stackra/ts-support/@types
  */
 
-import type { Collection, MapCollection, SetCollection } from '@stackra/ts-support';
+import type { Collection, MapCollection, SetCollection, Str, Stringable } from '@stackra/ts-support';
 
 declare global {
   // ════════════════════════════════════════════════════════════════════════
@@ -147,22 +147,37 @@ declare global {
    * Handles various types intelligently:
    * - Primitives → string conversion
    * - Objects/Arrays → JSON.stringify
-   * - null/undefined → empty string
-   * - Functions → function source code
+  /**
+   * String manipulation helper with dual interface.
    *
-   * @param val - The value to convert to string
-   * @returns String representation of the value
+   * **Without arguments**: Returns the Str utility class for static methods
+   * ```typescript
+   * str().camel('hello-world')  // 'helloWorld'
+   * str().snake('HelloWorld')   // 'hello_world'
+   * ```
+   *
+   * **With a string argument**: Returns a fluent Stringable wrapper for chaining
+   * ```typescript
+   * str('hello-world').camel().ucfirst().toString()  // 'HelloWorld'
+   * str('foo_bar').studly().lower().toString()       // 'foobar'
+   * ```
+   *
+   * @param value - Optional string to wrap in a Stringable instance
+   * @returns The Str class (no args) or a Stringable instance (with args)
    *
    * @example
    * ```typescript
-   * str(123);                    // '123'
-   * str({ name: 'Alice' });      // '{"name":"Alice"}'
-   * str([1, 2, 3]);              // '[1,2,3]'
-   * str(null);                   // ''
-   * str(undefined);              // ''
+   * // Static usage
+   * str().camel('hello-world');      // 'helloWorld'
+   * str().kebab('HelloWorld');       // 'hello-world'
+   *
+   * // Fluent usage
+   * str('hello-world').camel();      // Stringable('helloWorld')
+   * str('hello').upper().toString(); // 'HELLO'
    * ```
    */
-  function str(val: unknown): string;
+  function str(): typeof Str;
+  function str(value: string): Stringable;
 
   /**
    * Call a callback with the given value for side effects, then return the value.
