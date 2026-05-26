@@ -43,7 +43,7 @@
     "collect.js": "^4.36.1"
   },
   "devDependencies": {
-    "@stackra/testing": "github:stackra-inc/testing#main",
+    "@stackra/testing": "github:stackra-inc/testing#be1b2fe",
     "@stackra/typescript-config": "^1.0.12",
     "tslib": "^2.8.1",
     "vitest": "^4.1.7",
