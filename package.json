@@ -1,7 +1,7 @@
 {
   "name": "@stackra/ts-support",
   "version": "2.7.0",
-  "description": "Foundation utility layer — Str, Arr, Num, Env, BaseRegistry, MultipleInstanceManager, and collection wrappers",
+  "description": "Foundation utility layer \u2014 Str, Arr, Num, Env, BaseRegistry, MultipleInstanceManager, and collection wrappers",
   "license": "MIT",
   "author": {
     "name": "Stackra L.L.C",
@@ -45,7 +45,8 @@
   "devDependencies": {
     "@stackra/testing": "github:stackra-inc/testing#main",
     "@stackra/typescript-config": "^1.0.12",
-    "tslib": "^2.8.1"
+    "tslib": "^2.8.1",
+    "vitest": "^4.1.7"
   },
   "peerDependencies": {
     "@stackra/contracts": "*"
