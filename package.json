@@ -46,7 +46,10 @@
     "@stackra/testing": "github:stackra-inc/testing#main",
     "@stackra/typescript-config": "^1.0.12",
     "tslib": "^2.8.1",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "@stackra/tsup-config": "^1.0.12",
+    "@stackra/contracts": "github:stackra-inc/contracts#195bfa1",
+    "tsup": "^8.5.1"
   },
   "peerDependencies": {
     "@stackra/contracts": "*"
