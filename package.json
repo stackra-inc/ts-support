@@ -50,8 +50,5 @@
     "@stackra/tsup-config": "^1.0.12",
     "@stackra/contracts": "github:stackra-inc/contracts#195bfa1",
     "tsup": "^8.5.1"
-  },
-  "peerDependencies": {
-    "@stackra/contracts": "*"
   }
 }
